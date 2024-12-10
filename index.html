@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Manager - Demo Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+        }
+        .card-shine {
+            position: relative;
+            overflow: hidden;
+        }
+        .card-shine::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.1) 50%,
+                transparent 100%
+            );
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+        @keyframes shine {
+            0% { transform: translateX(-50%) rotate(45deg); }
+            100% { transform: translateX(150%) rotate(45deg); }
+        }
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+        <!-- Left Side - Platform Info -->
+        <div class="text-white space-y-6 p-4">
+            <div class="space-y-4">
+                <h1 class="text-4xl font-bold">Performance Manager</h1>
+                <p class="text-xl text-blue-100">Revolutionise your venue's entertainment management</p>
+            </div>
+
+            <div class="space-y-4 mt-8">
+                <div class="flex items-start space-x-4">
+                    <div class="p-2 bg-blue-500 bg-opacity-20 rounded-lg">
+                        <i class="fas fa-star text-yellow-300 text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg">Real-time Ratings</h3>
+                        <p class="text-blue-100">Instant feedback from your customers about performances</p>
+                    </div>
+                </div>
+
+                <div class="flex items-start space-x-4">
+                    <div class="p-2 bg-blue-500 bg-opacity-20 rounded-lg">
+                        <i class="fas fa-chart-line text-green-300 text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg">Performance Analytics</h3>
+                        <p class="text-blue-100">Detailed insights into your venue's entertainment success</p>
+                    </div>
+                </div>
+
+                <div class="flex items-start space-x-4">
+                    <div class="p-2 bg-blue-500 bg-opacity-20 rounded-lg">
+                        <i class="fas fa-mobile-alt text-purple-300 text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg">Digital Tipping</h3>
+                        <p class="text-blue-100">Seamless digital tipping system for performers</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-4 mt-8">
+                <div class="flex -space-x-2">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=1" alt="User" class="w-10 h-10 rounded-full border-2 border-white">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=2" alt="User" class="w-10 h-10 rounded-full border-2 border-white">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=3" alt="User" class="w-10 h-10 rounded-full border-2 border-white">
+                </div>
+                <p class="text-sm text-blue-100">Join 100+ venues already using our platform</p>
+            </div>
+        </div>
+
+        <!-- Right Side - Login Form -->
+        <div class="card-shine bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-auto">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-blue-500 rounded-full mx-auto mb-4 floating flex items-center justify-center">
+                    <i class="fas fa-music text-3xl text-white"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800">Demo Access</h2>
+                <p class="text-gray-500 mt-2">Experience the full platform features</p>
+            </div>
+
+            <form action="dashboard.html" class="space-y-6">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-envelope text-gray-400"></i>
+                            </div>
+                            <input 
+                                type="email" 
+                                value="demo@thelionofbeaconsfield.com" 
+                                readonly 
+                                class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            >
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-lock text-gray-400"></i>
+                            </div>
+                            <input 
+                                type="password" 
+                                value="demoaccess123" 
+                                readonly 
+                                class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            >
+                        </div>
+                    </div>
+                </div>
+
+                <button 
+                    type="submit"
+                    class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
+                >
+                    <span>Access Demo Platform</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+
+            <div class="mt-6 text-center text-sm text-gray-500">
+                <p>This is a demonstration account.</p>
+                <p>All features are functional but data is not persistent.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Optional: Background Elements -->
+    <div class="fixed top-0 left-0 w-full h-full pointer-events-none overflow-hidden -z-10">
+        <div class="absolute top-0 right-0 w-1/3 h-1/3 bg-blue-400 rounded-full filter blur-3xl opacity-10 transform translate-x-1/2 -translate-y-1/2"></div>
+        <div class="absolute bottom-0 left-0 w-1/3 h-1/3 bg-blue-600 rounded-full filter blur-3xl opacity-10 transform -translate-x-1/2 translate-y-1/2"></div>
+    </div>
+</body>
+</html>
