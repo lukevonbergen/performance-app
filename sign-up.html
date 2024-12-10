@@ -43,12 +43,12 @@
             100% { transform: translateY(0px); }
         }
     </style>
-  <script type="module">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.2.0/bcrypt.min.js"></script>
+<script type="module">
   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-  import * as bcrypt from 'https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.2.0/bcrypt.js';
 
   const supabaseUrl = 'https://vhfbwhyfroedggmsdbhs.supabase.co';
-  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoZmJ3aHlmcm9lZGdnbXNkYmhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM4Mzc5MTQsImV4cCI6MjA0OTQxMzkxNH0.EmS6PzfNRr3Q93aWY4iNpVrIsmHjhe5v_EnfKyHo4tY';
+  const supabaseKey = 'your-supabase-key';
   const supabase = createClient(supabaseUrl, supabaseKey);
 
   document.getElementById('signup-form').addEventListener('submit', async (event) => {
@@ -62,24 +62,21 @@
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
 
-    // Validate password and confirm password
     if (password !== confirmPassword) {
       alert('Passwords do not match');
       return;
     }
 
     try {
-      // Create a new user using Supabase's authentication feature
       const { user, error } = await supabase.auth.signUp({
         email,
         password,
       });
       if (error) throw error;
 
-      // Hash the password using bcryptjs from the CDNJS CDN
-      const hashedPassword = await bcrypt.hash(password, 10);
+      // Use bcrypt from the global `dcodeIO` object
+      const hashedPassword = await dcodeIO.bcrypt.hash(password, 10);
 
-      // Save the user's additional data to the Supabase table
       await supabase.from('PerformanceApp').insert({
         first_name: firstName,
         last_name: surname,
@@ -96,6 +93,7 @@
     }
   });
 </script>
+
 </head>
 <body class="bg-gray-900 text-white">
   <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
