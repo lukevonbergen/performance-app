@@ -4,8 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sign-Up Form</title>
-  <!-- Load bcryptjs as a global script -->
-  <script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.min.js"></script>
 </head>
 <body>
   <form id="signup-form">
@@ -21,6 +19,7 @@
 
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+    import bcrypt from 'https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/+esm';
 
     const supabaseUrl = 'https://vhfbwhyfroedggmsdbhs.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoZmJ3aHlmcm9lZGdnbXNkYmhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM4Mzc5MTQsImV4cCI6MjA0OTQxMzkxNH0.EmS6PzfNRr3Q93aWY4iNpVrIsmHjhe5v_EnfKyHo4tY';
@@ -50,7 +49,7 @@
         });
         if (error) throw error;
 
-        // Hash password using bcryptjs (global dcodeIO object)
+        // Hash password using bcryptjs
         const hashedPassword = bcrypt.hashSync(password, 10);
 
         // Save additional user info to Supabase database
