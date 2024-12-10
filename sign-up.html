@@ -1,193 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Performance Manager - Demo Platform - Sign up</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        .gradient-bg {
-            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-        }
-        .card-shine {
-            position: relative;
-            overflow: hidden;
-        }
-        .card-shine::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(
-                45deg,
-                transparent 0%,
-                rgba(255, 255, 255, 0.1) 50%,
-                transparent 100%
-            );
-            transform: rotate(45deg);
-            animation: shine 3s infinite;
-        }
-        @keyframes shine {
-            0% { transform: translateX(-50%) rotate(45deg); }
-            100% { transform: translateX(150%) rotate(45deg); }
-        }
-        .floating {
-            animation: float 3s ease-in-out infinite;
-        }
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
-        }
-    </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.2.0/bcrypt.min.js"></script>
-<script type="module">
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-    import * as bcrypt from 'https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.min.js';
-
-
-
-  const supabaseUrl = 'https://vhfbwhyfroedggmsdbhs.supabase.co';
-  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoZmJ3aHlmcm9lZGdnbXNkYmhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM4Mzc5MTQsImV4cCI6MjA0OTQxMzkxNH0.EmS6PzfNRr3Q93aWY4iNpVrIsmHjhe5v_EnfKyHo4tY';
-  const supabase = createClient(supabaseUrl, supabaseKey);
-
-  document.getElementById('signup-form').addEventListener('submit', async (event) => {
-    event.preventDefault();
-
-    const firstName = document.getElementById('firstName').value;
-    const surname = document.getElementById('surname').value;
-    const venueName = document.getElementById('venueName').value;
-    const venueAddress = document.getElementById('venueAddress').value;
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
-
-    if (password !== confirmPassword) {
-      alert('Passwords do not match');
-      return;
-    }
-
-    try {
-      const { user, error } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-      if (error) throw error;
-
-      // Use bcrypt from the global `dcodeIO` object
-      const hashedPassword = bcrypt.hashSync(password, 10);
-
-      await supabase.from('PerformanceApp').insert({
-        first_name: firstName,
-        last_name: surname,
-        venue_name: venueName,
-        venue_address: venueAddress,
-        email: email,
-        password: hashedPassword,
-        created_at: new Date().toISOString(),
-      });
-
-      console.log('User signed up:', user);
-    } catch (error) {
-      console.error('Error signing up:', error.message);
-    }
-  });
-</script>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign-Up Form</title>
+  <!-- Load bcryptjs as a global script -->
+  <script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.min.js"></script>
 </head>
-<body class="bg-gray-900 text-white">
-  <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-    <div class="text-white space-y-6 p-4">
-      <div class="space-y-4">
-        <h1 class="text-4xl font-bold" id="performance-manager">Performance Manager</h1>
-        <p>Revolutionise your venue's entertainment management</p>
-      </div>
-      <div class="space-y-4 mt-8">
-        <div class="flex items-start space-x-4">
-          <div class="p-2 bg-blue-500 bg-opacity-20 rounded-lg"></div>
-          <div>
-            <h3 class="font-semibold text-lg" id="real-time-ratings">Real-time Ratings</h3>
-            <p>Instant feedback from your customers about performances</p>
-          </div>
-        </div>
-        <div class="flex items-start space-x-4">
-          <div class="p-2 bg-blue-500 bg-opacity-20 rounded-lg"></div>
-          <div>
-            <h3 class="font-semibold text-lg" id="performance-analytics">Performance Analytics</h3>
-            <p>Detailed insights into your venue's entertainment success</p>
-          </div>
-        </div>
-        <div class="flex items-start space-x-4">
-          <div class="p-2 bg-blue-500 bg-opacity-20 rounded-lg"></div>
-          <div>
-            <h3 class="font-semibold text-lg" id="digital-tipping">Digital Tipping</h3>
-            <p>Seamless digital tipping system for performers</p>
-          </div>
-        </div>
-      </div>
-      <div class="flex items-center space-x-4 mt-8">
-        <div class="flex -space-x-2">
-          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=1" class="w-10 h-10 rounded-full border-2 border-white" alt="User">
-          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=2" class="w-10 h-10 rounded-full border-2 border-white" alt="User">
-          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=3" class="w-10 h-10 rounded-full border-2 border-white" alt="User">
-        </div>
-        <p>Join 100+ venues already using our platform</p>
-      </div>
-    </div>
-    <div class="card-shine bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-auto">
-      <div class="text-center mb-8">
-        <div class="w-20 h-20 bg-blue-500 rounded-full mx-auto mb-4 floating flex items-center justify-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.586L7.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 10.586V7z" clip-rule="evenodd" />
-          </svg>
-        </div>
-        <h2 class="text-2xl font-bold text-gray-800" id="sign-up">Sign Up</h2>
-      </div>
-      <form id="signup-form" class="space-y-4">
-        <div>
-          <label for="firstName" class="block mb-2 font-medium text-gray-700">First Name</label>
-          <input type="text" id="firstName" name="firstName" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter your first name" required>
-        </div>
-        <div>
-          <label for="surname" class="block mb-2 font-medium text-gray-700">Surname</label>
-          <input type="text" id="surname" name="surname" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter your surname" required>
-        </div>
-        <div>
-          <label for="venueName" class="block mb-2 font-medium text-gray-700">Venue Name</label>
-          <input type="text" id="venueName" name="venueName" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter your venue name" required>
-        </div>
-        <div>
-          <label for="venueAddress" class="block mb-2 font-medium text-gray-700">Venue Address</label>
-          <input type="text" id="venueAddress" name="venueAddress" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter your venue address" required>
-        </div>
-        <div>
-          <label for="email" class="block mb-2 font-medium text-gray-700">Email Address</label>
-          <input type="email" id="email" name="email" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter your email address" required>
-        </div>
-        <div>
-          <label for="password" class="block mb-2 font-medium text-gray-700">Password</label>
-          <input type="password" id="password" name="password" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter a password" required>
-        </div>
-        <div>
-          <label for="confirmPassword" class="block mb-2 font-medium text-gray-700">Confirm Password</label>
-          <input type="password" id="confirmPassword" name="confirmPassword" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Confirm your password" required>
-        </div>
-        <button type="submit" class="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
-          Sign Up
-        </button>
-      </form>
-      <div class="mt-6 text-center text-sm text-gray-500">
-        This is a demonstration account. All features are functional but data is not persistent.
-      </div>
-    </div>
-  </div>
+<body>
+  <form id="signup-form">
+    <input type="text" id="firstName" placeholder="First Name" required />
+    <input type="text" id="surname" placeholder="Surname" required />
+    <input type="text" id="venueName" placeholder="Venue Name" required />
+    <input type="text" id="venueAddress" placeholder="Venue Address" required />
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="password" id="password" placeholder="Password" required />
+    <input type="password" id="confirmPassword" placeholder="Confirm Password" required />
+    <button type="submit">Sign Up</button>
+  </form>
 
-  <div class="fixed top-0 left-0 w-full h-full pointer-events-none overflow-hidden -z-10">
-    <div class="absolute top-0 right-0 w-1/3 h-1/3 bg-blue-400 rounded-full filter blur-3xl opacity-10 transform translate-x-1/2 -translate-y-1/2"></div>
-    <div class="absolute bottom-0 left-0 w-1/3 h-1/3 bg-blue-600 rounded-full filter blur-3xl opacity-10 transform -translate-x-1/2 translate-y-1/2"></div>
-  </div>
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+    const supabaseUrl = 'https://vhfbwhyfroedggmsdbhs.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoZmJ3aHlmcm9lZGdnbXNkYmhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM4Mzc5MTQsImV4cCI6MjA0OTQxMzkxNH0.EmS6PzfNRr3Q93aWY4iNpVrIsmHjhe5v_EnfKyHo4tY';
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    document.getElementById('signup-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const firstName = document.getElementById('firstName').value;
+      const surname = document.getElementById('surname').value;
+      const venueName = document.getElementById('venueName').value;
+      const venueAddress = document.getElementById('venueAddress').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      if (password !== confirmPassword) {
+        alert('Passwords do not match');
+        return;
+      }
+
+      try {
+        // Supabase user creation
+        const { user, error } = await supabase.auth.signUp({
+          email,
+          password,
+        });
+        if (error) throw error;
+
+        // Hash password using bcryptjs (global dcodeIO object)
+        const hashedPassword = bcrypt.hashSync(password, 10);
+
+        // Save additional user info to Supabase database
+        await supabase.from('PerformanceApp').insert({
+          first_name: firstName,
+          last_name: surname,
+          venue_name: venueName,
+          venue_address: venueAddress,
+          email: email,
+          password: hashedPassword,
+          created_at: new Date().toISOString(),
+        });
+
+        alert('User signed up successfully!');
+        console.log('User signed up:', user);
+      } catch (error) {
+        console.error('Error signing up:', error.message);
+        alert(`Error signing up: ${error.message}`);
+      }
+    });
+  </script>
 </body>
 </html>
