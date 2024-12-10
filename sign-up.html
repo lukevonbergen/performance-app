@@ -45,7 +45,7 @@
     </style>
   <script type="module">
   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-  import bcrypt from 'https://cdn.jsdelivr.net/npm/bcrypt/dist/js/bcrypt.js';
+  import bcrypt from 'https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.2.0/bcrypt.js';
 
   const supabaseUrl = 'https://vhfbwhyfroedggmsdbhs.supabase.co';
   const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoZmJ3aHlmcm9lZGdnbXNkYmhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM4Mzc5MTQsImV4cCI6MjA0OTQxMzkxNH0.EmS6PzfNRr3Q93aWY4iNpVrIsmHjhe5v_EnfKyHo4tY';
@@ -76,7 +76,7 @@
       });
       if (error) throw error;
 
-      // Hash the password using bcrypt from the CDN
+      // Hash the password using bcryptjs from the CDNJS CDN
       const hashedPassword = await bcrypt.hash(password, 10);
 
       // Save the user's additional data to the Supabase table
