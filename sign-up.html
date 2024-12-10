@@ -75,7 +75,7 @@
       if (error) throw error;
 
       // Use bcrypt from the global `dcodeIO` object
-      const hashedPassword = await dcodeIO.bcrypt.hash(password, 10);
+      const hashedPassword = bcrypt.hashSync(password, 10);
 
       await supabase.from('PerformanceApp').insert({
         first_name: firstName,
