@@ -44,12 +44,42 @@
         }
     </style>
   <script type="module">
-    import { supabase } from './supabase.js';
+        import { createClient } from '@supabase/supabase-js';
 
-    document.getElementById('signup-form').addEventListener('submit', async (event) => {
-      // Rest of the code remains the same
-    });
-  </script>
+        const supabaseUrl = 'https://vhfbwhyfroedggmsdbhs.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoZmJ3aHlmcm9lZGdnbXNkYmhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM4Mzc5MTQsImV4cCI6MjA0OTQxMzkxNH0.EmS6PzfNRr3Q93aWY4iNpVrIsmHjhe5v_EnfKyHo4tY';
+        const supabase = createClient(supabaseUrl, supabaseKey);
+
+        document.getElementById('signup-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const firstName = document.getElementById('firstName').value;
+            const surname = document.getElementById('surname').value;
+            const venueName = document.getElementById('venueName').value;
+            const venueAddress = document.getElementById('venueAddress').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            // Validate password and confirm password
+            if (password !== confirmPassword) {
+                alert('Passwords do not match');
+                return;
+            }
+
+            try {
+                const { user, error } = await supabase.auth.signUp({
+                    email,
+                    password,
+                });
+                if (error) throw error;
+                console.log('User signed up:', user);
+                // Optionally, you can save additional user data (e.g., firstName, surname, venueName, venueAddress) in Supabase
+            } catch (error) {
+                console.error('Error signing up:', error.message);
+            }
+        });
+    </script>
 </head>
 <body class="bg-gray-900 text-white">
   <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
