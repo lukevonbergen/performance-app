@@ -12,6 +12,9 @@
     .card-shine {
       position: relative;
       overflow: hidden;
+      background-color: white;
+      border-radius: 1rem;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
     .card-shine::before {
       content: '';
@@ -33,19 +36,28 @@
       0% { transform: translateX(-50%) rotate(45deg); }
       100% { transform: translateX(150%) rotate(45deg); }
     }
+    .btn {
+      @apply px-4 py-2 font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-opacity-50;
+    }
+    .btn-primary {
+      @apply bg-blue-500 hover:bg-blue-600 text-white focus:ring-blue-500;
+    }
+    .btn-secondary {
+      @apply text-blue-500 hover:text-blue-600 focus:ring-blue-500;
+    }
   </style>
 </head>
 <body class="gradient-bg text-white min-h-screen flex items-center justify-center">
-  <div class="card-shine bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
+  <div class="card-shine px-8 py-12 w-full max-w-md">
     <h1 class="text-3xl font-bold text-center mb-6">Welcome to Performance Manager</h1>
     <div class="space-y-4">
-      <a href="venue-signup.html" class="block px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+      <a href="venue-signup.html" class="btn btn-primary block">
         Sign Up as a Venue
       </a>
-      <a href="performer-signup.html" class="block px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+      <a href="performer-signup.html" class="btn btn-primary block">
         Sign Up as a Performer
       </a>
-      <a href="login.html" class="block px-4 py-2 text-blue-500 hover:text-blue-600 font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+      <a href="login.html" class="btn btn-secondary block">
         Log In
       </a>
     </div>
