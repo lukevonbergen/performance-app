@@ -70,7 +70,7 @@
                 if (user) {
                     debugDiv.innerHTML += 'Venue user found<br>';
                     messageDiv.className = 'mt-4 text-center text-green-600';
-                    messageDiv.textContent = 'Login successful! Redirecting to venue dashboard...';
+                    messageDiv.textContent = 'Login successful! Lets book those gigs!';
                     
                     // Store user data with type
                     sessionStorage.setItem('user', JSON.stringify({ ...user, type: 'venue' }));
@@ -95,7 +95,7 @@
                 if (user) {
                     debugDiv.innerHTML += 'Performer user found<br>';
                     messageDiv.className = 'mt-4 text-center text-green-600';
-                    messageDiv.textContent = 'Login successful! Redirecting to performer dashboard...';
+                    messageDiv.textContent = 'Login successful! Lets get you performing!';
                     
                     // Store user data with type
                     sessionStorage.setItem('user', JSON.stringify({ ...user, type: 'performer' }));
