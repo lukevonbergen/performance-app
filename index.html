@@ -6,43 +6,64 @@
   <title>Performance Manager</title>
   <link href="https://cdn.tailwindcss.com" rel="stylesheet">
   <style>
-    .gradient-bg {
-      background: linear-gradient(135deg, #1e40af, #3b82f6);
+    .min-h-screen {
+      min-height: 100vh;
     }
-    .card-shine {
-      position: relative;
-      overflow: hidden;
+    .flex {
+      display: flex;
     }
-    .card-shine::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(
-        45deg,
-        transparent 0%,
-        rgba(255, 255, 255, 0.1) 50%,
-        transparent 100%
-      );
-      transform: rotate(45deg);
-      animation: shine 3s infinite;
+    .items-center {
+      align-items: center;
     }
-    @keyframes shine {
-      0% { transform: translateX(-50%) rotate(45deg); }
-      100% { transform: translateX(150%) rotate(45deg); }
+    .justify-center {
+      justify-content: center;
+    }
+    .max-w-md {
+      max-width: 28rem;
+    }
+    .w-full {
+      width: 100%;
+    }
+    .bg-white {
+      background-color: white;
+    }
+    .rounded-lg {
+      border-radius: 0.5rem;
+    }
+    .shadow-lg {
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    .p-8 {
+      padding: 2rem;
+    }
+    .text-2xl {
+      font-size: 1.5rem;
+    }
+    .font-bold {
+      font-weight: 700;
+    }
+    .text-center {
+      text-align: center;
+    }
+    .mb-6 {
+      margin-bottom: 1.5rem;
+    }
+    .mt-4 {
+      margin-top: 1rem;
+    }
+    .hidden {
+      display: none;
     }
   </style>
 </head>
-<body class="gradient-bg text-white min-h-screen flex items-center justify-center">
-  <div class="card-shine bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
-    <h1 class="text-3xl font-bold text-center mb-6">Welcome to Performance Manager</h1>
+<body class="min-h-screen flex items-center justify-center">
+  <div class="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
+    <h1 class="text-2xl font-bold text-center mb-6">Welcome to Performance Manager</h1>
     <div class="space-y-4">
-      <a href="venue-signup.html" class="block px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+      <a href="v-signup.html" class="block px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
         Sign Up as a Venue
       </a>
-      <a href="performer-signup.html" class="block px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+      <a href="p-signup.html" class="block px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
         Sign Up as a Performer
       </a>
       <a href="login.html" class="block px-4 py-2 text-blue-500 hover:text-blue-600 font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
