@@ -37,11 +37,16 @@
             </div>
 
             <div id="message" class="mt-4 text-center text-red-600"></div>
+
+            <!-- Debug Info -->
+            <div id="debug" class="mt-4 p-4 bg-gray-100 rounded text-xs text-gray-600"></div>
         </div>
     </div>
 
     <script type="module">
         import { supabase } from './supabase.js';
+
+        const debugDiv = document.getElementById('debug');
 
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -51,37 +56,45 @@
             const password = document.getElementById('password').value;
 
             try {
+                debugDiv.innerHTML = 'Attempting login...';
+
                 const { data, error } = await supabase
                     .from('PerformanceApp')
-                    .select('*')
-                    .eq('email', email)
-                    .limit(1);
+                    .select('*');
+
+                debugDiv.innerHTML += '<br>Query complete.';
+                console.log('Full data from Supabase:', data);
 
                 if (error) {
                     throw error;
                 }
 
-                if (data && data.length > 0) {
-                    // Check if password matches
-                    if (data[0].password === password) {
-                        // Store user data
-                        sessionStorage.setItem('user', JSON.stringify(data[0]));
-                        
+                // Find matching email
+                const user = data.find(u => u.email.toLowerCase() === email.toLowerCase());
+                console.log('Found user:', user);
+
+                if (user) {
+                    debugDiv.innerHTML += '<br>User found.';
+                    debugDiv.innerHTML += `<br>Stored password: ${user.password}`;
+                    debugDiv.innerHTML += `<br>Entered password: ${password}`;
+
+                    if (user.password === password) {
+                        sessionStorage.setItem('user', JSON.stringify(user));
                         messageDiv.className = 'mt-4 text-center text-green-600';
                         messageDiv.textContent = 'Login successful! Redirecting...';
                         
-                        // Redirect to dashboard
                         setTimeout(() => {
                             window.location.href = 'dashboard.html';
                         }, 1000);
                     } else {
-                        messageDiv.textContent = 'Invalid email or password';
+                        messageDiv.textContent = 'Invalid password';
                     }
                 } else {
-                    messageDiv.textContent = 'Invalid email or password';
+                    messageDiv.textContent = 'Email not found';
                 }
             } catch (error) {
                 console.error('Error:', error);
+                debugDiv.innerHTML += `<br>Error: ${error.message}`;
                 messageDiv.textContent = 'Error logging in. Please try again.';
             }
         });
