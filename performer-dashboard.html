@@ -96,29 +96,166 @@
                 </div>
             </div>
         </div>
+
+        <div class="bg-white rounded-lg shadow mb-6">
+            <div class="px-6 py-4 border-b flex justify-between items-center">
+                <h2 class="text-lg font-semibold">Manage Availability</h2>
+                <button onclick="openAvailabilityModal()" 
+                    class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    Add Availability
+                </button>
+            </div>
+            <div class="p-6">
+                <div id="availabilityList" class="space-y-4">
+                    <p class="text-center text-gray-500">Loading availability...</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="availabilityModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <h3 class="text-lg font-semibold mb-4">Add Availability</h3>
+            <form id="availabilityForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Day of Week</label>
+                    <select id="dayOfWeek" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        <option value="0">Sunday</option>
+                        <option value="1">Monday</option>
+                        <option value="2">Tuesday</option>
+                        <option value="3">Wednesday</option>
+                        <option value="4">Thursday</option>
+                        <option value="5">Friday</option>
+                        <option value="6">Saturday</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Start Time</label>
+                    <input type="time" id="startTime" required
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">End Time</label>
+                    <input type="time" id="endTime" required
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Rate per Hour (£)</label>
+                    <input type="number" id="ratePerHour" required min="0" step="0.01"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="closeAvailabilityModal()"
+                        class="px-4 py-2 border rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        Save
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <script type="module">
         import { supabase } from './supabase.js';
 
-        // Check if user is logged in
-        const user = JSON.parse(sessionStorage.getItem('user'));
-        if (!user || user.type !== 'performer') {
+        // Make supabase and user globally available
+        window.supabase = supabase;
+        window.user = JSON.parse(sessionStorage.getItem('user'));
+
+        if (!window.user || window.user.type !== 'performer') {
             window.location.href = 'login.html';
         }
 
         // Display user info
-        document.getElementById('performerName').textContent = user.stage_name || 'Performer Dashboard';
-        document.getElementById('userEmail').textContent = user.email;
+        document.getElementById('performerName').textContent = window.user.stage_name || 'Performer Dashboard';
+        document.getElementById('userEmail').textContent = window.user.email;
 
-        // Function to load dashboard data
+        // Make functions globally available
+        window.openAvailabilityModal = function() {
+            document.getElementById('availabilityModal').classList.remove('hidden');
+        }
+
+        window.closeAvailabilityModal = function() {
+            document.getElementById('availabilityModal').classList.add('hidden');
+            document.getElementById('availabilityForm').reset();
+        }
+
+        window.formatTime = function(timeStr) {
+            return new Date(`2000-01-01T${timeStr}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        window.deleteAvailability = async function(id) {
+            if (confirm('Are you sure you want to delete this availability?')) {
+                try {
+                    const { error } = await supabase
+                        .from('performer_availability')
+                        .delete()
+                        .eq('id', id);
+
+                    if (error) throw error;
+                    await loadAvailability();
+                } catch (error) {
+                    console.error('Error deleting availability:', error);
+                }
+            }
+        }
+
+        window.logout = function() {
+            sessionStorage.removeItem('user');
+            window.location.href = 'login.html';
+        }
+
+        async function loadAvailability() {
+            try {
+                const { data: availability, error } = await supabase
+                    .from('performer_availability')
+                    .select('*')
+                    .eq('performer_id', window.user.id)
+                    .order('day_of_week');
+
+                if (error) throw error;
+
+                const availabilityList = document.getElementById('availabilityList');
+                
+                if (availability && availability.length > 0) {
+                    const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                    
+                    availabilityList.innerHTML = availability.map(slot => `
+                        <div class="border-l-4 border-blue-500 pl-4 flex justify-between items-center">
+                            <div>
+                                <p class="font-semibold">${daysOfWeek[slot.day_of_week]}</p>
+                                <p class="text-gray-600">${formatTime(slot.start_time)} - ${formatTime(slot.end_time)}</p>
+                                <p class="text-sm text-gray-500">£${slot.rate_per_hour} per hour</p>
+                            </div>
+                            <button onclick="deleteAvailability('${slot.id}')"
+                                class="text-red-600 hover:text-red-800">
+                                Delete
+                            </button>
+                        </div>
+                    `).join('');
+                } else {
+                    availabilityList.innerHTML = '<p class="text-center text-gray-500">No availability set</p>';
+                }
+            } catch (error) {
+                console.error('Error loading availability:', error);
+            }
+        }
+
         async function loadDashboardData() {
             try {
                 // Load upcoming performances
                 const { data: performances, error: perfError } = await supabase
                     .from('performances')
                     .select('*')
-                    .eq('performer_id', user.id)
+                    .eq('performer_id', window.user.id)
                     .gte('start_time', new Date().toISOString())
                     .order('start_time');
 
@@ -154,7 +291,7 @@
                             amount
                         )
                     `)
-                    .eq('performer_id', user.id)
+                    .eq('performer_id', window.user.id)
                     .lt('start_time', new Date().toISOString())
                     .order('start_time', { ascending: false });
 
@@ -212,14 +349,36 @@
             }
         }
 
+        // Add event listener for the availability form
+        document.getElementById('availabilityForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            try {
+                const newAvailability = {
+                    performer_id: window.user.id,
+                    day_of_week: parseInt(document.getElementById('dayOfWeek').value),
+                    start_time: document.getElementById('startTime').value,
+                    end_time: document.getElementById('endTime').value,
+                    rate_per_hour: parseFloat(document.getElementById('ratePerHour').value)
+                };
+
+                const { error } = await supabase
+                    .from('performer_availability')
+                    .insert([newAvailability]);
+
+                if (error) throw error;
+
+                closeAvailabilityModal();
+                await loadAvailability();
+            } catch (error) {
+                console.error('Error adding availability:', error);
+                alert('Error adding availability. Please try again.');
+            }
+        });
+
         // Load initial data
         loadDashboardData();
-
-        // Logout function
-        window.logout = function() {
-            sessionStorage.removeItem('user');
-            window.location.href = 'login.html';
-        }
+        loadAvailability();
     </script>
 </body>
 </html>
