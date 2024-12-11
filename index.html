@@ -1,101 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Venue Sign Up</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcrypt.min.js"></script>
-    <script type="module" src="supabase.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Performance Manager</title>
+  <link href="https://cdn.tailwindcss.com" rel="stylesheet">
+  <style>
+    .gradient-bg {
+      background: linear-gradient(135deg, #1e40af, #3b82f6);
+    }
+    .card-shine {
+      position: relative;
+      overflow: hidden;
+    }
+    .card-shine::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        45deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.1) 50%,
+        transparent 100%
+      );
+      transform: rotate(45deg);
+      animation: shine 3s infinite;
+    }
+    @keyframes shine {
+      0% { transform: translateX(-50%) rotate(45deg); }
+      100% { transform: translateX(150%) rotate(45deg); }
+    }
+  </style>
 </head>
-<body class="bg-gray-50">
-    <div class="min-h-screen flex items-center justify-center">
-        <div class="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
-            <h2 class="text-2xl font-bold text-center mb-6">Sign Up Your Venue</h2>
-            
-            <form id="signupForm" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">First Name</label>
-                    <input type="text" id="firstName" required
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Last Name</label>
-                    <input type="text" id="lastName" required
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Venue Name</label>
-                    <input type="text" id="venueName" required
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Email</label>
-                    <input type="email" id="email" required
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Password</label>
-                    <input type="password" id="password" required
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                </div>
-
-                <button type="submit"
-                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                    Sign Up
-                </button>
-            </form>
-
-            <div id="message" class="mt-4 text-center hidden">
-                <!-- Success/Error messages will appear here -->
-            </div>
-        </div>
+<body class="gradient-bg text-white min-h-screen flex items-center justify-center">
+  <div class="card-shine bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
+    <h1 class="text-3xl font-bold text-center mb-6">Welcome to Performance Manager</h1>
+    <div class="space-y-4">
+      <a href="venue-signup.html" class="block px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+        Sign Up as a Venue
+      </a>
+      <a href="performer-signup.html" class="block px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+        Sign Up as a Performer
+      </a>
+      <a href="login.html" class="block px-4 py-2 text-blue-500 hover:text-blue-600 font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+        Log In
+      </a>
     </div>
-
-    <script type="module">
-        import { supabase } from './supabase.js';
-
-        document.getElementById('signupForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const messageDiv = document.getElementById('message');
-            messageDiv.className = 'mt-4 text-center';
-            
-            try {
-                // Create the user data without hashing (Supabase will handle password security)
-                const userData = {
-                    first_name: document.getElementById('firstName').value,
-                    last_name: document.getElementById('lastName').value,
-                    venue_name: document.getElementById('venueName').value,
-                    email: document.getElementById('email').value,
-                    password: document.getElementById('password').value, // Plain password
-                    created_at: new Date().toISOString()
-                };
-
-                // Insert into Supabase
-                const { data, error } = await supabase
-                    .from('PerformanceApp')
-                    .insert([userData]);
-
-                if (error) throw error;
-
-                messageDiv.textContent = 'Sign up successful!';
-                messageDiv.className = 'mt-4 text-center text-green-600';
-                
-                // Clear the form
-                document.getElementById('signupForm').reset();
-                
-            } catch (error) {
-                console.error('Error:', error);
-                messageDiv.textContent = 'Error signing up. Please try again.';
-                messageDiv.className = 'mt-4 text-center text-red-600';
-            }
-        });
-    </script>
+  </div>
 </body>
 </html>
