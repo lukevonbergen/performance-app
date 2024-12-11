@@ -46,55 +46,60 @@
     <script type="module">
         import { supabase } from './supabase.js';
 
-        const debugDiv = document.getElementById('debug');
-
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const messageDiv = document.getElementById('message');
+            const debugDiv = document.getElementById('debug');
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
             try {
-                debugDiv.innerHTML = 'Attempting login...';
+                debugDiv.innerHTML = 'Attempting login...<br>';
 
+                // Use exact table name case
                 const { data, error } = await supabase
-                    .from('PerformanceApp')
+                    .from('PerformanceApp')  // Exact match for table name
                     .select('*');
 
-                debugDiv.innerHTML += '<br>Query complete.';
-                console.log('Full data from Supabase:', data);
+                console.log('Raw Supabase response:', data);
+                debugDiv.innerHTML += `Query complete. Found ${data ? data.length : 0} records<br>`;
 
                 if (error) {
                     throw error;
                 }
 
-                // Find matching email
-                const user = data.find(u => u.email.toLowerCase() === email.toLowerCase());
-                console.log('Found user:', user);
+                if (data && data.length > 0) {
+                    // Log all retrieved data for debugging
+                    console.log('All records:', data);
+                    
+                    // Find matching email
+                    const user = data.find(u => u.email.toLowerCase() === email.toLowerCase());
+                    console.log('Matching user:', user);
 
-                if (user) {
-                    debugDiv.innerHTML += '<br>User found.';
-                    debugDiv.innerHTML += `<br>Stored password: ${user.password}`;
-                    debugDiv.innerHTML += `<br>Entered password: ${password}`;
+                    debugDiv.innerHTML += user ? 'User found<br>' : 'User not found<br>';
 
-                    if (user.password === password) {
-                        sessionStorage.setItem('user', JSON.stringify(user));
+                    if (user && user.password === password) {
+                        // Login successful
                         messageDiv.className = 'mt-4 text-center text-green-600';
                         messageDiv.textContent = 'Login successful! Redirecting...';
                         
+                        // Store user data
+                        sessionStorage.setItem('user', JSON.stringify(user));
+                        
+                        // Redirect to dashboard
                         setTimeout(() => {
                             window.location.href = 'dashboard.html';
                         }, 1000);
                     } else {
-                        messageDiv.textContent = 'Invalid password';
+                        messageDiv.textContent = user ? 'Invalid password' : 'Email not found';
                     }
                 } else {
-                    messageDiv.textContent = 'Email not found';
+                    messageDiv.textContent = 'No users found in database';
                 }
             } catch (error) {
                 console.error('Error:', error);
-                debugDiv.innerHTML += `<br>Error: ${error.message}`;
+                debugDiv.innerHTML += `Error: ${error.message}<br>`;
                 messageDiv.textContent = 'Error logging in. Please try again.';
             }
         });
