@@ -11,7 +11,6 @@
 <body class="bg-gray-50">
     <!-- Check if user is logged in -->
     <script>
-        // Check for logged in user
         const user = JSON.parse(sessionStorage.getItem('user'));
         if (!user) {
             window.location.href = 'login.html';
@@ -20,7 +19,7 @@
 
     <!-- Navigation Bar -->
     <nav class="bg-white shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto px-4">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
                     <h1 class="text-xl font-bold text-gray-800" id="venueName">Loading...</h1>
@@ -50,7 +49,7 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm text-gray-500">Tonight's Acts</p>
-                        <p class="text-2xl font-semibold">3</p>
+                        <p class="text-2xl font-semibold" id="actsCount">--</p>
                     </div>
                 </div>
             </div>
@@ -65,7 +64,7 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm text-gray-500">Average Rating</p>
-                        <p class="text-2xl font-semibold">4.8</p>
+                        <p class="text-2xl font-semibold" id="avgRating">--</p>
                     </div>
                 </div>
             </div>
@@ -80,7 +79,7 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm text-gray-500">Tips Today</p>
-                        <p class="text-2xl font-semibold">£175</p>
+                        <p class="text-2xl font-semibold" id="totalTips">£--</p>
                     </div>
                 </div>
             </div>
@@ -88,42 +87,106 @@
 
         <!-- Tonight's Schedule -->
         <div class="bg-white rounded-lg shadow">
-            <div class="px-6 py-4 border-b">
+            <div class="px-6 py-4 border-b flex justify-between items-center">
                 <h2 class="text-lg font-semibold">Tonight's Schedule</h2>
+                <button onclick="addPerformance()" 
+                        class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                    Add Performance
+                </button>
             </div>
             <div class="p-6">
-                <div class="space-y-4">
-                    <!-- Sample performers - this would be populated from your database -->
-                    <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-                        <div>
-                            <h3 class="font-medium">Sarah Johnson</h3>
-                            <p class="text-sm text-gray-500">Jazz Vocalist</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-sm font-medium">20:00 - 21:30</p>
-                            <div class="flex items-center space-x-1 text-yellow-400">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                                </svg>
-                                <span class="text-gray-600">4.9</span>
-                            </div>
-                        </div>
-                    </div>
+                <div id="scheduleList" class="space-y-4">
+                    <!-- Performances will be loaded here -->
+                    <div class="text-center text-gray-500">Loading performances...</div>
                 </div>
             </div>
         </div>
     </main>
 
     <script type="module">
-        // Set user info when page loads
+        import { supabase } from './supabase.js';
+
         const user = JSON.parse(sessionStorage.getItem('user'));
         document.getElementById('venueName').textContent = user.venue_name;
         document.getElementById('userEmail').textContent = user.email;
+
+        // Load venue-specific data
+        async function loadDashboardData() {
+            try {
+                // Query performances for this venue
+                const { data: performances, error } = await supabase
+                    .from('Performances')  // You'll need to create this table
+                    .select('*')
+                    .eq('venue_id', user.id)
+                    .eq('date', new Date().toISOString().split('T')[0]);
+
+                if (error) throw error;
+
+                // Update stats
+                document.getElementById('actsCount').textContent = performances?.length || 0;
+                
+                // Calculate average rating
+                if (performances?.length) {
+                    const avgRating = performances.reduce((acc, curr) => acc + (curr.rating || 0), 0) / performances.length;
+                    document.getElementById('avgRating').textContent = avgRating.toFixed(1);
+                }
+
+                // Calculate total tips
+                const totalTips = performances?.reduce((acc, curr) => acc + (curr.tips || 0), 0) || 0;
+                document.getElementById('totalTips').textContent = `£${totalTips}`;
+
+                // Update schedule list
+                const scheduleList = document.getElementById('scheduleList');
+                scheduleList.innerHTML = '';
+
+                if (performances?.length) {
+                    performances.forEach(perf => {
+                        scheduleList.innerHTML += `
+                            <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                                <div>
+                                    <h3 class="font-medium">${perf.performer_name}</h3>
+                                    <p class="text-sm text-gray-500">${perf.performance_type}</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-sm font-medium">${perf.start_time} - ${perf.end_time}</p>
+                                    <div class="flex items-center space-x-1 text-yellow-400">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                        </svg>
+                                        <span class="text-gray-600">${perf.rating || '--'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    scheduleList.innerHTML = `
+                        <div class="text-center text-gray-500">
+                            No performances scheduled for today
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        // Load initial data
+        loadDashboardData();
+
+        // Refresh data every minute
+        setInterval(loadDashboardData, 60000);
 
         // Logout function
         window.logout = function() {
             sessionStorage.removeItem('user');
             window.location.href = 'login.html';
+        };
+
+        // Add performance function
+        window.addPerformance = function() {
+            // You can implement this to open a modal or navigate to a new page
+            alert('Add performance functionality coming soon!');
         };
     </script>
 </body>
