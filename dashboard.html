@@ -3,167 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Performance Manager - Live Dashboard</title>
+    <title>Venue Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <style>
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .gradient-bg {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-        }
-        
-        .card-shine {
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .card-shine::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(
-                45deg,
-                transparent 0%,
-                rgba(255, 255, 255, 0.1) 50%,
-                transparent 100%
-            );
-            transform: rotate(45deg);
-            animation: shine 3s infinite;
-        }
-
-        .live-pulse {
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.5;
-            }
-        }
-
-        @keyframes shine {
-            0% { transform: translateX(-50%) rotate(45deg); }
-            100% { transform: translateX(150%) rotate(45deg); }
-        }
-
-        .floating {
-            animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
-        }
-
-        .stat-card {
-            transition: all 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px) scale(1.02);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
-
-        .chart-container {
-            transition: all 0.3s ease;
-        }
-
-        .chart-container:hover {
-            transform: scale(1.01);
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-
-        /* Notification Badge Animation */
-        @keyframes notification-pulse {
-            0% { transform: scale(0.95); background: #ef4444; }
-            50% { transform: scale(1.1); background: #dc2626; }
-            100% { transform: scale(0.95); background: #ef4444; }
-        }
-
-        .notification-badge {
-            animation: notification-pulse 2s infinite;
-        }
-
-        /* Live Rating Animation */
-        @keyframes rating-update {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2); color: #eab308; }
-            100% { transform: scale(1); }
-        }
-
-        .rating-update {
-            animation: rating-update 0.5s ease-out;
-        }
-    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="supabase.js"></script>
 </head>
-<body class="gradient-bg min-h-screen">
-    <!-- Top Navigation -->
-    <nav class="glass-effect border-b border-white/10">
-        <div class="max-w-7xl mx-auto px-4">
+<body class="bg-gray-50">
+    <!-- Check if user is logged in -->
+    <script>
+        // Check for logged in user
+        const user = JSON.parse(sessionStorage.getItem('user'));
+        if (!user) {
+            window.location.href = 'login.html';
+        }
+    </script>
+
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
-                <div class="flex items-center space-x-4">
-                    <span class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 text-transparent bg-clip-text">
-                        The Blue Note
-                    </span>
-                    <span class="px-3 py-1 bg-blue-500/10 text-blue-400 text-sm rounded-full border border-blue-500/20">
-                        Live Dashboard
-                    </span>
+                <div class="flex items-center">
+                    <h1 class="text-xl font-bold text-gray-800" id="venueName">Loading...</h1>
                 </div>
-
-                <div class="flex items-center space-x-6">
-                    <!-- Time Display -->
-                    <div class="text-gray-300 text-sm" id="liveTime"></div>
-
-                    <!-- Notifications -->
-                    <button class="relative p-2 text-gray-300 hover:text-white transition-colors">
-                        <i class="fas fa-bell text-xl"></i>
-                        <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-white text-xs flex items-center justify-center notification-badge">
-                            3
-                        </span>
+                <div class="flex items-center space-x-4">
+                    <span class="text-gray-600" id="userEmail"></span>
+                    <button onclick="logout()" 
+                            class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
+                        Logout
                     </button>
-
-                    <!-- User Menu -->
-                    <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center text-white font-medium">
-                            VD
-                        </div>
-                        <div class="text-sm">
-                            <div class="text-gray-300">Venue Demo</div>
-                            <div class="text-gray-500 text-xs">Administrator</div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -171,358 +38,93 @@
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto py-6 px-4">
-        <!-- Stats Overview -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-            <!-- Tonight's Acts -->
-            <div class="stat-card glass-effect rounded-xl p-6">
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <!-- Tonight's Performers -->
+            <div class="bg-white rounded-lg shadow p-6">
                 <div class="flex items-center">
-                    <div class="p-3 rounded-full bg-blue-500/10 text-blue-400">
-                        <i class="fas fa-users text-xl"></i>
+                    <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.318l-1.318 2.637L8.59 7.956l2.318 1.318L11.318 12l2.637-1.318L16.41 9.956l-2.318-1.318L13.682 6z" />
+                        </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-gray-400 text-sm">Tonight's Acts</p>
-                        <div class="flex items-center space-x-2">
-                            <p class="text-2xl font-bold text-white" id="actsCounter">0</p>
-                            <span class="text-green-400 text-sm">
-                                <i class="fas fa-arrow-up"></i> +1
-                            </span>
-                        </div>
+                        <p class="text-sm text-gray-500">Tonight's Acts</p>
+                        <p class="text-2xl font-semibold">3</p>
                     </div>
                 </div>
             </div>
 
             <!-- Average Rating -->
-            <div class="stat-card glass-effect rounded-xl p-6">
+            <div class="bg-white rounded-lg shadow p-6">
                 <div class="flex items-center">
-                    <div class="p-3 rounded-full bg-yellow-500/10 text-yellow-400">
-                        <i class="fas fa-star text-xl"></i>
+                    <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                        </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-gray-400 text-sm">Average Rating</p>
-                        <div class="flex items-center space-x-2">
-                            <p class="text-2xl font-bold text-white" id="ratingCounter">4.8</p>
-                            <div class="flex text-yellow-400">
-                                <i class="fas fa-star text-sm"></i>
-                                <i class="fas fa-star text-sm"></i>
-                                <i class="fas fa-star text-sm"></i>
-                                <i class="fas fa-star text-sm"></i>
-                                <i class="fas fa-star-half-alt text-sm"></i>
-                            </div>
-                        </div>
+                        <p class="text-sm text-gray-500">Average Rating</p>
+                        <p class="text-2xl font-semibold">4.8</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Tips Today -->
-            <div class="stat-card glass-effect rounded-xl p-6">
+            <!-- Total Tips -->
+            <div class="bg-white rounded-lg shadow p-6">
                 <div class="flex items-center">
-                    <div class="p-3 rounded-full bg-green-500/10 text-green-400">
-                        <i class="fas fa-pound-sign text-xl"></i>
+                    <div class="p-3 rounded-full bg-green-100 text-green-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-gray-400 text-sm">Tips Today</p>
-                        <div class="flex items-center space-x-2">
-                            <p class="text-2xl font-bold text-white" id="tipsCounter">£0</p>
-                            <span class="text-green-400 text-sm">
-                                <i class="fas fa-arrow-up"></i> 12%
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Customer Satisfaction -->
-            <div class="stat-card glass-effect rounded-xl p-6">
-                <div class="flex items-center">
-                    <div class="p-3 rounded-full bg-purple-500/10 text-purple-400">
-                        <i class="fas fa-heart text-xl"></i>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-gray-400 text-sm">Satisfaction</p>
-                        <div class="flex items-center space-x-2">
-                            <p class="text-2xl font-bold text-white" id="satisfactionCounter">0%</p>
-                            <span class="text-green-400 text-sm">
-                                <i class="fas fa-arrow-up"></i> 5%
-                            </span>
-                        </div>
+                        <p class="text-sm text-gray-500">Tips Today</p>
+                        <p class="text-2xl font-semibold">£175</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Main Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Left Column - Live Schedule -->
-            <div class="lg:col-span-2 space-y-6">
-                <!-- Current Performance -->
-                <div class="glass-effect rounded-xl p-6">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-xl font-bold text-white">Live Performance</h2>
-                        <span class="flex items-center space-x-2 px-3 py-1 bg-green-500/10 text-green-400 rounded-full">
-                            <span class="w-2 h-2 bg-green-400 rounded-full live-pulse"></span>
-                            <span class="text-sm">Live Now</span>
-                        </span>
-                    </div>
-
-                    <div class="flex items-center space-x-6">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=1" alt="Sarah Johnson" 
-                             class="w-20 h-20 rounded-full border-2 border-blue-500">
+        <!-- Tonight's Schedule -->
+        <div class="bg-white rounded-lg shadow">
+            <div class="px-6 py-4 border-b">
+                <h2 class="text-lg font-semibold">Tonight's Schedule</h2>
+            </div>
+            <div class="p-6">
+                <div class="space-y-4">
+                    <!-- Sample performers - this would be populated from your database -->
+                    <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
                         <div>
-                            <h3 class="text-xl font-bold text-white">Sarah Johnson</h3>
-                            <p class="text-gray-400">Jazz Vocalist</p>
-                            <div class="flex items-center space-x-4 mt-2">
-                                <div class="flex items-center space-x-1 text-yellow-400">
-                                    <i class="fas fa-star"></i>
-                                    <span>4.9</span>
-                                </div>
-                                <div class="flex items-center space-x-1 text-green-400">
-                                    <i class="fas fa-pound-sign"></i>
-                                    <span>175 in tips</span>
-                                </div>
+                            <h3 class="font-medium">Sarah Johnson</h3>
+                            <p class="text-sm text-gray-500">Jazz Vocalist</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-medium">20:00 - 21:30</p>
+                            <div class="flex items-center space-x-1 text-yellow-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                </svg>
+                                <span class="text-gray-600">4.9</span>
                             </div>
                         </div>
-                        <div class="ml-auto text-right">
-                            <div class="text-gray-400">Time Remaining</div>
-                            <div class="text-2xl font-bold text-white" id="timeRemaining">45:00</div>
-                        </div>
-                    </div>
-
-                    <!-- Live Ratings -->
-                    <div class="mt-6 p-4 bg-slate-800/50 rounded-lg">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-gray-400">Live Ratings</span>
-                            <span class="text-sm text-gray-500">Last 5 minutes</span>
-                        </div>
-                        <div class="flex space-x-2" id="liveRatings">
-                            <!-- Rating bubbles will be added here dynamically -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Performance Chart -->
-                <div class="glass-effect rounded-xl p-6">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-xl font-bold text-white">Performance Analytics</h2>
-                        <select class="bg-slate-800/50 text-gray-300 rounded-lg px-3 py-1 border border-gray-700">
-                            <option>Last 7 Days</option>
-                            <option>Last 30 Days</option>
-                            <option>Last 3 Months</option>
-                        </select>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="performanceChart" height="200"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right Column - Schedule & Actions -->
-            <div class="space-y-6">
-                <!-- Upcoming Schedule -->
-                <div class="glass-effect rounded-xl p-6">
-                    <h2 class="text-xl font-bold text-white mb-4">Tonight's Schedule</h2>
-                    <div class="space-y-4" id="scheduleList">
-                        <!-- Schedule items will be added here -->
-                    </div>
-                </div>
-
-                <!-- Quick Actions -->
-                <div class="glass-effect rounded-xl p-6">
-                    <h2 class="text-xl font-bold text-white mb-4">Quick Actions</h2>
-                    <div class="space-y-3">
-                        <button class="w-full px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center justify-center space-x-2">
-                            <i class="fas fa-plus"></i>
-                            <span>Book New Performer</span>
-                        </button>
-                        <button class="w-full px-4 py-3 bg-slate-800/50 hover:bg-slate-700/50 text-gray-300 rounded-lg transition-colors flex items-center justify-center space-x-2">
-                            <i class="fas fa-calendar"></i>
-                            <span>View All Bookings</span>
-                        </button>
-                        <button class="w-full px-4 py-3 bg-slate-800/50 hover:bg-slate-700/50 text-gray-300 rounded-lg transition-colors flex items-center justify-center space-x-2">
-                            <i class="fas fa-chart-bar"></i>
-                            <span>Generate Report</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Recent Activity -->
-                <div class="glass-effect rounded-xl p-6">
-                    <h2 class="text-xl font-bold text-white mb-4">Live Activity</h2>
-                    <div class="space-y-4" id="activityFeed">
-                        <!-- Activity items will be added here -->
                     </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <script>
-        // Initialize all animations and live updates
-        document.addEventListener('DOMContentLoaded', () => {
-            // Counter animations
-            animateCounter('actsCounter', 0, 4, 2000);
-            animateCounter('tipsCounter', 0, 342, 2000, '£');
-            animateCounter('satisfactionCounter', 0, 95, 2000, '%');
+    <script type="module">
+        // Set user info when page loads
+        const user = JSON.parse(sessionStorage.getItem('user'));
+        document.getElementById('venueName').textContent = user.venue_name;
+        document.getElementById('userEmail').textContent = user.email;
 
-            // Initialize performance chart
-            const ctx = document.getElementById('performanceChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-                    datasets: [{
-                        label: 'Average Rating',
-                        data: [4.5, 4.6, 4.8, 4.7, 4.9, 4.8, 4.7],
-                        borderColor: '#3b82f6',
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }, {
-                        label: 'Tips (£)',
-                        data: [250, 320, 280, 400, 450, 380, 342],
-                        borderColor: '#10b981',
-                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                color: '#94a3b8'
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            grid: {
-                                color: 'rgba(148, 163, 184, 0.1)'
-                            },
-                            ticks: {
-                                color: '#94a3b8'
-                            }
-                        },
-                        x: {
-                            grid: {
-                                color: 'rgba(148, 163, 184, 0.1)'
-                            },
-                            ticks: {
-                                color: '#94a3b8'
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Initialize schedule
-            const schedule = [
-                { time: '21:45', name: 'The Jazz Trio', type: 'Instrumental', rating: 4.7 },
-                { time: '23:30', name: 'Mike Stevens', type: 'Blues', rating: 4.8 }
-            ];
-
-            const scheduleList = document.getElementById('scheduleList');
-            schedule.forEach(act => {
-                const div = document.createElement('div');
-                div.className = 'p-4 bg-slate-800/50 rounded-lg hover:bg-slate-700/50 transition-colors';
-                div.innerHTML = `
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <h3 class="text-white font-medium">${act.name}</h3>
-                            <p class="text-gray-400 text-sm">${act.type}</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-gray-300">${act.time}</p>
-                            <div class="flex items-center justify-end space-x-1 text-yellow-400">
-                                <i class="fas fa-star text-sm"></i>
-                                <span>${act.rating}</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                scheduleList.appendChild(div);
-            });
-
-            // Live activity feed
-            const activities = [
-                { type: 'rating', text: 'New 5-star rating received', time: '2m ago', icon: 'star', color: 'yellow' },
-                { type: 'tip', text: '£20 tip received', time: '5m ago', icon: 'pound-sign', color: 'green' },
-                { type: 'booking', text: 'New booking confirmed', time: '15m ago', icon: 'calendar', color: 'blue' }
-            ];
-
-            const activityFeed = document.getElementById('activityFeed');
-            activities.forEach(activity => {
-                const div = document.createElement('div');
-                div.className = 'flex items-center space-x-3';
-                div.innerHTML = `
-                    <div class="p-2 bg-${activity.color}-500/10 rounded-full text-${activity.color}-400">
-                        <i class="fas fa-${activity.icon}"></i>
-                    </div>
-                    <div>
-                        <p class="text-gray-300 text-sm">${activity.text}</p>
-                        <p class="text-gray-500 text-xs">${activity.time}</p>
-                    </div>
-                `;
-                activityFeed.appendChild(div);
-            });
-
-            // Live time update
-            setInterval(updateTime, 1000);
-            setInterval(updateTimeRemaining, 1000);
-            setInterval(addNewRating, 5000);
-        });
-
-        // Helper functions
-        function animateCounter(id, start, end, duration, prefix = '') {
-            const element = document.getElementById(id);
-            const range = end - start;
-            const increment = range / (duration / 16);
-            let current = start;
-
-            const timer = setInterval(() => {
-                current += increment;
-                if (current >= end) {
-                    clearInterval(timer);
-                    current = end;
-                }
-                element.textContent = prefix + Math.floor(current).toLocaleString();
-            }, 16);
-        }
-
-        function updateTime() {
-            const timeElement = document.getElementById('liveTime');
-            const now = new Date();
-            timeElement.textContent = now.toLocaleTimeString();
-        }
-
-        function updateTimeRemaining() {
-            const element = document.getElementById('timeRemaining');
-            const [minutes, seconds] = element.textContent.split(':').map(Number);
-            let totalSeconds = minutes * 60 + seconds - 1;
-            if (totalSeconds < 0) totalSeconds = 45 * 60;
-            const newMinutes = Math.floor(totalSeconds / 60);
-            const newSeconds = totalSeconds % 60;
-            element.textContent = `${String(newMinutes).padStart(2, '0')}:${String(newSeconds).padStart(2, '0')}`;
-        }
-
-        function addNewRating() {
-            const ratings = document.getElementById('liveRatings');
-            const rating = Math.floor(Math.random() * 2) + 4; // Random 4 or 5 star rating
-            const bubble = document.createElement('div');
-            bubble.className = 'w-8 h-8 bg-slate-800/50 rounded-full flex items-center justify-center text-yellow-400 text-sm';
-            bubble.innerHTML = `<i class="fas fa-star"></i>`;
-            bubble.setAttribute('data-rating', rating);
-            ratings.appendChild(bubble);
-
-            // Keep only last 8 ratings
-            if (ratings.children.length > 8) {
-                ratings.removeChild(ratings.firstChild);
-            }
-
-            // Animate new rating
-            bubble.style.animation = 'rating-update 0.5s ease-out';
-        }
+        // Logout function
+        window.logout = function() {
+            sessionStorage.removeItem('user');
+            window.location.href = 'login.html';
+        };
     </script>
 </body>
 </html>
