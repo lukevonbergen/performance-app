@@ -59,7 +59,7 @@
 
                 // Use exact table name case
                 const { data, error } = await supabase
-                    .from('PerformanceApp')  // Exact match for table name
+                    .from('venues')  // Exact match for table name
                     .select('*');
 
                 console.log('Raw Supabase response:', data);
