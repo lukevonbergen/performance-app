@@ -36,9 +36,7 @@
                 <a href="index.html" class="text-blue-600 hover:text-blue-700">Don't have an account? Sign up</a>
             </div>
 
-            <div id="message" class="mt-4 text-center hidden">
-                <!-- Success/Error messages will appear here -->
-            </div>
+            <div id="message" class="mt-4 text-center text-red-600"></div>
         </div>
     </div>
 
@@ -49,42 +47,42 @@
             e.preventDefault();
             
             const messageDiv = document.getElementById('message');
-            messageDiv.className = 'mt-4 text-center';
-            
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
             try {
-                // Query Supabase to check credentials
                 const { data, error } = await supabase
                     .from('PerformanceApp')
                     .select('*')
                     .eq('email', email)
-                    .eq('password', password)
-                    .single();
+                    .limit(1);
 
-                if (error) throw error;
+                if (error) {
+                    throw error;
+                }
 
-                if (data) {
-                    messageDiv.textContent = 'Login successful!';
-                    messageDiv.className = 'mt-4 text-center text-green-600';
-                    
-                    // Store user data in session storage
-                    sessionStorage.setItem('user', JSON.stringify(data));
-                    
-                    // Redirect to dashboard after successful login
-                    setTimeout(() => {
-                        window.location.href = 'dashboard.html';
-                    }, 1000);
+                if (data && data.length > 0) {
+                    // Check if password matches
+                    if (data[0].password === password) {
+                        // Store user data
+                        sessionStorage.setItem('user', JSON.stringify(data[0]));
+                        
+                        messageDiv.className = 'mt-4 text-center text-green-600';
+                        messageDiv.textContent = 'Login successful! Redirecting...';
+                        
+                        // Redirect to dashboard
+                        setTimeout(() => {
+                            window.location.href = 'dashboard.html';
+                        }, 1000);
+                    } else {
+                        messageDiv.textContent = 'Invalid email or password';
+                    }
                 } else {
                     messageDiv.textContent = 'Invalid email or password';
-                    messageDiv.className = 'mt-4 text-center text-red-600';
                 }
-                
             } catch (error) {
                 console.error('Error:', error);
                 messageDiv.textContent = 'Error logging in. Please try again.';
-                messageDiv.className = 'mt-4 text-center text-red-600';
             }
         });
     </script>
