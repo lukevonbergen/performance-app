@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Venue Login</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="supabase.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen flex items-center justify-center">
+        <div class="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
+            <h2 class="text-2xl font-bold text-center mb-6">Login to Your Venue Dashboard</h2>
+            
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" id="email" required
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Password</label>
+                    <input type="password" id="password" required
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+
+                <button type="submit"
+                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Log In
+                </button>
+            </form>
+
+            <div class="mt-4 text-center text-sm">
+                <a href="index.html" class="text-blue-600 hover:text-blue-700">Don't have an account? Sign up</a>
+            </div>
+
+            <div id="message" class="mt-4 text-center hidden">
+                <!-- Success/Error messages will appear here -->
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase } from './supabase.js';
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const messageDiv = document.getElementById('message');
+            messageDiv.className = 'mt-4 text-center';
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                // Query Supabase to check credentials
+                const { data, error } = await supabase
+                    .from('PerformanceApp')
+                    .select('*')
+                    .eq('email', email)
+                    .eq('password', password)
+                    .single();
+
+                if (error) throw error;
+
+                if (data) {
+                    messageDiv.textContent = 'Login successful!';
+                    messageDiv.className = 'mt-4 text-center text-green-600';
+                    
+                    // Store user data in session storage
+                    sessionStorage.setItem('user', JSON.stringify(data));
+                    
+                    // Redirect to dashboard after successful login
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1000);
+                } else {
+                    messageDiv.textContent = 'Invalid email or password';
+                    messageDiv.className = 'mt-4 text-center text-red-600';
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                messageDiv.textContent = 'Error logging in. Please try again.';
+                messageDiv.className = 'mt-4 text-center text-red-600';
+            }
+        });
+    </script>
+</body>
+</html>
