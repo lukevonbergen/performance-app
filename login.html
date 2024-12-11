@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Venue Login</title>
+    <title>Login | PerformanceDash</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script type="module" src="supabase.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -11,7 +11,7 @@
 <body class="bg-gray-50">
     <div class="min-h-screen flex items-center justify-center">
         <div class="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
-            <h2 class="text-2xl font-bold text-center mb-6">Login to Your Venue Dashboard</h2>
+            <h2 class="text-2xl font-bold text-center mb-6">Login to PerformanceDash</h2>
             
             <form id="loginForm" class="space-y-4">
                 <div>
@@ -45,7 +45,7 @@
 
     <script type="module">
         import { supabase } from './supabase.js';
-
+    
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -53,50 +53,64 @@
             const debugDiv = document.getElementById('debug');
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-
+    
             try {
                 debugDiv.innerHTML = 'Attempting login...<br>';
-
-                // Use exact table name case
-                const { data, error } = await supabase
-                    .from('venues')  // Exact match for table name
+    
+                // First check venues table
+                let { data: venueData, error: venueError } = await supabase
+                    .from('venues')
                     .select('*');
-
-                console.log('Raw Supabase response:', data);
-                debugDiv.innerHTML += `Query complete. Found ${data ? data.length : 0} records<br>`;
-
-                if (error) {
-                    throw error;
-                }
-
-                if (data && data.length > 0) {
-                    // Log all retrieved data for debugging
-                    console.log('All records:', data);
+    
+                debugDiv.innerHTML += `Checking venues table. Found ${venueData ? venueData.length : 0} records<br>`;
+    
+                // Check for matching venue user
+                let user = venueData?.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
+                
+                if (user) {
+                    debugDiv.innerHTML += 'Venue user found<br>';
+                    messageDiv.className = 'mt-4 text-center text-green-600';
+                    messageDiv.textContent = 'Login successful! Redirecting to venue dashboard...';
                     
-                    // Find matching email
-                    const user = data.find(u => u.email.toLowerCase() === email.toLowerCase());
-                    console.log('Matching user:', user);
-
-                    debugDiv.innerHTML += user ? 'User found<br>' : 'User not found<br>';
-
-                    if (user && user.password === password) {
-                        // Login successful
-                        messageDiv.className = 'mt-4 text-center text-green-600';
-                        messageDiv.textContent = 'Login successful! Redirecting...';
-                        
-                        // Store user data
-                        sessionStorage.setItem('user', JSON.stringify(user));
-                        
-                        // Redirect to dashboard
-                        setTimeout(() => {
-                            window.location.href = 'dashboard.html';
-                        }, 1000);
-                    } else {
-                        messageDiv.textContent = user ? 'Invalid password' : 'Email not found';
-                    }
-                } else {
-                    messageDiv.textContent = 'No users found in database';
+                    // Store user data with type
+                    sessionStorage.setItem('user', JSON.stringify({ ...user, type: 'venue' }));
+                    
+                    // Redirect to venue dashboard
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1000);
+                    return;
                 }
+    
+                // If no venue found, check performers table
+                let { data: performerData, error: performerError } = await supabase
+                    .from('performers')
+                    .select('*');
+    
+                debugDiv.innerHTML += `Checking performers table. Found ${performerData ? performerData.length : 0} records<br>`;
+    
+                // Check for matching performer user
+                user = performerData?.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
+    
+                if (user) {
+                    debugDiv.innerHTML += 'Performer user found<br>';
+                    messageDiv.className = 'mt-4 text-center text-green-600';
+                    messageDiv.textContent = 'Login successful! Redirecting to performer dashboard...';
+                    
+                    // Store user data with type
+                    sessionStorage.setItem('user', JSON.stringify({ ...user, type: 'performer' }));
+                    
+                    // Redirect to performer dashboard
+                    setTimeout(() => {
+                        window.location.href = 'performer-dashboard.html';
+                    }, 1000);
+                    return;
+                }
+    
+                // If we get here, no user was found
+                messageDiv.textContent = 'Invalid email or password';
+                debugDiv.innerHTML += 'No matching user found in either table<br>';
+    
             } catch (error) {
                 console.error('Error:', error);
                 debugDiv.innerHTML += `Error: ${error.message}<br>`;
