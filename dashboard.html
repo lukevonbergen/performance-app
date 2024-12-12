@@ -229,83 +229,84 @@
         }
 
         // Search for available performers
-        async function searchPerformers(date, startTime) {
-            try {
-                // Convert date and time to timestamp
-                const searchDateTime = new Date(`${date}T${startTime}`);
-                
-                // Get all performers with availability on this date (not day of week anymore)
-                const { data: availability, error } = await supabase
-                    .from('performer_availability')
-                    .select(`
-                        *,
-                        performers (
-                            id,
-                            stage_name,
-                            first_name,
-                            last_name
-                        )
-                    `)
-                    .eq('date', date);  // Changed from day_of_week to date
+async function searchPerformers(date, startTime) {
+    try {
+        // Convert date and time to timestamp
+        const searchDateTime = new Date(`${date}T${startTime}`);
         
-                if (error) throw error;
+        // Calculate end time (1 hour after start time)
+        const searchEndTime = new Date(`${date}T${startTime}`);
+        searchEndTime.setHours(searchEndTime.getHours() + 1);
         
-                // Check for existing bookings (both pending and confirmed)
-                const { data: existingBookings } = await supabase
-                    .from('performances')
-                    .select('performer_id')
-                    .gte('start_time', searchDateTime.toISOString())
-                    .lt('end_time', searchEndTime.toISOString())
-                    .in('status', ['pending', 'confirmed']); // Only check pending and confirmed bookings
+        // Get all performers with availability on this date
+        const { data: availability, error } = await supabase
+            .from('performer_availability')
+            .select(`
+                *,
+                performers (
+                    id,
+                    stage_name,
+                    first_name,
+                    last_name
+                )
+            `)
+            .eq('date', date);
+
+        if (error) throw error;
+
+        // Filter out performers who are already booked
+        const { data: existingBookings } = await supabase
+            .from('performances')
+            .select('performer_id')
+            .eq('date', date)
+            .overlaps('start_time', startTime);
+
+        const bookedPerformerIds = existingBookings?.map(booking => booking.performer_id) || [];
         
-                // Filter out performers who are already booked
-                const bookedPerformerIds = existingBookings?.map(booking => booking.performer_id) || [];
-                
-                const availablePerformers = availability.filter(slot => {
-                    // Exclude if performer is already booked
-                    if (bookedPerformerIds.includes(slot.performer_id)) return false;
-                    
-                    // Check if requested time falls within availability slot
-                    const [slotStartHour] = slot.start_time.split(':');
-                    const [slotEndHour] = slot.end_time.split(':');
-                    const searchHour = searchDateTime.getHours();
-                    
-                    return searchHour >= parseInt(slotStartHour) && searchHour < parseInt(slotEndHour);
-                });
+        // Filter available performers
+        const availablePerformers = availability.filter(slot => {
+            if (bookedPerformerIds.includes(slot.performer_id)) return false;
+            
+            // Check if requested time falls within availability slot
+            const requestedTime = startTime.split(':')[0];
+            const slotStart = slot.start_time.split(':')[0];
+            const slotEnd = slot.end_time.split(':')[0];
+            
+            return requestedTime >= slotStart && requestedTime < slotEnd;
+        });
+
+        const resultsDiv = document.getElementById('searchResults');
         
-                // Display results
-                const resultsDiv = document.getElementById('searchResults');
-                
-                if (availablePerformers.length > 0) {
-                    resultsDiv.innerHTML = availablePerformers.map(slot => `
-                        <div class="border rounded-lg p-4 flex justify-between items-center">
-                            <div>
-                                <h3 class="font-medium">${slot.performers.stage_name}</h3>
-                                <p class="text-sm text-gray-500">Available ${slot.start_time} - ${slot.end_time}</p>
-                                <p class="text-sm text-gray-500">Rate: £${slot.rate_per_hour}/hr</p>
-                            </div>
-                            <button onclick="openBookingModal('${slot.performer_id}', '${slot.performers.stage_name}', ${slot.rate_per_hour}, '${searchDateTime.toISOString()}')"
-                                class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
-                                Book Now
-                            </button>
-                        </div>
-                    `).join('');
-                } else {
-                    resultsDiv.innerHTML = `
-                        <div class="text-center text-gray-500">
-                            No performers available at this time
-                        </div>
-                    `;
-                }
-            } catch (error) {
-                console.error('Error searching performers:', error);
-                document.getElementById('searchResults').innerHTML = `
-                    <div class="text-center text-red-500">
-                        Error searching for performers. Please try again.
+        if (availablePerformers.length > 0) {
+            resultsDiv.innerHTML = availablePerformers.map(slot => `
+                <div class="border rounded-lg p-4 flex justify-between items-center">
+                    <div>
+                        <h3 class="font-medium">${slot.performers.stage_name}</h3>
+                        <p class="text-sm text-gray-500">Available ${slot.start_time} - ${slot.end_time}</p>
+                        <p class="text-sm text-gray-500">Rate: £${slot.rate_per_hour}/hr</p>
                     </div>
-                `;
-            }
+                    <button onclick="openBookingModal('${slot.performer_id}', '${slot.performers.stage_name}', ${slot.rate_per_hour}, '${searchDateTime.toISOString()}')"
+                        class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                        Book Now
+                    </button>
+                </div>
+            `).join('');
+        } else {
+            resultsDiv.innerHTML = `
+                <div class="text-center text-gray-500">
+                    No performers available at this time
+                </div>
+            `;
         }
+    } catch (error) {
+        console.error('Error searching performers:', error);
+        document.getElementById('searchResults').innerHTML = `
+            <div class="text-center text-red-500">
+                Error searching for performers. Please try again.
+            </div>
+        `;
+    }
+}
 
         // Modal functions
         window.openBookingModal = function(performerId, performerName, rate, startTime) {
