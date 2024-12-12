@@ -250,15 +250,20 @@
 
         async function loadDashboardData() {
             try {
-                // Load upcoming performances
-                const { data: performances, error: perfError } = await supabase
+                // Get today's date in the correct format
+                const today = new Date();
+                const startOfDay = today.toISOString();
+                const endOfDay = new Date(today.setDate(today.getDate() + 1)).toISOString();
+        
+                // Query performances for this venue
+                const { data: performances, error } = await supabase
                     .from('performances')
-                    .select('*')
-                    .eq('performer_id', window.user.id)
-                    .gte('start_time', new Date().toISOString())
-                    .order('start_time');
-
-                if (perfError) throw perfError;
+                    .select('*, performers(stage_name, id)')  // Simplified select statement
+                    .eq('venue_id', window.user.id)
+                    .gte('start_time', startOfDay)
+                    .lt('start_time', endOfDay);
+        
+                if (error) throw error;
 
                 // Update upcoming gigs count
                 document.getElementById('upcomingGigs').textContent = performances?.length || 0;
