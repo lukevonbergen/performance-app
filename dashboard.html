@@ -233,13 +233,8 @@
             try {
                 // Convert date and time to timestamp
                 const searchDateTime = new Date(`${date}T${startTime}`);
-                const dayOfWeek = searchDateTime.getDay();
                 
-                // Calculate end time (1 hour after start time)
-                const searchEndTime = new Date(searchDateTime);
-                searchEndTime.setHours(searchEndTime.getHours() + 1);
-        
-                // First get all performers with availability on this day
+                // Get all performers with availability on this date (not day of week anymore)
                 const { data: availability, error } = await supabase
                     .from('performer_availability')
                     .select(`
@@ -251,7 +246,7 @@
                             last_name
                         )
                     `)
-                    .eq('day_of_week', dayOfWeek);
+                    .eq('date', date);  // Changed from day_of_week to date
         
                 if (error) throw error;
         
