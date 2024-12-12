@@ -9,14 +9,6 @@
     <script type="module" src="supabase.js"></script>
 </head>
 <body class="bg-gray-50">
-    <!-- Check if user is logged in -->
-    <script>
-        const user = JSON.parse(sessionStorage.getItem('user'));
-        if (!user) {
-            window.location.href = 'login.html';
-        }
-    </script>
-
     <!-- Navigation Bar -->
     <nav class="bg-white shadow-sm">
         <div class="max-w-7xl mx-auto px-4">
@@ -85,80 +77,139 @@
             </div>
         </div>
 
+        <!-- Search and Book Performers -->
+        <div class="bg-white rounded-lg shadow mb-6">
+            <div class="px-6 py-4 border-b">
+                <h2 class="text-lg font-semibold">Find and Book Performers</h2>
+            </div>
+            <div class="p-6">
+                <!-- Search Form -->
+                <form id="searchForm" class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                        <input type="date" id="searchDate" required min="" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+                        <input type="time" id="searchStartTime" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div class="flex items-end">
+                        <button type="submit"
+                            class="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                            Search Available Performers
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Search Results -->
+                <div id="searchResults" class="space-y-4">
+                    <!-- Results will be populated here -->
+                </div>
+            </div>
+        </div>
+
         <!-- Tonight's Schedule -->
         <div class="bg-white rounded-lg shadow">
-            <div class="px-6 py-4 border-b flex justify-between items-center">
+            <div class="px-6 py-4 border-b">
                 <h2 class="text-lg font-semibold">Tonight's Schedule</h2>
-                <button onclick="addPerformance()" 
-                        class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
-                    Add Performance
-                </button>
             </div>
             <div class="p-6">
                 <div id="scheduleList" class="space-y-4">
                     <!-- Performances will be loaded here -->
-                    <div class="text-center text-gray-500">You have no performances currently booked.</div>
+                    <div class="text-center text-gray-500">Loading schedule...</div>
                 </div>
             </div>
         </div>
     </main>
 
+    <!-- Booking Modal -->
+    <div id="bookingModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <h3 class="text-lg font-semibold mb-4">Confirm Booking</h3>
+            <div id="bookingDetails" class="mb-4">
+                <!-- Booking details will be populated here -->
+            </div>
+            <div class="flex justify-end space-x-3">
+                <button onclick="closeBookingModal()"
+                    class="px-4 py-2 border rounded-md hover:bg-gray-100">
+                    Cancel
+                </button>
+                <button onclick="confirmBooking()"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                    Confirm Booking
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { supabase } from './supabase.js';
 
-        const user = JSON.parse(sessionStorage.getItem('user'));
-        document.getElementById('venueName').textContent = user.venue_name;
-        document.getElementById('userEmail').textContent = user.email;
+        // Make supabase globally available
+        window.supabase = supabase;
+        
+        // Get user data
+        window.user = JSON.parse(sessionStorage.getItem('user'));
+        if (!window.user || window.user.type !== 'venue') {
+            window.location.href = 'login.html';
+        }
 
-        // Load venue-specific data
+        // Display user info
+        document.getElementById('venueName').textContent = window.user.venue_name;
+        document.getElementById('userEmail').textContent = window.user.email;
+
+        // Set minimum date to today
+        document.getElementById('searchDate').min = new Date().toISOString().split('T')[0];
+
+        // Global variable to store selected performer for booking
+        window.selectedPerformer = null;
+        window.selectedTime = null;
+
         async function loadDashboardData() {
             try {
+                // Get today's date
+                const today = new Date().toISOString().split('T')[0];
+                
                 // Query performances for this venue
                 const { data: performances, error } = await supabase
-                    .from('Performances')  // You'll need to create this table
-                    .select('*')
-                    .eq('venue_id', user.id)
-                    .eq('date', new Date().toISOString().split('T')[0]);
+                    .from('performances')
+                    .select(`
+                        *,
+                        performers (
+                            stage_name,
+                            id
+                        )
+                    `)
+                    .eq('venue_id', window.user.id)
+                    .gte('start_time', today)
+                    .lt('start_time', new Date(today).getTime() + 24 * 60 * 60 * 1000);
 
                 if (error) throw error;
 
                 // Update stats
                 document.getElementById('actsCount').textContent = performances?.length || 0;
-                
-                // Calculate average rating
-                if (performances?.length) {
-                    const avgRating = performances.reduce((acc, curr) => acc + (curr.rating || 0), 0) / performances.length;
-                    document.getElementById('avgRating').textContent = avgRating.toFixed(1);
-                }
-
-                // Calculate total tips
-                const totalTips = performances?.reduce((acc, curr) => acc + (curr.tips || 0), 0) || 0;
-                document.getElementById('totalTips').textContent = `£${totalTips}`;
 
                 // Update schedule list
                 const scheduleList = document.getElementById('scheduleList');
-                scheduleList.innerHTML = '';
-
+                
                 if (performances?.length) {
-                    performances.forEach(perf => {
-                        scheduleList.innerHTML += `
-                            <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-                                <div>
-                                    <h3 class="font-medium">${perf.performer_name}</h3>
-                                    <p class="text-sm text-gray-500">${perf.performance_type}</p>
-                                </div>
-                                <div class="text-right">
-                                    <p class="text-sm font-medium">${perf.start_time} - ${perf.end_time}</p>
-                                    <div class="flex items-center space-x-1 text-yellow-400">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                                        </svg>
-                                        <span class="text-gray-600">${perf.rating || '--'}</span>
-                                    </div>
-                                </div>
+                    scheduleList.innerHTML = performances.map(perf => `
+                        <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                            <div>
+                                <h3 class="font-medium">${perf.performers.stage_name}</h3>
+                                <p class="text-sm text-gray-500">Status: ${perf.status}</p>
                             </div>
-                        `;
-                    });
+                            <div class="text-right">
+                                <p class="text-sm font-medium">
+                                    ${new Date(perf.start_time).toLocaleTimeString()} - 
+                                    ${new Date(perf.end_time).toLocaleTimeString()}
+                                </p>
+                                <p class="text-sm text-gray-500">Rate: £${perf.booking_rate}/hr</p>
+                            </div>
+                        </div>
+                    `).join('');
                 } else {
                     scheduleList.innerHTML = `
                         <div class="text-center text-gray-500">
@@ -171,11 +222,144 @@
             }
         }
 
-        // Load initial data
-        loadDashboardData();
+        // Search for available performers
+        async function searchPerformers(date, startTime) {
+            try {
+                // Convert date and time to timestamp
+                const searchDateTime = new Date(`${date}T${startTime}`);
+                const dayOfWeek = searchDateTime.getDay();
 
-        // Refresh data every minute
-        setInterval(loadDashboardData, 60000);
+                // Get all performers with availability on this day
+                const { data: availability, error } = await supabase
+                    .from('performer_availability')
+                    .select(`
+                        *,
+                        performers (
+                            id,
+                            stage_name,
+                            first_name,
+                            last_name
+                        )
+                    `)
+                    .eq('day_of_week', dayOfWeek);
+
+                if (error) throw error;
+
+                // Check for existing bookings
+                const searchEndTime = new Date(searchDateTime);
+                searchEndTime.setHours(searchEndTime.getHours() + 1); // Assume 1-hour slots
+
+                const { data: existingBookings } = await supabase
+                    .from('performances')
+                    .select('performer_id')
+                    .gte('start_time', searchDateTime.toISOString())
+                    .lt('end_time', searchEndTime.toISOString());
+
+                // Filter out performers who are already booked
+                const bookedPerformerIds = existingBookings?.map(booking => booking.performer_id) || [];
+                
+                const availablePerformers = availability.filter(slot => {
+                    if (bookedPerformerIds.includes(slot.performer_id)) return false;
+                    
+                    // Check if the requested time falls within the availability slot
+                    const [slotStart] = slot.start_time.split(':');
+                    const [slotEnd] = slot.end_time.split(':');
+                    const searchHour = searchDateTime.getHours();
+                    
+                    return searchHour >= parseInt(slotStart) && searchHour < parseInt(slotEnd);
+                });
+
+                const resultsDiv = document.getElementById('searchResults');
+                
+                if (availablePerformers.length > 0) {
+                    resultsDiv.innerHTML = availablePerformers.map(slot => `
+                        <div class="border rounded-lg p-4 flex justify-between items-center">
+                            <div>
+                                <h3 class="font-medium">${slot.performers.stage_name}</h3>
+                                <p class="text-sm text-gray-500">Available ${slot.start_time} - ${slot.end_time}</p>
+                                <p class="text-sm text-gray-500">Rate: £${slot.rate_per_hour}/hr</p>
+                            </div>
+                            <button onclick="openBookingModal('${slot.performer_id}', '${slot.performers.stage_name}', ${slot.rate_per_hour}, '${searchDateTime.toISOString()}')"
+                                class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                                Book Now
+                            </button>
+                        </div>
+                    `).join('');
+                } else {
+                    resultsDiv.innerHTML = `
+                        <div class="text-center text-gray-500">
+                            No performers available at this time
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error searching performers:', error);
+                document.getElementById('searchResults').innerHTML = `
+                    <div class="text-center text-red-500">
+                        Error searching for performers. Please try again.
+                    </div>
+                `;
+            }
+        }
+
+        // Modal functions
+        window.openBookingModal = function(performerId, performerName, rate, startTime) {
+            window.selectedPerformer = {
+                id: performerId,
+                name: performerName,
+                rate: rate
+            };
+            window.selectedTime = startTime;
+
+            const endTime = new Date(startTime);
+            endTime.setHours(endTime.getHours() + 1);
+
+            document.getElementById('bookingDetails').innerHTML = `
+                <div class="space-y-2">
+                    <p><span class="font-medium">Performer:</span> ${performerName}</p>
+                    <p><span class="font-medium">Date:</span> ${new Date(startTime).toLocaleDateString()}</p>
+                    <p><span class="font-medium">Time:</span> ${new Date(startTime).toLocaleTimeString()} - ${endTime.toLocaleTimeString()}</p>
+                    <p><span class="font-medium">Rate:</span> £${rate}/hr</p>
+                </div>
+            `;
+
+            document.getElementById('bookingModal').classList.remove('hidden');
+        };
+
+        window.closeBookingModal = function() {
+            document.getElementById('bookingModal').classList.add('hidden');
+            window.selectedPerformer = null;
+            window.selectedTime = null;
+        };
+
+        window.confirmBooking = async function() {
+            try {
+                const startTime = new Date(window.selectedTime);
+                const endTime = new Date(startTime);
+                endTime.setHours(endTime.getHours() + 1);
+
+                const { error } = await supabase
+                    .from('performances')
+                    .insert([{
+                        venue_id: window.user.id,
+                        performer_id: window.selectedPerformer.id,
+                        start_time: startTime.toISOString(),
+                        end_time: endTime.toISOString(),
+                        booking_rate: window.selectedPerformer.rate,
+                        status: 'pending'
+                    }]);
+
+                if (error) throw error;
+
+                closeBookingModal();
+                alert('Booking submitted successfully! Awaiting performer confirmation.');
+                loadDashboardData(); // Refresh the schedule
+                document.getElementById('searchResults').innerHTML = ''; // Clear search results
+            } catch (error) {
+                console.error('Error creating booking:', error);
+                alert('Error creating booking. Please try again.');
+            }
+        };
 
         // Logout function
         window.logout = function() {
@@ -183,11 +367,19 @@
             window.location.href = 'login.html';
         };
 
-        // Add performance function
-        window.addPerformance = function() {
-            // You can implement this to open a modal or navigate to a new page
-            alert('Add performance functionality coming soon!');
-        };
+        // Set up form submission handler
+        document.getElementById('searchForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const date = document.getElementById('searchDate').value;
+            const startTime = document.getElementById('searchStartTime').value;
+            searchPerformers(date, startTime);
+        });
+
+        // Load initial data
+        loadDashboardData();
+
+        // Refresh data every minute
+        setInterval(loadDashboardData, 60000);
     </script>
 </body>
 </html>
