@@ -354,44 +354,42 @@
         }
 
         // Add event listener for the availability form
-        document.getElementById('availabilityForm').addEventListener('submit', async (e) => {
+       document.getElementById('availabilityForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
-        try {
-            // First verify all elements exist
-            const dateInput = document.getElementById('availabilityDate');
-            const startTimeInput = document.getElementById('startTime');
-            const endTimeInput = document.getElementById('endTime');
-            const rateInput = document.getElementById('ratePerHour');
-    
-            // Check if any element is missing
-            if (!dateInput || !startTimeInput || !endTimeInput || !rateInput) {
-                throw new Error('Form elements not found');
-            }
-    
-            const newAvailability = {
-                performer_id: window.user.id,
-                date: dateInput.value,
-                start_time: startTimeInput.value,
-                end_time: endTimeInput.value,
-                rate_per_hour: parseFloat(rateInput.value)
-            };
-    
-            console.log('Submitting availability:', newAvailability); // Debug log
-    
-            const { error } = await supabase
-                .from('performer_availability')
-                .insert([newAvailability]);
-    
-            if (error) throw error;
-    
-            closeAvailabilityModal();
-            await loadAvailability();
-        } catch (error) {
-            console.error('Error adding availability:', error);
-            alert('Error adding availability. Please try again.');
-        }
-    });
+    try {
+        const dateInput = document.getElementById('availabilityDate').value;
+        const startTimeInput = document.getElementById('startTime').value;
+        const endTimeInput = document.getElementById('endTime').value;
+        const rateInput = document.getElementById('ratePerHour').value;
+
+        // Format the time fields to exclude seconds
+        const formattedStartTime = startTimeInput + ':00';
+        const formattedEndTime = endTimeInput + ':00';
+
+        const newAvailability = {
+            performer_id: window.user.id,
+            date: dateInput,
+            start_time: formattedStartTime,
+            end_time: formattedEndTime,
+            rate_per_hour: parseFloat(rateInput)
+        };
+
+        console.log('Submitting availability:', newAvailability); // Debug log
+
+        const { data, error } = await supabase
+            .from('performer_availability')
+            .insert([newAvailability]);
+
+        if (error) throw error;
+
+        closeAvailabilityModal();
+        await loadAvailability();
+    } catch (error) {
+        console.error('Error adding availability:', error);
+        alert('Error adding availability. Please try again.');
+    }
+});
 
         // Load initial data
         loadDashboardData();
