@@ -219,7 +219,8 @@
                     .from('performer_availability')
                     .select('*')
                     .eq('performer_id', window.user.id)
-                    .order('day_of_week');
+                    .gte('date', new Date().toISOString().split('T')[0])  // Get dates from today onwards
+                    .order('date');  // Order by date instead of day_of_week
 
                 if (error) throw error;
 
