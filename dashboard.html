@@ -167,66 +167,71 @@
         window.selectedPerformer = null;
         window.selectedTime = null;
 
-        async function loadDashboardData() {
-            try {
-                // Get today's date in the correct ISO format
-                const today = new Date();
-                const tomorrow = new Date(today);
-                tomorrow.setDate(tomorrow.getDate() + 1);
-                
-                // Format dates correctly for Supabase
-                const startOfDay = today.toISOString();
-                const endOfDay = tomorrow.toISOString();
-                
-                // Query performances for this venue
-                const { data: performances, error } = await supabase
-                    .from('performances')
-                    .select(`
-                        *,
-                        performers (
-                            stage_name,
-                            id
-                        )
-                    `)
-                    .eq('venue_id', window.user.id)
-                    .gte('start_time', startOfDay)
-                    .lt('start_time', endOfDay);
+async function loadDashboardData() {
+    try {
+        // Get today's date
+        const today = new Date();
+        const startOfDay = today.toISOString().split('T')[0];
         
-                if (error) throw error;
+        // Query performances for this venue
+        const { data: performances, error } = await supabase
+            .from('performances')
+            .select(`
+                *,
+                performers (
+                    stage_name,
+                    id
+                )
+            `)
+            .eq('venue_id', window.user.id)
+            .gte('start_time', startOfDay)
+            .order('start_time', { ascending: true });
 
-                // Update stats
-                document.getElementById('actsCount').textContent = performances?.length || 0;
+        if (error) throw error;
 
-                // Update schedule list
-                const scheduleList = document.getElementById('scheduleList');
-                
-                if (performances?.length) {
-                    scheduleList.innerHTML = performances.map(perf => `
-                        <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-                            <div>
-                                <h3 class="font-medium">${perf.performers.stage_name}</h3>
-                                <p class="text-sm text-gray-500">Status: ${perf.status}</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-sm font-medium">
-                                    ${new Date(perf.start_time).toLocaleTimeString()} - 
-                                    ${new Date(perf.end_time).toLocaleTimeString()}
-                                </p>
-                                <p class="text-sm text-gray-500">Rate: £${perf.booking_rate}/hr</p>
-                            </div>
-                        </div>
-                    `).join('');
-                } else {
-                    scheduleList.innerHTML = `
-                        <div class="text-center text-gray-500">
-                            No performances scheduled for today
-                        </div>
-                    `;
-                }
-            } catch (error) {
-                console.error('Error loading dashboard data:', error);
-            }
+        // Update stats
+        document.getElementById('actsCount').textContent = performances?.length || 0;
+
+        // Update schedule list
+        const scheduleList = document.getElementById('scheduleList');
+        
+        if (performances?.length > 0) {
+            scheduleList.innerHTML = performances.map(perf => `
+                <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                    <div>
+                        <h3 class="font-medium">${perf.performers.stage_name}</h3>
+                        <p class="text-sm text-gray-500">
+                            ${new Date(perf.date).toLocaleDateString()}
+                        </p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm font-medium">
+                            ${perf.start_time} - ${perf.end_time}
+                        </p>
+                        <p class="text-sm text-gray-500">
+                            Rate: £${perf.booking_rate}/hr
+                        </p>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            perf.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                            perf.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-gray-100 text-gray-800'
+                        }">
+                            ${perf.status.charAt(0).toUpperCase() + perf.status.slice(1)}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            scheduleList.innerHTML = `
+                <div class="text-center text-gray-500">
+                    No performances scheduled
+                </div>
+            `;
         }
+    } catch (error) {
+        console.error('Error loading dashboard:', error);
+    }
+}
 
         // Search for available performers
 async function searchPerformers(date, startTime) {
