@@ -358,15 +358,27 @@
             if (confirm('Are you sure you want to cancel this booking?')) {
                 try {
                     console.log('Attempting to cancel booking:', bookingId);
-    
-                    const { error } = await supabase
+        
+                    // Try to delete with explicit match condition
+                    const { data, error } = await supabase
                         .from('performances')
                         .delete()
-                        .eq('id', bookingId);
-    
-                    if (error) throw error;
-    
-                    await loadDashboardData();
+                        .match({ id: bookingId });
+        
+                    if (error) {
+                        console.error('Delete error:', error);
+                        throw error;
+                    }
+        
+                    // Force refresh the UI
+                    const upcomingEventsList = document.getElementById('upcomingEventsList');
+                    upcomingEventsList.innerHTML = '<div class="text-center text-gray-500">Refreshing...</div>';
+        
+                    // Wait a moment before reloading data
+                    setTimeout(async () => {
+                        await loadDashboardData();
+                    }, 100);
+        
                     alert('Booking cancelled successfully');
                 } catch (error) {
                     console.error('Error cancelling booking:', error);
