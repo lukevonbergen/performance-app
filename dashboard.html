@@ -349,23 +349,32 @@
 
         window.confirmBooking = async function() {
             try {
+                const date = new Date(window.selectedTime).toISOString().split('T')[0];
+                const startTime = document.getElementById('searchStartTime').value;
+                
+                // Calculate end time (1 hour later)
+                const [hours, minutes] = startTime.split(':');
+                const endTimeHours = (parseInt(hours) + 1).toString().padStart(2, '0');
+                const endTime = `${endTimeHours}:${minutes}`;
+        
                 const bookingData = {
                     venue_id: window.user.id,
                     performer_id: window.selectedPerformer.id,
-                    date: new Date(window.selectedTime).toISOString().split('T')[0],
-                    start_time: new Date(window.selectedTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                    end_time: new Date(new Date(window.selectedTime).setHours(new Date(window.selectedTime).getHours() + 1))
-                        .toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    date: date,
+                    start_time: startTime,
+                    end_time: endTime,
                     booking_rate: window.selectedPerformer.rate,
                     status: 'pending'
                 };
-
+        
+                console.log('Submitting booking:', bookingData); // Debug log
+        
                 const { error } = await supabase
                     .from('performances')
                     .insert([bookingData]);
-
+        
                 if (error) throw error;
-
+        
                 closeBookingModal();
                 alert('Booking submitted successfully! Awaiting performer confirmation.');
                 loadDashboardData();
