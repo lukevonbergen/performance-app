@@ -354,43 +354,49 @@
             }
         }
     
-       window.cancelBooking = async function(bookingId) {
-            if (confirm('Are you sure you want to cancel this booking?')) {
-                try {
-                    console.log('Attempting to cancel booking:', bookingId);
-        
-                    const { data, error } = await supabase
-                        .from('performances')
-                        .delete()
-                        .match({ id: bookingId })
-                        .select(); // This will return the deleted record if successful
-        
-                    console.log('Delete operation result:', { data, error });
-        
-                    if (error) {
-                        console.error('Delete error:', error);
-                        throw error;
-                    }
-        
-                    // Verify the deletion worked
-                    const { data: checkData } = await supabase
-                        .from('performances')
-                        .select()
-                        .eq('id', bookingId);
-        
-                    console.log('Verification check:', checkData);
-        
-                    if (checkData && checkData.length > 0) {
-                        console.error('Record still exists after deletion attempt');
-                        throw new Error('Failed to delete booking');
-                    }
-        
-                    await loadDashboardData();
-                    alert('Booking cancelled successfully');
-                } catch (error) {
-                    console.error('Error cancelling booking:', error);
-                    alert('Error cancelling booking. Please try again.');
+        window.cancelBooking = async function(bookingId) {
+            if (!confirm('Are you sure you want to cancel this booking?')) {
+                return; // Exit early if user cancels
+            }
+
+            // Disable the button immediately to prevent double-clicks
+            const button = event.target;
+            button.disabled = true;
+            button.innerHTML = 'Cancelling...';
+
+            try {
+                // Delete the booking
+                const { error: deleteError } = await supabase
+                    .from('performances')
+                    .delete()
+                    .eq('id', bookingId)
+                    .eq('venue_id', window.user.id);
+
+                if (deleteError) throw deleteError;
+
+                // Update UI first
+                const bookingElement = button.closest('.border-l-4');
+                if (bookingElement) {
+                    bookingElement.style.opacity = '0.5';
+                    bookingElement.style.transition = 'opacity 0.3s';
                 }
+
+                // Then refresh data in background
+                setTimeout(() => {
+                    loadDashboardData();
+                }, 300);
+
+                // Show success message
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'text-green-600 text-sm mt-2';
+                messageDiv.textContent = 'Booking cancelled successfully';
+                button.parentNode.appendChild(messageDiv);
+
+            } catch (error) {
+                console.error('Error cancelling booking:', error);
+                button.disabled = false;
+                button.innerHTML = 'Cancel Booking';
+                alert('Error cancelling booking. Please try again.');
             }
         };
     
