@@ -213,13 +213,23 @@
                                     <p class="text-sm text-gray-500">${new Date(event.date).toLocaleDateString()}</p>
                                     <p class="text-sm text-gray-500">${event.start_time} - ${event.end_time}</p>
                                 </div>
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                    event.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                                    event.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                    'bg-gray-100 text-gray-800'
-                                }">
-                                    ${event.status.charAt(0).toUpperCase() + event.status.slice(1)}
-                                </span>
+                                <div class="flex flex-col items-end">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                        event.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                                        event.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                        'bg-gray-100 text-gray-800'
+                                    }">
+                                        ${event.status.charAt(0).toUpperCase() + event.status.slice(1)}
+                                    </span>
+                                    ${event.status === 'pending' ? `
+                                        <button 
+                                            onclick="cancelBooking('${event.id}')"
+                                            class="mt-2 text-sm text-red-600 hover:text-red-800"
+                                        >
+                                            Cancel Booking
+                                        </button>
+                                    ` : ''}
+                                </div>
                             </div>
                         </div>
                     `).join('');
@@ -338,6 +348,25 @@
                 `;
             }
         }
+
+        window.cancelBooking = async function(bookingId) {
+            if (confirm('Are you sure you want to cancel this booking?')) {
+                try {
+                    const { error } = await supabase
+                        .from('performances')
+                        .delete()
+                        .eq('id', bookingId);
+        
+                    if (error) throw error;
+        
+                    alert('Booking cancelled successfully');
+                    loadDashboardData(); // Refresh the dashboard
+                } catch (error) {
+                    console.error('Error cancelling booking:', error);
+                    alert('Error cancelling booking. Please try again.');
+                }
+            }
+        };
 
         // Modal functions
         window.openBookingModal = function(performerId, performerName, rate, startTime) {
