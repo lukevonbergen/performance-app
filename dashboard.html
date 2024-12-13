@@ -264,16 +264,12 @@
                 // Convert date and time to timestamp
                 const searchDateTime = new Date(`${date}T${startTime}`);
                 
-                // Calculate end time (1 hour after start time)
-                const searchEndTime = new Date(`${date}T${startTime}`);
-                searchEndTime.setHours(searchEndTime.getHours() + 1);
-                
                 // Get all performers with availability on this date
                 const { data: availability, error } = await supabase
                     .from('performer_availability')
                     .select(`
                         *,
-                        performers (
+                        performers!inner (
                             id,
                             stage_name,
                             first_name,
@@ -281,8 +277,11 @@
                         )
                     `)
                     .eq('date', date);
-
-                if (error) throw error;
+        
+                if (error) {
+                    console.error('Supabase error:', error);
+                    throw error;
+                }
 
                 // Filter out performers who are already booked
                 const { data: existingBookings } = await supabase
