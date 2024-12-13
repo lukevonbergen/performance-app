@@ -355,48 +355,53 @@
         }
     
         window.cancelBooking = async function(bookingId) {
-            if (!confirm('Are you sure you want to cancel this booking?')) {
-                return; // Exit early if user cancels
-            }
-
-            // Disable the button immediately to prevent double-clicks
+            // Cache DOM elements before the operation
             const button = event.target;
+            const bookingElement = button.closest('.border-l-4');
+            
+            // Prevent multiple clicks
+            if (button.disabled) return;
+            
+            // Show immediate feedback
             button.disabled = true;
-            button.innerHTML = 'Cancelling...';
-
+            button.style.opacity = '0.5';
+            
             try {
-                // Delete the booking
-                const { error: deleteError } = await supabase
-                    .from('performances')
-                    .delete()
-                    .eq('id', bookingId)
-                    .eq('venue_id', window.user.id);
+                const response = await Promise.race([
+                    supabase
+                        .from('performances')
+                        .delete()
+                        .eq('id', bookingId)
+                        .eq('venue_id', window.user.id),
+                    new Promise((_, reject) => 
+                        setTimeout(() => reject(new Error('Operation timed out')), 5000)
+                    )
+                ]);
 
-                if (deleteError) throw deleteError;
+                if (response.error) throw response.error;
 
-                // Update UI first
-                const bookingElement = button.closest('.border-l-4');
+                // Remove the booking element from UI immediately
                 if (bookingElement) {
-                    bookingElement.style.opacity = '0.5';
-                    bookingElement.style.transition = 'opacity 0.3s';
+                    bookingElement.remove();
                 }
 
-                // Then refresh data in background
-                setTimeout(() => {
+                // Refresh data in background
+                requestAnimationFrame(() => {
                     loadDashboardData();
-                }, 300);
-
-                // Show success message
-                const messageDiv = document.createElement('div');
-                messageDiv.className = 'text-green-600 text-sm mt-2';
-                messageDiv.textContent = 'Booking cancelled successfully';
-                button.parentNode.appendChild(messageDiv);
+                });
 
             } catch (error) {
-                console.error('Error cancelling booking:', error);
+                console.error('Cancellation error:', error);
                 button.disabled = false;
-                button.innerHTML = 'Cancel Booking';
-                alert('Error cancelling booking. Please try again.');
+                button.style.opacity = '1';
+                
+                // Show error in UI
+                const errorMsg = document.createElement('span');
+                errorMsg.className = 'text-red-500 text-sm ml-2';
+                errorMsg.textContent = 'Failed to cancel';
+                button.parentNode.appendChild(errorMsg);
+                
+                setTimeout(() => errorMsg.remove(), 3000);
             }
         };
     
