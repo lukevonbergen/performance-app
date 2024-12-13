@@ -264,6 +264,18 @@
                 // Convert date and time to timestamp
                 const searchDateTime = new Date(`${date}T${startTime}`);
                 
+                // First, get existing bookings for this date and time
+                const { data: existingBookings, error: bookingsError } = await supabase
+                    .from('performances')
+                    .select('performer_id')
+                    .eq('date', date)
+                    .eq('start_time', startTime + ':00');
+        
+                if (bookingsError) throw bookingsError;
+        
+                // Get array of already booked performer IDs
+                const bookedPerformerIds = existingBookings?.map(booking => booking.performer_id) || [];
+                
                 // Get all performers with availability on this date
                 const { data: availability, error } = await supabase
                     .from('performer_availability')
@@ -279,11 +291,21 @@
                 if (error) throw error;
         
                 // Filter available performers
-                const availablePerformers = availability || [];
+                const availablePerformers = (availability || []).filter(slot => {
+                    // Exclude if performer is already booked
+                    if (bookedPerformerIds.includes(slot.performer_id)) return false;
+                    
+                    // Check if requested time falls within availability slot
+                    const requestedTime = parseInt(startTime.split(':')[0]);
+                    const slotStart = parseInt(slot.start_time.split(':')[0]);
+                    const slotEnd = parseInt(slot.end_time.split(':')[0]);
+                    
+                    return requestedTime >= slotStart && requestedTime < slotEnd;
+                });
+        
                 const resultsDiv = document.getElementById('searchResults');
                 
                 if (availablePerformers.length > 0) {
-                    // In the searchPerformers function, modify the button part:
                     resultsDiv.innerHTML = availablePerformers.map(slot => `
                         <div class="border rounded-lg p-4 flex justify-between items-center">
                             <div>
