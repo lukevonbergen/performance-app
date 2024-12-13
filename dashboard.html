@@ -157,7 +157,7 @@
 
     <script type="module">
         import { supabase } from './supabase.js';
-
+    
         // Make supabase globally available
         window.supabase = supabase;
         
@@ -166,23 +166,23 @@
         if (!window.user || window.user.type !== 'venue') {
             window.location.href = 'login.html';
         }
-
+    
         // Display user info
         document.getElementById('venueName').textContent = window.user.venue_name;
         document.getElementById('userEmail').textContent = window.user.email;
-
+    
         // Set minimum date to today
         document.getElementById('searchDate').min = new Date().toISOString().split('T')[0];
-
+    
         // Global variable to store selected performer for booking
         window.selectedPerformer = null;
         window.selectedTime = null;
-
+    
         async function loadDashboardData() {
             try {
                 const today = new Date().toISOString().split('T')[0];
                 console.log('Fetching fresh data for date:', today);
-        
+    
                 // Clear cache and get fresh data
                 const { data: upcomingEvents, error } = await supabase
                     .from('performances')
@@ -194,16 +194,15 @@
                     `)
                     .eq('venue_id', window.user.id)
                     .gte('date', today)
-                    .order('date', { ascending: true })
-                    .limit(100); // Add a limit to ensure we're not getting stale data
-        
+                    .order('date', { ascending: true });
+    
                 if (error) {
                     console.error('Fetch error:', error);
                     throw error;
                 }
-        
+    
                 console.log('Fresh events data:', upcomingEvents);
-        
+    
                 const upcomingEventsList = document.getElementById('upcomingEventsList');
                 
                 if (upcomingEvents && upcomingEvents.length > 0) {
@@ -246,11 +245,7 @@
                         </div>
                     `;
                 }
-            } catch (error) {
-                console.error('Dashboard refresh error:', error);
-            }
-        }
-
+    
                 // Update today's schedule
                 const todayEvents = upcomingEvents?.filter(event => event.date === today) || [];
                 const scheduleList = document.getElementById('scheduleList');
@@ -270,16 +265,16 @@
                         </div>
                     `;
                 }
-
+    
                 // Update stats
                 document.getElementById('actsCount').textContent = todayEvents.length;
-
+    
             } catch (error) {
                 console.error('Error loading dashboard data:', error);
             }
         }
-
-       async function searchPerformers(date, startTime) {
+    
+        async function searchPerformers(date, startTime) {
             try {
                 // Convert date and time to timestamp
                 const searchDateTime = new Date(`${date}T${startTime}`);
@@ -358,28 +353,20 @@
                 `;
             }
         }
-
+    
         window.cancelBooking = async function(bookingId) {
             if (confirm('Are you sure you want to cancel this booking?')) {
                 try {
-                    console.log('Attempting to cancel booking:', bookingId); // Debug log
-        
-                    const { data, error } = await supabase
+                    console.log('Attempting to cancel booking:', bookingId);
+    
+                    const { error } = await supabase
                         .from('performances')
                         .delete()
-                        .match({ id: bookingId })
-                        .select(); // This will return the deleted record
-        
-                    if (error) {
-                        console.error('Supabase error:', error);
-                        throw error;
-                    }
-        
-                    console.log('Deleted booking:', data); // Debug log
-                    
-                    // Immediately refresh the dashboard
+                        .eq('id', bookingId);
+    
+                    if (error) throw error;
+    
                     await loadDashboardData();
-                    
                     alert('Booking cancelled successfully');
                 } catch (error) {
                     console.error('Error cancelling booking:', error);
@@ -387,7 +374,7 @@
                 }
             }
         };
-
+    
         // Modal functions
         window.openBookingModal = function(performerId, performerName, rate, startTime) {
             window.selectedPerformer = {
@@ -396,10 +383,10 @@
                 rate: rate
             };
             window.selectedTime = startTime;
-
+    
             const endTime = new Date(startTime);
             endTime.setHours(endTime.getHours() + 1);
-
+    
             document.getElementById('bookingDetails').innerHTML = `
                 <div class="space-y-2">
                     <p><span class="font-medium">Performer:</span> ${performerName}</p>
@@ -408,16 +395,16 @@
                     <p><span class="font-medium">Rate:</span> £${rate}/hr</p>
                 </div>
             `;
-
+    
             document.getElementById('bookingModal').classList.remove('hidden');
         };
-
+    
         window.closeBookingModal = function() {
             document.getElementById('bookingModal').classList.add('hidden');
             window.selectedPerformer = null;
             window.selectedTime = null;
         };
-
+    
         window.confirmBooking = async function() {
             try {
                 const date = new Date(window.selectedTime).toISOString().split('T')[0];
@@ -432,13 +419,11 @@
                     venue_id: window.user.id,
                     performer_id: window.selectedPerformer.id,
                     date: date,
-                    start_time: startTime,
-                    end_time: endTime,
+                    start_time: startTime + ':00',
+                    end_time: endTime + ':00',
                     booking_rate: window.selectedPerformer.rate,
                     status: 'pending'
                 };
-        
-                console.log('Submitting booking:', bookingData); // Debug log
         
                 const { error } = await supabase
                     .from('performances')
@@ -449,30 +434,30 @@
                 closeBookingModal();
                 alert('Booking submitted successfully! Awaiting performer confirmation.');
                 loadDashboardData();
-                document.getElementById('searchForm').dispatchEvent(new Event('submit')); // Refresh search results
+                document.getElementById('searchForm').dispatchEvent(new Event('submit'));
             } catch (error) {
                 console.error('Error creating booking:', error);
                 alert('Error creating booking. Please try again.');
             }
         };
-
+    
         // Logout function
         window.logout = function() {
             sessionStorage.removeItem('user');
             window.location.href = 'login.html';
         };
-
-        // Update this part where you set up the form submission handler
+    
+        // Set up form submission handler
         document.getElementById('searchForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const date = document.getElementById('searchDate').value;
             const startTime = document.getElementById('searchStartTime').value;
-            await searchPerformers(date, startTime);  // Make sure to await the function
+            await searchPerformers(date, startTime);
         });
-
+    
         // Load initial data
         loadDashboardData();
-
+    
         // Refresh data every minute
         setInterval(loadDashboardData, 60000);
     </script>
