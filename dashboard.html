@@ -259,7 +259,7 @@
             }
         }
 
-        async function searchPerformers(date, startTime) {
+       async function searchPerformers(date, startTime) {
             try {
                 // Convert date and time to timestamp
                 const searchDateTime = new Date(`${date}T${startTime}`);
@@ -269,59 +269,35 @@
                     .from('performer_availability')
                     .select(`
                         *,
-                        performers!inner (
+                        performers (
                             id,
-                            stage_name,
-                            first_name,
-                            last_name
+                            stage_name
                         )
                     `)
                     .eq('date', date);
         
-                if (error) {
-                    console.error('Supabase error:', error);
-                    throw error;
-                }
-
-                // Filter out performers who are already booked
-                const { data: existingBookings } = await supabase
-                    .from('performances')
-                    .select('performer_id')
-                    .eq('date', date)
-                    .overlaps('start_time', startTime);
-
-                const bookedPerformerIds = existingBookings?.map(booking => booking.performer_id) || [];
-                
+                if (error) throw error;
+        
                 // Filter available performers
-                const availablePerformers = availability.filter(slot => {
-                    if (bookedPerformerIds.includes(slot.performer_id)) return false;
-                    
-                    // Check if requested time falls within availability slot
-                    const requestedTime = startTime.split(':')[0];
-                    const slotStart = slot.start_time.split(':')[0];
-                    const slotEnd = slot.end_time.split(':')[0];
-                    
-                    return requestedTime >= slotStart && requestedTime < slotEnd;
-                });
-
+                const availablePerformers = availability || [];
                 const resultsDiv = document.getElementById('searchResults');
                 
                 if (availablePerformers.length > 0) {
-                    resultsDiv.innerHTML = availablePerformers.map(slot => `
-                        <div class="border rounded-lg p-4 flex justify-between items-center">
+                    resultsDiv.innerHTML = availablePerformers.map(slot => 
+                        `<div class="border rounded-lg p-4 flex justify-between items-center">
                             <div>
                                 <h3 class="font-medium">${slot.performers.stage_name}</h3>
                                 <p class="text-sm text-gray-500">Available ${slot.start_time} - ${slot.end_time}</p>
                                 <p class="text-sm text-gray-500">Rate: £${slot.rate_per_hour}/hr</p>
                             </div>
                             <button 
-                                id="book-${slot.performer_id}"
-                                onclick="openBookingModal('${slot.performer_id}', '${slot.performers.stage_name}', ${slot.rate_per_hour}, '${searchDateTime.toISOString()}')"
-                                class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all duration-200">
+                                onclick="openBookingModal('${slot.performer_id}','${slot.performers.stage_name}',${slot.rate_per_hour},'${searchDateTime.toISOString()}')"
+                                class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all duration-200"
+                            >
                                 Book Now
                             </button>
-                        </div>
-                    `).join('');
+                        </div>`
+                    ).join('');
                 } else {
                     resultsDiv.innerHTML = `
                         <div class="text-center text-gray-500">
@@ -404,12 +380,12 @@
             window.location.href = 'login.html';
         };
 
-        // Set up form submission handler
-        document.getElementById('searchForm').addEventListener('submit', (e) => {
+        // Update this part where you set up the form submission handler
+        document.getElementById('searchForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const date = document.getElementById('searchDate').value;
             const startTime = document.getElementById('searchStartTime').value;
-            searchPerformers(date, startTime);
+            await searchPerformers(date, startTime);  // Make sure to await the function
         });
 
         // Load initial data
