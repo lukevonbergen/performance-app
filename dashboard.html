@@ -283,21 +283,23 @@
                 const resultsDiv = document.getElementById('searchResults');
                 
                 if (availablePerformers.length > 0) {
-                    resultsDiv.innerHTML = availablePerformers.map(slot => 
-                        `<div class="border rounded-lg p-4 flex justify-between items-center">
+                    // In the searchPerformers function, modify the button part:
+                    resultsDiv.innerHTML = availablePerformers.map(slot => `
+                        <div class="border rounded-lg p-4 flex justify-between items-center">
                             <div>
                                 <h3 class="font-medium">${slot.performers.stage_name}</h3>
                                 <p class="text-sm text-gray-500">Available ${slot.start_time} - ${slot.end_time}</p>
                                 <p class="text-sm text-gray-500">Rate: £${slot.rate_per_hour}/hr</p>
                             </div>
                             <button 
-                                onclick="openBookingModal('${slot.performer_id}','${slot.performers.stage_name}',${slot.rate_per_hour},'${searchDateTime.toISOString()}')"
+                                id="book-${slot.performer_id}"
+                                onclick="openBookingModal(\`${slot.performer_id}\`, \`${slot.performers.stage_name}\`, ${slot.rate_per_hour}, \`${searchDateTime.toISOString()}\`)"
                                 class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all duration-200"
                             >
                                 Book Now
                             </button>
-                        </div>`
-                    ).join('');
+                        </div>
+                    `).join('');
                 } else {
                     resultsDiv.innerHTML = `
                         <div class="text-center text-gray-500">
