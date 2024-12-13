@@ -352,15 +352,25 @@
         window.cancelBooking = async function(bookingId) {
             if (confirm('Are you sure you want to cancel this booking?')) {
                 try {
-                    const { error } = await supabase
+                    console.log('Attempting to cancel booking:', bookingId); // Debug log
+        
+                    const { data, error } = await supabase
                         .from('performances')
                         .delete()
-                        .eq('id', bookingId);
+                        .match({ id: bookingId })
+                        .select(); // This will return the deleted record
         
-                    if (error) throw error;
+                    if (error) {
+                        console.error('Supabase error:', error);
+                        throw error;
+                    }
         
+                    console.log('Deleted booking:', data); // Debug log
+                    
+                    // Immediately refresh the dashboard
+                    await loadDashboardData();
+                    
                     alert('Booking cancelled successfully');
-                    loadDashboardData(); // Refresh the dashboard
                 } catch (error) {
                     console.error('Error cancelling booking:', error);
                     alert('Error cancelling booking. Please try again.');
