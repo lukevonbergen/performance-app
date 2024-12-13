@@ -354,31 +354,38 @@
             }
         }
     
-        window.cancelBooking = async function(bookingId) {
+       window.cancelBooking = async function(bookingId) {
             if (confirm('Are you sure you want to cancel this booking?')) {
                 try {
                     console.log('Attempting to cancel booking:', bookingId);
         
-                    // Try to delete with explicit match condition
                     const { data, error } = await supabase
                         .from('performances')
                         .delete()
-                        .match({ id: bookingId });
+                        .match({ id: bookingId })
+                        .select(); // This will return the deleted record if successful
+        
+                    console.log('Delete operation result:', { data, error });
         
                     if (error) {
                         console.error('Delete error:', error);
                         throw error;
                     }
         
-                    // Force refresh the UI
-                    const upcomingEventsList = document.getElementById('upcomingEventsList');
-                    upcomingEventsList.innerHTML = '<div class="text-center text-gray-500">Refreshing...</div>';
+                    // Verify the deletion worked
+                    const { data: checkData } = await supabase
+                        .from('performances')
+                        .select()
+                        .eq('id', bookingId);
         
-                    // Wait a moment before reloading data
-                    setTimeout(async () => {
-                        await loadDashboardData();
-                    }, 100);
+                    console.log('Verification check:', checkData);
         
+                    if (checkData && checkData.length > 0) {
+                        console.error('Record still exists after deletion attempt');
+                        throw new Error('Failed to delete booking');
+                    }
+        
+                    await loadDashboardData();
                     alert('Booking cancelled successfully');
                 } catch (error) {
                     console.error('Error cancelling booking:', error);
