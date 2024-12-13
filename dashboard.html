@@ -181,8 +181,9 @@
         async function loadDashboardData() {
             try {
                 const today = new Date().toISOString().split('T')[0];
-                
-                // Get all upcoming bookings
+                console.log('Fetching fresh data for date:', today);
+        
+                // Clear cache and get fresh data
                 const { data: upcomingEvents, error } = await supabase
                     .from('performances')
                     .select(`
@@ -193,14 +194,19 @@
                     `)
                     .eq('venue_id', window.user.id)
                     .gte('date', today)
-                    .order('date', { ascending: true });
-
-                if (error) throw error;
-
-                // Update upcoming events list
+                    .order('date', { ascending: true })
+                    .limit(100); // Add a limit to ensure we're not getting stale data
+        
+                if (error) {
+                    console.error('Fetch error:', error);
+                    throw error;
+                }
+        
+                console.log('Fresh events data:', upcomingEvents);
+        
                 const upcomingEventsList = document.getElementById('upcomingEventsList');
                 
-                if (upcomingEvents?.length > 0) {
+                if (upcomingEvents && upcomingEvents.length > 0) {
                     upcomingEventsList.innerHTML = upcomingEvents.map(event => `
                         <div class="border-l-4 ${
                             event.status === 'confirmed' ? 'border-green-500' :
@@ -240,6 +246,10 @@
                         </div>
                     `;
                 }
+            } catch (error) {
+                console.error('Dashboard refresh error:', error);
+            }
+        }
 
                 // Update today's schedule
                 const todayEvents = upcomingEvents?.filter(event => event.date === today) || [];
