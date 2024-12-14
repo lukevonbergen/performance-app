@@ -1,29 +1,72 @@
-/* Landing Page Styles */
-
-/* Main Background & Layout */
+/* Base styles */
 body {
-    background: linear-gradient(to bottom right, #312E81, #4C1D95, #1E3A8A);
+    background-color: #0A0A18;
     min-height: 100vh;
 }
 
-/* Glass Card Effect */
-.glass-card {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
+/* Navigation styles */
+.nav-link {
+    color: rgba(255, 255, 255, 0.8);
     transition: all 0.3s ease;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.5rem;
 }
 
-/* Gradient Text */
-.gradient-text {
-    background: linear-gradient(135deg, #4F46E5, #7C3AED);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+.nav-link:hover {
+    color: rgba(255, 255, 255, 1);
 }
 
-/* Hero Section Gradients */
+/* Dropdown styles */
+.nav-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 0.5rem;
+    min-width: 200px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.group:hover .nav-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+.nav-dropdown-item {
+    display: block;
+    padding: 0.75rem 1rem;
+    color: rgba(255, 255, 255, 0.8);
+    transition: all 0.3s ease;
+    border-radius: 6px;
+}
+
+.nav-dropdown-item:hover {
+    color: rgba(255, 255, 255, 1);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Glass card effect */
+.glass-card {
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* Gradient text effects */
 .hero-gradient-1 {
-    background: linear-gradient(to right, #A78BFA, #EC4899);
+    background: linear-gradient(to right, #EC4899, #A78BFA);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -34,7 +77,7 @@ body {
     -webkit-text-fill-color: transparent;
 }
 
-/* Venue Card Button */
+/* Button gradients */
 .venue-button {
     background: linear-gradient(to right, #2563EB, #4F46E5);
     transition: all 0.3s ease;
@@ -42,37 +85,18 @@ body {
 
 .venue-button:hover {
     background: linear-gradient(to right, #1D4ED8, #4338CA);
-    box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
+    transform: translateY(-2px);
 }
 
-/* Performer Card Button */
 .performer-button {
-    background: linear-gradient(to right, #7C3AED, #DB2777);
+    background: linear-gradient(to right, #7C3AED, #EC4899);
     transition: all 0.3s ease;
 }
 
 .performer-button:hover {
-    background: linear-gradient(to right, #6D28D9, #BE185D);
-    box-shadow: 0 10px 20px rgba(124, 58, 237, 0.2);
+    background: linear-gradient(to right, #6D28D9, #DB2777);
+    transform: translateY(-2px);
 }
-
-/* Feature Icons */
-.feature-icon {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.2));
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-/* Secondary Buttons */
-.secondary-button {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: all 0.3s ease;
-}
-
-.secondary-button:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
 /* Previous CSS styles remain */
 
 /* Navigation Styles */
