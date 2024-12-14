@@ -72,3 +72,73 @@ body {
 .secondary-button:hover {
     background: rgba(255, 255, 255, 0.1);
 }
+
+/* Previous CSS styles remain */
+
+/* Navigation Styles */
+.nav-link {
+    color: white;
+    opacity: 0.8;
+    transition: all 0.3s ease;
+    padding: 0.5rem;
+}
+
+.nav-link:hover {
+    opacity: 1;
+}
+
+.nav-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 0.5rem;
+    min-width: 200px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.group:hover .nav-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+.nav-dropdown-item {
+    display: block;
+    padding: 0.5rem 1rem;
+    color: white;
+    opacity: 0.8;
+    transition: all 0.3s ease;
+    border-radius: 6px;
+}
+
+.nav-dropdown-item:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Mobile Navigation */
+.mobile-menu {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mobile-dropdown-button.active .mobile-dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.mobile-menu-button {
+    padding: 0.5rem;
+    color: white;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.mobile-menu-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
