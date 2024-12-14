@@ -166,3 +166,140 @@ body {
 .mobile-menu-button:hover {
     background: rgba(255, 255, 255, 0.1);
 }
+
+/* Base styles */
+body {
+    background-color: #0A0A18;
+    min-height: 100vh;
+    color: white;
+}
+
+/* Navigation styles */
+.nav-link {
+    color: rgba(255, 255, 255, 0.8);
+    transition: all 0.3s ease;
+    padding: 0.5rem;
+}
+
+.nav-link:hover {
+    color: rgba(255, 255, 255, 1);
+}
+
+/* Auth pages (login & signup) styles */
+.auth-container {
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    padding: 2rem;
+    color: white;
+}
+
+.auth-container h2 {
+    color: white;
+}
+
+.auth-input {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.auth-input:focus {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+}
+
+.auth-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.auth-label {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.auth-button {
+    background: linear-gradient(to right, #4F46E5, #7C3AED);
+    border: none;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.auth-button:hover {
+    background: linear-gradient(to right, #4338CA, #6D28D9);
+    transform: translateY(-1px);
+}
+
+/* Landing page specific styles */
+.hero-gradient-1 {
+    background: linear-gradient(to right, #EC4899, #A78BFA);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-gradient-2 {
+    background: linear-gradient(to right, #60A5FA, #67E8F9);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.glass-card {
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* Button styles */
+.venue-button {
+    background: linear-gradient(to right, #2563EB, #4F46E5);
+    transition: all 0.3s ease;
+}
+
+.venue-button:hover {
+    background: linear-gradient(to right, #1D4ED8, #4338CA);
+    transform: translateY(-2px);
+}
+
+.performer-button {
+    background: linear-gradient(to right, #7C3AED, #EC4899);
+    transition: all 0.3s ease;
+}
+
+.performer-button:hover {
+    background: linear-gradient(to right, #6D28D9, #DB2777);
+    transform: translateY(-2px);
+}
+
+/* Form styles */
+.form-input {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.form-input:focus {
+    border-color: #4F46E5;
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+}
+
+/* Message styles */
+.success-message {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    color: #10B981;
+}
+
+.error-message {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    color: #EF4444;
+}
