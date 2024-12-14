@@ -374,13 +374,13 @@
                 const startOfDay = today.toISOString();
                 const endOfDay = new Date(today.setDate(today.getDate() + 1)).toISOString();
         
-                // Query performances for this venue
+               // Query performances for this performer (not venue)
                 const { data: performances, error } = await supabase
                     .from('performances')
-                    .select('*, performers(stage_name, id)')  // Simplified select statement
-                    .eq('venue_id', window.user.id)
-                    .gte('start_time', startOfDay)
-                    .lt('start_time', endOfDay);
+                    .select('*, venues(venue_name, id)')  // Changed from performers to venues
+                    .eq('performer_id', window.user.id)   // Changed from venue_id to performer_id
+                    .gte('date', startOfDay)
+                    .lt('date', endOfDay);
         
                 if (error) throw error;
 
@@ -438,15 +438,6 @@
                 const avgRating = ratingCount > 0 ? (totalRating / ratingCount).toFixed(1) : '--';
                 document.getElementById('averageRating').textContent = avgRating;
                 document.getElementById('totalTips').textContent = `£${totalTips.toFixed(2)}`;
-
-                // Modify your existing loadDashboardData function to also call loadPendingBookings
-                const originalLoadDashboardData = loadDashboardData;
-                loadDashboardData = async function() {
-                    await Promise.all([
-                        originalLoadDashboardData(),
-                        loadPendingBookings()
-                    ]);
-                };
 
                 // Display past performances
                 const pastPerfList = document.getElementById('pastPerformancesList');
@@ -522,6 +513,7 @@
         // Load initial data
         loadDashboardData();
         loadAvailability();
+        loadPendingBookings();
     </script>
 </body>
 </html>
