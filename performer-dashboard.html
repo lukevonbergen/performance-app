@@ -318,33 +318,35 @@
 
         window.handleBookingResponse = async function(bookingId, status) {
             try {
-                // Check for any time conflicts if accepting
-                if (status === 'confirmed') {
-                    const { data: booking } = await supabase
-                        .from('performances')
-                        .select('date, start_time, end_time')
-                        .eq('id', bookingId)
-                        .single();
+                // Add debug logging
+                console.log('Attempting to update booking:', { bookingId, status });
 
-                    // Check for existing bookings on the same date
-                    const { data: existingBookings } = await supabase
-                        .from('performances')
-                        .select('*')
-                        .eq('performer_id', window.user.id)
-                        .eq('date', booking.date)
-                        .eq('status', 'confirmed');
+                // Update the booking status
+                const { data, error } = await supabase  // Note: capture the data response too
+                    .from('performances')
+                    .update({ status: status })
+                    .eq('id', bookingId)
+                    .select();  // Add this to see what was updated
 
-                    // Check for time conflicts
-                    if (existingBookings?.some(existing => {
-                        return (
-                            (booking.start_time >= existing.start_time && booking.start_time < existing.end_time) ||
-                            (booking.end_time > existing.start_time && booking.end_time <= existing.end_time)
-                        );
-                    })) {
-                        alert('Cannot accept this booking as it conflicts with an existing confirmed booking.');
-                        return;
-                    }
+                if (error) {
+                    console.error('Update error:', error);
+                    throw error;
                 }
+
+                console.log('Update response:', data);  // See what Supabase returns
+
+                // Refresh the lists immediately
+                await Promise.all([
+                    loadPendingBookings(),
+                    loadDashboardData()
+                ]);
+
+                alert(`Booking ${status === 'confirmed' ? 'accepted' : 'declined'} successfully`);
+            } catch (error) {
+                console.error('Error handling booking response:', error);
+                alert('Error updating booking status. Please try again.');
+            }
+        };
 
                 // Update the booking status
                 const { error } = await supabase
