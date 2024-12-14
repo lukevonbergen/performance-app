@@ -1,0 +1,79 @@
+/* Landing Page Styles */
+
+/* Main Background & Layout */
+body {
+    background: linear-gradient(to bottom right, #312E81, #4C1D95, #1E3A8A);
+    min-height: 100vh;
+}
+
+/* Glass Card Effect */
+.glass-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Gradient Text */
+.gradient-text {
+    background: linear-gradient(135deg, #4F46E5, #7C3AED);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Hero Section Gradients */
+.hero-gradient-1 {
+    background: linear-gradient(to right, #A78BFA, #EC4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-gradient-2 {
+    background: linear-gradient(to right, #60A5FA, #67E8F9);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Venue Card Button */
+.venue-button {
+    background: linear-gradient(to right, #2563EB, #4F46E5);
+    transition: all 0.3s ease;
+}
+
+.venue-button:hover {
+    background: linear-gradient(to right, #1D4ED8, #4338CA);
+    box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
+}
+
+/* Performer Card Button */
+.performer-button {
+    background: linear-gradient(to right, #7C3AED, #DB2777);
+    transition: all 0.3s ease;
+}
+
+.performer-button:hover {
+    background: linear-gradient(to right, #6D28D9, #BE185D);
+    box-shadow: 0 10px 20px rgba(124, 58, 237, 0.2);
+}
+
+/* Feature Icons */
+.feature-icon {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.2));
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Secondary Buttons */
+.secondary-button {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.secondary-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
