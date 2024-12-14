@@ -7,7 +7,7 @@
     <title>Venue Signup | Stagelink</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcrypt.min.js"></script>
-    <script type="module" src="supabase.js"></script>
+    <script type="module" src="./js/utils/supabase.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50">
@@ -64,7 +64,7 @@
     </div>
 
     <script type="module">
-        import { supabase } from './js/supabase.js';
+        import { supabase } from './js/utils/supabase.js';
         
         document.getElementById('signupForm').addEventListener('submit', async (e) => {
             e.preventDefault();
