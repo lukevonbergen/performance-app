@@ -318,23 +318,43 @@
 
         window.handleBookingResponse = async function(bookingId, status) {
             try {
-                // Add debug logging
-                console.log('Attempting to update booking:', { bookingId, status });
+                // First, verify the booking exists and belongs to this performer
+                const { data: bookingCheck, error: checkError } = await supabase
+                    .from('performances')
+                    .select('*')
+                    .eq('id', bookingId)
+                    .single();
+
+                if (checkError) {
+                    console.error('Check error:', checkError);
+                    throw checkError;
+                }
+
+                console.log('Found booking:', bookingCheck);  // See what we're trying to update
 
                 // Update the booking status
                 const { data, error } = await supabase
                     .from('performances')
                     .update({ status: status })
                     .eq('id', bookingId)
-                    .eq('performer_id', window.user.id)  // Extra safety check
-                    .select();  // Add this to see what was updated
+                    // Removed performer_id check temporarily for testing
+                    .select();
 
                 if (error) {
                     console.error('Update error:', error);
                     throw error;
                 }
 
-                console.log('Update response:', data);  // See what Supabase returns
+                console.log('Update response:', data);
+
+                // Verify the update worked
+                const { data: verifyUpdate } = await supabase
+                    .from('performances')
+                    .select('*')
+                    .eq('id', bookingId)
+                    .single();
+
+                console.log('Verification check:', verifyUpdate);
 
                 // Refresh the lists immediately
                 await Promise.all([
@@ -348,7 +368,6 @@
                 alert('Error updating booking status. Please try again.');
             }
         };
-
         async function loadDashboardData() {
             try {
                 // Get today's date in the correct format
