@@ -176,7 +176,7 @@
         window.user = JSON.parse(sessionStorage.getItem('user'));
 
         if (!window.user || window.user.type !== 'performer') {
-            window.location.href = 'login.html';
+            window.location.href = 'login';
         }
 
         // Display user info
@@ -219,7 +219,7 @@
 
         window.logout = function() {
             sessionStorage.removeItem('user');
-            window.location.href = 'login.html';
+            window.location.href = 'login';
         }
 
         async function loadAvailability() {

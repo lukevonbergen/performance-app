@@ -164,7 +164,7 @@
         // Get user data
         window.user = JSON.parse(sessionStorage.getItem('user'));
         if (!window.user || window.user.type !== 'venue') {
-            window.location.href = 'login.html';
+            window.location.href = 'login';
         }
     
         // Display user info
@@ -474,7 +474,7 @@
         // Logout function
         window.logout = function() {
             sessionStorage.removeItem('user');
-            window.location.href = 'login.html';
+            window.location.href = 'login';
         };
     
         // Set up form submission handler
