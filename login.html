@@ -10,25 +10,30 @@
     <link rel="stylesheet" href="./css/landing.css">
 </head>
 <body class="bg-gray-50">
-    <div class="min-h-screen flex items-center justify-center">
-        <div class="max-w-md w-full bg-black/20 backdrop-blur-lg rounded-xl border border-white/10 p-8">
+    <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute w-[500px] h-[500px] bg-purple-500/30 rounded-full filter blur-3xl -top-32 -left-40"></div>
+        <div class="absolute w-[500px] h-[500px] bg-blue-500/30 rounded-full filter blur-3xl -bottom-32 -right-40"></div>
+    </div>
+
+    <div class="relative min-h-screen flex items-center justify-center">
+        <div class="max-w-md w-full glass-card p-8">
             <h2 class="text-2xl font-bold text-center mb-6 text-white">Login to Stagelink</h2>
             
             <form id="loginForm" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-300">Email</label>
                     <input type="email" id="email" required
-                        class="mt-1 block w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:border-white/20 focus:ring-white/20">
+                        class="auth-input mt-1 block w-full px-3 py-2 rounded-lg">
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-300">Password</label>
                     <input type="password" id="password" required
-                        class="mt-1 block w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:border-white/20 focus:ring-white/20">
+                        class="auth-input mt-1 block w-full px-3 py-2 rounded-lg">
                 </div>
 
                 <button type="submit"
-                    class="w-full flex justify-center py-3 px-4 rounded-lg text-sm font-medium text-white bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200">
+                    class="auth-button w-full py-3 px-4 rounded-lg font-medium">
                     Log In
                 </button>
             </form>
@@ -38,9 +43,6 @@
             </div>
 
             <div id="message" class="mt-4 text-center text-red-400"></div>
-
-            <!-- Debug Info -->
-            <div id="debug" class="mt-4 p-4 bg-black/30 rounded text-xs text-gray-400"></div>
         </div>
     </div>
 

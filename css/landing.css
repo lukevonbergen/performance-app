@@ -1,6 +1,6 @@
 /* Base styles */
 body {
-    background-color: #0A0A18;
+    background-color: #0A0A18 !important;
     min-height: 100vh;
 }
 
