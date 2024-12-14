@@ -346,13 +346,10 @@
                     }
                 }
 
-                // Update the booking status
+                // Update the booking status - removed updated_at
                 const { error } = await supabase
                     .from('performances')
-                    .update({ 
-                        status: status,
-                        updated_at: new Date().toISOString() 
-                    })
+                    .update({ status: status })
                     .eq('id', bookingId);
 
                 if (error) throw error;
