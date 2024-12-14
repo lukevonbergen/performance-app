@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,57 +8,63 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcrypt.min.js"></script>
     <script type="module" src="./js/utils/supabase.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="./css/landing.css">
 </head>
-<body class="bg-gray-50">
-    <div class="min-h-screen flex items-center justify-center">
-        <div class="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
-            <h2 class="text-2xl font-bold text-center mb-6">Venue Register</h2>
+<body class="bg-[#0A0A18]">
+    <!-- Background Elements -->
+    <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute w-[500px] h-[500px] bg-purple-500/30 rounded-full filter blur-3xl -top-32 -left-40"></div>
+        <div class="absolute w-[500px] h-[500px] bg-blue-500/30 rounded-full filter blur-3xl -bottom-32 -right-40"></div>
+    </div>
+
+    <div class="relative min-h-screen flex items-center justify-center">
+        <div class="max-w-md w-full glass-card p-8">
+            <h2 class="text-2xl font-bold text-center mb-6 text-white">Register as Venue</h2>
             
             <form id="signupForm" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">First Name</label>
+                    <label class="block text-sm font-medium text-gray-300">First Name</label>
                     <input type="text" id="firstName" required
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        class="auth-input mt-1 block w-full px-3 py-2 rounded-lg">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Last Name</label>
+                    <label class="block text-sm font-medium text-gray-300">Last Name</label>
                     <input type="text" id="lastName" required
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        class="auth-input mt-1 block w-full px-3 py-2 rounded-lg">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Venue Name</label>
+                    <label class="block text-sm font-medium text-gray-300">Venue Name</label>
                     <input type="text" id="venueName" required
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        class="auth-input mt-1 block w-full px-3 py-2 rounded-lg">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Email</label>
+                    <label class="block text-sm font-medium text-gray-300">Email</label>
                     <input type="email" id="email" required
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        class="auth-input mt-1 block w-full px-3 py-2 rounded-lg">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Password</label>
+                    <label class="block text-sm font-medium text-gray-300">Password</label>
                     <input type="password" id="password" required
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        class="auth-input mt-1 block w-full px-3 py-2 rounded-lg">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Confirm Password</label>
-                    <input type="password" id="passwordConfirm" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <label class="block text-sm font-medium text-gray-300">Confirm Password</label>
+                    <input type="password" id="passwordConfirm" required 
+                        class="auth-input mt-1 block w-full px-3 py-2 rounded-lg">
                 </div>
 
                 <button type="submit"
-                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    class="auth-button w-full py-3 px-4 rounded-lg font-medium">
                     Sign Up
                 </button>
             </form>
 
-            <div id="message" class="mt-4 text-center hidden">
-                <!-- Success/Error messages will appear here -->
-            </div>
+            <div id="message" class="mt-4 text-center text-white"></div>
         </div>
     </div>
 
@@ -70,22 +75,19 @@
             e.preventDefault();
             
             const messageDiv = document.getElementById('message');
-            messageDiv.className = 'mt-4 text-center';
+            messageDiv.className = 'mt-4 text-center text-white';
     
-            // Get form values
-            const email = document.getElementById('email').value; // Added this line
+            const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const passwordConfirm = document.getElementById('passwordConfirm').value;
             
-            // Check if passwords match
             if (password !== passwordConfirm) {
                 messageDiv.textContent = 'Passwords do not match';
-                messageDiv.className = 'mt-4 text-center text-red-600';
+                messageDiv.className = 'mt-4 text-center text-red-400';
                 return;
             }
             
             try {
-                // Check if email exists in venues table
                 const { data: existingVenue, error: checkError } = await supabase
                     .from('venues')
                     .select('email')
@@ -93,20 +95,18 @@
                     
                 if (checkError) throw checkError;
                 
-                // If email exists, prevent signup
                 if (existingVenue?.length > 0) {
                     messageDiv.textContent = 'It looks like you are already a user, please login.';
-                    messageDiv.className = 'mt-4 text-center text-red-600';
+                    messageDiv.className = 'mt-4 text-center text-red-400';
                     return;
                 }
     
-                // Create the user data without hashing (Supabase will handle password security)
                 const userData = {
                     first_name: document.getElementById('firstName').value,
                     last_name: document.getElementById('lastName').value,
                     venue_name: document.getElementById('venueName').value,
-                    email: email, // Use the email variable we declared above
-                    password: password, // Use the password variable we declared above
+                    email: email,
+                    password: password,
                     created_at: new Date().toISOString()
                 };
                 
@@ -117,7 +117,7 @@
                 if (error) throw error;
                 
                 messageDiv.textContent = 'Sign up successful!';
-                messageDiv.className = 'mt-4 text-center text-green-600';
+                messageDiv.className = 'mt-4 text-center text-green-400';
                 
                 document.getElementById('signupForm').reset();
     
@@ -128,7 +128,7 @@
             } catch (error) {
                 console.error('Error:', error);
                 messageDiv.textContent = 'Error signing up. Please try again.';
-                messageDiv.className = 'mt-4 text-center text-red-600';
+                messageDiv.className = 'mt-4 text-center text-red-400';
             }
         });
     </script>
