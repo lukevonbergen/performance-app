@@ -73,6 +73,17 @@
             </div>
         </div>
 
+        <div class="bg-white rounded-lg shadow mb-6">
+            <div class="px-6 py-4 border-b">
+                <h2 class="text-lg font-semibold">Pending Booking Requests</h2>
+            </div>
+            <div class="p-6">
+                <div id="pendingBookingsList" class="space-y-4">
+                    <p class="text-center text-gray-500">Loading pending bookings...</p>
+                </div>
+            </div>
+        </div>
+
         <!-- Upcoming Performances Section -->
         <div class="bg-white rounded-lg shadow mb-6">
             <div class="px-6 py-4 border-b flex justify-between items-center">
@@ -248,6 +259,114 @@
             }
         }
 
+        async function loadPendingBookings() {
+            try {
+                const { data: pendingBookings, error } = await supabase
+                    .from('performances')
+                    .select(`
+                        *,
+                        venues (
+                            venue_name,
+                            id
+                        )
+                    `)
+                    .eq('performer_id', window.user.id)
+                    .eq('status', 'pending')
+                    .gte('date', new Date().toISOString().split('T')[0])
+                    .order('date');
+
+                if (error) throw error;
+
+                const pendingList = document.getElementById('pendingBookingsList');
+                
+                if (pendingBookings && pendingBookings.length > 0) {
+                    pendingList.innerHTML = pendingBookings.map(booking => `
+                        <div class="border-l-4 border-yellow-500 pl-4 py-3">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="font-medium">${booking.venues.venue_name}</h3>
+                                    <p class="text-sm text-gray-500">Date: ${new Date(booking.date).toLocaleDateString()}</p>
+                                    <p class="text-sm text-gray-500">Time: ${booking.start_time} - ${booking.end_time}</p>
+                                    <p class="text-sm text-gray-500">Rate: £${booking.booking_rate}/hr</p>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button 
+                                        onclick="handleBookingResponse('${booking.id}', 'confirmed')"
+                                        class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 text-sm">
+                                        Accept
+                                    </button>
+                                    <button 
+                                        onclick="handleBookingResponse('${booking.id}', 'rejected')"
+                                        class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm">
+                                        Decline
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    pendingList.innerHTML = `
+                        <div class="text-center text-gray-500">
+                            No pending booking requests
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading pending bookings:', error);
+            }
+        }
+
+        window.handleBookingResponse = async function(bookingId, status) {
+            try {
+                // Check for any time conflicts if accepting
+                if (status === 'confirmed') {
+                    const { data: booking } = await supabase
+                        .from('performances')
+                        .select('date, start_time, end_time')
+                        .eq('id', bookingId)
+                        .single();
+
+                    // Check for existing bookings on the same date
+                    const { data: existingBookings } = await supabase
+                        .from('performances')
+                        .select('*')
+                        .eq('performer_id', window.user.id)
+                        .eq('date', booking.date)
+                        .eq('status', 'confirmed');
+
+                    // Check for time conflicts
+                    if (existingBookings?.some(existing => {
+                        return (
+                            (booking.start_time >= existing.start_time && booking.start_time < existing.end_time) ||
+                            (booking.end_time > existing.start_time && booking.end_time <= existing.end_time)
+                        );
+                    })) {
+                        alert('Cannot accept this booking as it conflicts with an existing confirmed booking.');
+                        return;
+                    }
+                }
+
+                // Update the booking status
+                const { error } = await supabase
+                    .from('performances')
+                    .update({ status: status })
+                    .eq('id', bookingId);
+
+                if (error) throw error;
+
+                // Refresh all relevant data
+                await Promise.all([
+                    loadPendingBookings(),
+                    loadDashboardData()
+                ]);
+
+                alert(`Booking ${status === 'confirmed' ? 'accepted' : 'declined'} successfully`);
+            } catch (error) {
+                console.error('Error handling booking response:', error);
+                alert('Error updating booking status. Please try again.');
+            }
+        };
+
         async function loadDashboardData() {
             try {
                 // Get today's date in the correct format
@@ -319,6 +438,15 @@
                 const avgRating = ratingCount > 0 ? (totalRating / ratingCount).toFixed(1) : '--';
                 document.getElementById('averageRating').textContent = avgRating;
                 document.getElementById('totalTips').textContent = `£${totalTips.toFixed(2)}`;
+
+                // Modify your existing loadDashboardData function to also call loadPendingBookings
+                const originalLoadDashboardData = loadDashboardData;
+                loadDashboardData = async function() {
+                    await Promise.all([
+                        originalLoadDashboardData(),
+                        loadPendingBookings()
+                    ]);
+                };
 
                 // Display past performances
                 const pastPerfList = document.getElementById('pastPerformancesList');
