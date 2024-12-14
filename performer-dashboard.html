@@ -241,7 +241,7 @@
                     availabilityList.innerHTML = availability.map(slot => `
                         <div class="border-l-4 border-blue-500 pl-4 flex justify-between items-center">
                             <div>
-                                <p class="font-semibold">${daysOfWeek[slot.day_of_week]}</p>
+                                <p class="font-semibold">${new Date(slot.date).toLocaleDateString()}</p>
                                 <p class="text-gray-600">${formatTime(slot.start_time)} - ${formatTime(slot.end_time)}</p>
                                 <p class="text-sm text-gray-500">£${slot.rate_per_hour} per hour</p>
                             </div>
@@ -349,16 +349,17 @@
                 // Update the booking status
                 const { error } = await supabase
                     .from('performances')
-                    .update({ status: status })
+                    .update({ 
+                        status: status,
+                        updated_at: new Date().toISOString() 
+                    })
                     .eq('id', bookingId);
 
                 if (error) throw error;
 
-                // Refresh all relevant data
-                await Promise.all([
-                    loadPendingBookings(),
-                    loadDashboardData()
-                ]);
+                // Refresh the dashboard data
+                await loadPendingBookings();
+                await loadDashboardData();
 
                 alert(`Booking ${status === 'confirmed' ? 'accepted' : 'declined'} successfully`);
             } catch (error) {
@@ -389,12 +390,14 @@
 
                 // Display upcoming performances
                 const performancesList = document.getElementById('performancesList');
+                // In loadDashboardData function, update the performances display:
                 if (performances && performances.length > 0) {
                     performancesList.innerHTML = performances.map(perf => `
                         <div class="border-l-4 border-blue-500 pl-4">
-                            <p class="font-semibold">${new Date(perf.start_time).toLocaleDateString()}</p>
-                            <p class="text-gray-600">${perf.venue_name}</p>
-                            <p class="text-sm text-gray-500">Time: ${new Date(perf.start_time).toLocaleTimeString()}</p>
+                            <p class="font-semibold">${perf.venues?.venue_name || 'Unknown Venue'}</p>
+                            <p class="text-gray-600">Date: ${new Date(perf.date).toLocaleDateString()}</p>
+                            <p class="text-sm text-gray-500">Time: ${perf.start_time} - ${perf.end_time}</p>
+                            <p class="text-sm text-gray-500">Status: ${perf.status}</p>
                         </div>
                     `).join('');
                 } else {
