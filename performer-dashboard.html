@@ -322,10 +322,11 @@
                 console.log('Attempting to update booking:', { bookingId, status });
 
                 // Update the booking status
-                const { data, error } = await supabase  // Note: capture the data response too
+                const { data, error } = await supabase
                     .from('performances')
                     .update({ status: status })
                     .eq('id', bookingId)
+                    .eq('performer_id', window.user.id)  // Extra safety check
                     .select();  // Add this to see what was updated
 
                 if (error) {
@@ -334,30 +335,6 @@
                 }
 
                 console.log('Update response:', data);  // See what Supabase returns
-
-                // Refresh the lists immediately
-                await Promise.all([
-                    loadPendingBookings(),
-                    loadDashboardData()
-                ]);
-
-                alert(`Booking ${status === 'confirmed' ? 'accepted' : 'declined'} successfully`);
-            } catch (error) {
-                console.error('Error handling booking response:', error);
-                alert('Error updating booking status. Please try again.');
-            }
-        };
-
-                // Update the booking status
-                const { error } = await supabase
-                    .from('performances')
-                    .update({ 
-                        status: status 
-                    })
-                    .eq('id', bookingId)
-                    .eq('performer_id', window.user.id);  // Extra safety check to ensure performers can only update their own bookings
-
-                if (error) throw error;
 
                 // Refresh the lists immediately
                 await Promise.all([
