@@ -346,17 +346,22 @@
                     }
                 }
 
-                // Update the booking status - removed updated_at
+                // Update the booking status
                 const { error } = await supabase
                     .from('performances')
-                    .update({ status: status })
-                    .eq('id', bookingId);
+                    .update({ 
+                        status: status 
+                    })
+                    .eq('id', bookingId)
+                    .eq('performer_id', window.user.id);  // Extra safety check to ensure performers can only update their own bookings
 
                 if (error) throw error;
 
-                // Refresh the dashboard data
-                await loadPendingBookings();
-                await loadDashboardData();
+                // Refresh the lists immediately
+                await Promise.all([
+                    loadPendingBookings(),
+                    loadDashboardData()
+                ]);
 
                 alert(`Booking ${status === 'confirmed' ? 'accepted' : 'declined'} successfully`);
             } catch (error) {
