@@ -33,9 +33,22 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
                             </button>
-                            <div class="absolute left-0 mt-2 w-48 bg-black/90 border border-white/10 rounded-lg shadow-lg hidden group-hover:block">
-                                <a href="/p-signup" class="block px-4 py-2 text-gray-300 hover:bg-white/10 rounded-t-lg">For Performers</a>
-                                <a href="/v-signup" class="block px-4 py-2 text-gray-300 hover:bg-white/10 rounded-b-lg">For Venues</a>
+                            <!-- Dropdown -->
+                            <div class="absolute left-0 mt-2 w-48 bg-black/90 border border-white/10 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                                <a href="/signup/performer" class="flex items-center px-4 py-2 text-gray-300 hover:bg-white/10 rounded-t-lg">
+                                    <!-- Icon for Performers -->
+                                    <svg class="h-5 w-5 text-white mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3l14 9-14 9V3z" />
+                                    </svg>
+                                    For Performers
+                                </a>
+                                <a href="/signup/venue" class="flex items-center px-4 py-2 text-gray-300 hover:bg-white/10 rounded-b-lg">
+                                    <!-- Icon for Venues -->
+                                    <svg class="h-5 w-5 text-white mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16l4-4-4-4m8 0h4m-4 8h4" />
+                                    </svg>
+                                    For Venues
+                                </a>
                             </div>
                         </div>
     
@@ -68,8 +81,18 @@
                             Sign Up
                         </button>
                         <div class="pl-4">
-                            <a href="/p-signup" class="text-gray-300 block px-3 py-2 hover:bg-white/10 rounded-lg transition-colors duration-200">For Performers</a>
-                            <a href="/v-signup" class="text-gray-300 block px-3 py-2 hover:bg-white/10 rounded-lg transition-colors duration-200">For Venues</a>
+                            <a href="/signup/performer" class="text-gray-300 flex items-center px-3 py-2 hover:bg-white/10 rounded-lg">
+                                <svg class="h-5 w-5 text-white mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3l14 9-14 9V3z" />
+                                </svg>
+                                For Performers
+                            </a>
+                            <a href="/signup/venue" class="text-gray-300 flex items-center px-3 py-2 hover:bg-white/10 rounded-lg">
+                                <svg class="h-5 w-5 text-white mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16l4-4-4-4m8 0h4m-4 8h4" />
+                                </svg>
+                                For Venues
+                            </a>
                         </div>
                     </div>
                     
@@ -78,6 +101,7 @@
             </div>
         </div>
     </nav>
+    
     
 
 <!-- Add a spacer to prevent content from going under the fixed nav -->
