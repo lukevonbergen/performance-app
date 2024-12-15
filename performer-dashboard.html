@@ -5,163 +5,172 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stagelink | Performer Dashboard</title>
     <link rel="icon" type="image/x-icon" href="./img/favicon/fav.ico">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script type="module" src=".js/utils/supabase.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-gray-50">
+<body class="bg-[#0A0A18] min-h-screen">
     <!-- Navigation Bar -->
-    <div class="max-w-7xl mx-auto px-4">
-        <div class="flex justify-between h-16">
-            <div class="flex items-center">
-                <h1 id="performerName" class="text-xl font-bold text-gray-800">Loading...</h1>
-            </div>
-
-            <div class="flex items-center space-x-4">
-                <span id="userEmail" class="text-gray-600"></span>
-                <button onclick="logout()" class="text-blue-600 hover:text-blue-800">Logout</button>
+    <nav class="fixed w-full z-50 bg-black/20 backdrop-blur-lg border-b border-white/5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <img src="/img/logo_v1.svg" alt="StageLink Logo" class="h-12 w-auto mr-4">
+                    <div class="flex flex-col">
+                        <h1 class="text-xl font-bold text-white" id="performerName">Loading...</h1>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button onclick="logout()" 
+                            class="px-4 py-2 rounded-full bg-white/10 text-white border border-white/10 hover:bg-white/20 transition-all duration-300 flex items-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        <span>Logout</span>
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
+    </nav>
 
     <!-- Main Content -->
-    <div class="max-w-7xl mx-auto py-6 px-4" role="main">
-        <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <!-- Upcoming Performances -->
-            <div class="bg-white rounded-lg shadow p-6">
+    <main class="max-w-7xl mx-auto py-20 px-4 sm:px-6 lg:px-8">
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- Upcoming Gigs -->
+            <div class="glass-card rounded-xl p-6 border border-white/10">
                 <div class="flex items-center">
-                    <div class="p-3 rounded-full bg-blue-100 text-blue-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+                    <div class="p-3 rounded-full bg-indigo-500/10 border border-indigo-500/20">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                     </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Upcoming Gigs</p>
-                        <p id="upcomingGigs" class="text-lg font-semibold">--</p>
+                    <div class="ml-5">
+                        <p class="text-sm font-medium text-gray-300">Upcoming Gigs</p>
+                        <p class="text-3xl font-bold text-white mt-1" id="upcomingGigs">--</p>
                     </div>
                 </div>
             </div>
 
             <!-- Average Rating -->
-            <div class="bg-white rounded-lg shadow p-6">
+            <div class="glass-card rounded-xl p-6 border border-white/10">
                 <div class="flex items-center">
-                    <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+                    <div class="p-3 rounded-full bg-purple-500/10 border border-purple-500/20">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                         </svg>
                     </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Average Rating</p>
-                        <p id="averageRating" class="text-lg font-semibold">--</p>
+                    <div class="ml-5">
+                        <p class="text-sm font-medium text-gray-300">Average Rating</p>
+                        <p class="text-3xl font-bold text-white mt-1" id="averageRating">--</p>
                     </div>
                 </div>
             </div>
 
             <!-- Total Tips -->
-            <div class="bg-white rounded-lg shadow p-6">
+            <div class="glass-card rounded-xl p-6 border border-white/10">
                 <div class="flex items-center">
-                    <div class="p-3 rounded-full bg-green-100 text-green-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+                    <div class="p-3 rounded-full bg-blue-500/10 border border-blue-500/20">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Total Tips</p>
-                        <p id="totalTips" class="text-lg font-semibold">£--</p>
+                    <div class="ml-5">
+                        <p class="text-sm font-medium text-gray-300">Total Tips</p>
+                        <p class="text-3xl font-bold text-white mt-1" id="totalTips">£--</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow mb-6">
-            <div class="px-6 py-4 border-b">
-                <h2 class="text-lg font-semibold">Pending Booking Requests</h2>
+        <!-- Pending Bookings -->
+        <div class="glass-card rounded-xl border border-white/10 mb-8">
+            <div class="px-6 py-4 border-b border-white/10">
+                <h2 class="text-lg font-semibold text-white">Pending Booking Requests</h2>
             </div>
             <div class="p-6">
                 <div id="pendingBookingsList" class="space-y-4">
-                    <p class="text-center text-gray-500">Loading pending bookings...</p>
+                    <!-- Pending bookings will be loaded here -->
                 </div>
             </div>
         </div>
 
-        <!-- Upcoming Performances Section -->
-        <div class="bg-white rounded-lg shadow mb-6">
-            <div class="px-6 py-4 border-b flex justify-between items-center">
-                <h2 class="text-lg font-semibold">Upcoming Performances</h2>
+        <!-- Upcoming Performances -->
+        <div class="glass-card rounded-xl border border-white/10 mb-8">
+            <div class="px-6 py-4 border-b border-white/10">
+                <h2 class="text-lg font-semibold text-white">Upcoming Performances</h2>
             </div>
             <div class="p-6">
                 <div id="performancesList" class="space-y-4">
-                    <p class="text-center text-gray-500">Loading performances...</p>
+                    <!-- Performances will be loaded here -->
                 </div>
             </div>
         </div>
 
-        <!-- Past Performances & Reviews -->
-        <div class="bg-white rounded-lg shadow">
-            <div class="px-6 py-4 border-b">
-                <h2 class="text-lg font-semibold">Past Performances & Reviews</h2>
+        <!-- Past Performances -->
+        <div class="glass-card rounded-xl border border-white/10 mb-8">
+            <div class="px-6 py-4 border-b border-white/10">
+                <h2 class="text-lg font-semibold text-white">Past Performances & Reviews</h2>
             </div>
             <div class="p-6">
-                <div id="pastPerformancesList" class="space-y-6">
-                    <p class="text-center text-gray-500">Loading past performances...</p>
+                <div id="pastPerformancesList" class="space-y-4">
+                    <!-- Past performances will be loaded here -->
                 </div>
             </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow mb-6">
-            <div class="px-6 py-4 border-b flex justify-between items-center">
-                <h2 class="text-lg font-semibold">Manage Availability</h2>
+        <!-- Manage Availability -->
+        <div class="glass-card rounded-xl border border-white/10">
+            <div class="px-6 py-4 border-b border-white/10 flex justify-between items-center">
+                <h2 class="text-lg font-semibold text-white">Manage Availability</h2>
                 <button onclick="openAvailabilityModal()" 
-                    class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    class="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-all duration-200">
                     Add Availability
                 </button>
             </div>
             <div class="p-6">
                 <div id="availabilityList" class="space-y-4">
-                    <p class="text-center text-gray-500">Loading availability...</p>
+                    <!-- Availability will be loaded here -->
                 </div>
             </div>
         </div>
+    </main>
 
-    </div>
-
-    <div id="availabilityModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <h3 class="text-lg font-semibold mb-4">Add Availability</h3>
+    <!-- Availability Modal -->
+    <div id="availabilityModal" class="fixed inset-0 bg-black/50 hidden overflow-y-auto h-full w-full backdrop-blur-sm">
+        <div class="relative top-20 mx-auto p-6 border w-full max-w-md glass-card rounded-xl border-white/10">
+            <h3 class="text-xl font-semibold text-white mb-4">Add Availability</h3>
             <form id="availabilityForm" class="space-y-4">
-                <!-- New Date selector -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Date</label>
-                    <input type="date" id="availabilityDate" required
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Date</label>
+                    <input type="date" id="availabilityDate" required 
+                        class="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:border-white/20 focus:ring-white/20">
                 </div>
-    
+
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Start Time</label>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Start Time</label>
                     <input type="time" id="startTime" required
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        class="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:border-white/20 focus:ring-white/20">
                 </div>
-    
+
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">End Time</label>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">End Time</label>
                     <input type="time" id="endTime" required
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        class="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:border-white/20 focus:ring-white/20">
                 </div>
-    
+
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Rate per Hour (£)</label>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Rate per Hour (£)</label>
                     <input type="number" id="ratePerHour" required min="0" step="0.01"
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        class="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:border-white/20 focus:ring-white/20">
                 </div>
-    
-                <div class="flex justify-end space-x-3">
+
+                <div class="flex justify-end space-x-4">
                     <button type="button" onclick="closeAvailabilityModal()"
-                        class="px-4 py-2 border rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                        class="px-4 py-2 bg-white/5 text-white rounded-lg hover:bg-white/10 transition-all duration-200 border border-white/10">
                         Cancel
                     </button>
                     <button type="submit"
-                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        class="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-all duration-200">
                         Save
                     </button>
                 </div>
@@ -169,355 +178,6 @@
         </div>
     </div>
 
-    <script type="module">
-        import { supabase } from './js/utils/supabase.js';
-
-        // Make supabase and user globally available
-        window.supabase = supabase;
-        window.user = JSON.parse(sessionStorage.getItem('user'));
-
-        if (!window.user || window.user.type !== 'performer') {
-            window.location.href = 'login';
-        }
-
-        // Display user info
-        document.getElementById('performerName').textContent = window.user.stage_name || 'Performer Dashboard';
-        document.getElementById('userEmail').textContent = window.user.email;
-
-        // Make functions globally available
-        window.openAvailabilityModal = function() {
-            // Set minimum date to today
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('availabilityDate').min = today;
-            
-            document.getElementById('availabilityModal').classList.remove('hidden');
-        }
-
-        window.closeAvailabilityModal = function() {
-            document.getElementById('availabilityModal').classList.add('hidden');
-            document.getElementById('availabilityForm').reset();
-        }
-
-        window.formatTime = function(timeStr) {
-            return new Date(`2000-01-01T${timeStr}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        }
-
-        window.deleteAvailability = async function(id) {
-            if (confirm('Are you sure you want to delete this availability?')) {
-                try {
-                    const { error } = await supabase
-                        .from('performer_availability')
-                        .delete()
-                        .eq('id', id);
-
-                    if (error) throw error;
-                    await loadAvailability();
-                } catch (error) {
-                    console.error('Error deleting availability:', error);
-                }
-            }
-        }
-
-        window.logout = function() {
-            sessionStorage.removeItem('user');
-            window.location.href = 'login';
-        }
-
-        async function loadAvailability() {
-            try {
-                const { data: availability, error } = await supabase
-                    .from('performer_availability')
-                    .select('*')
-                    .eq('performer_id', window.user.id)
-                    .gte('date', new Date().toISOString().split('T')[0])  // Get dates from today onwards
-                    .order('date');  // Order by date instead of day_of_week
-
-                if (error) throw error;
-
-                const availabilityList = document.getElementById('availabilityList');
-                
-                if (availability && availability.length > 0) {
-                    const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-                    
-                    availabilityList.innerHTML = availability.map(slot => `
-                        <div class="border-l-4 border-blue-500 pl-4 flex justify-between items-center">
-                            <div>
-                                <p class="font-semibold">${new Date(slot.date).toLocaleDateString()}</p>
-                                <p class="text-gray-600">${formatTime(slot.start_time)} - ${formatTime(slot.end_time)}</p>
-                                <p class="text-sm text-gray-500">£${slot.rate_per_hour} per hour</p>
-                            </div>
-                            <button onclick="deleteAvailability('${slot.id}')"
-                                class="text-red-600 hover:text-red-800">
-                                Delete
-                            </button>
-                        </div>
-                    `).join('');
-                } else {
-                    availabilityList.innerHTML = '<p class="text-center text-gray-500">No availability set</p>';
-                }
-            } catch (error) {
-                console.error('Error loading availability:', error);
-            }
-        }
-
-        async function loadPendingBookings() {
-            try {
-                const { data: pendingBookings, error } = await supabase
-                    .from('performances')
-                    .select(`
-                        *,
-                        venues (
-                            venue_name,
-                            id
-                        )
-                    `)
-                    .eq('performer_id', window.user.id)
-                    .eq('status', 'pending')
-                    .gte('date', new Date().toISOString().split('T')[0])
-                    .order('date');
-
-                if (error) throw error;
-
-                const pendingList = document.getElementById('pendingBookingsList');
-                
-                if (pendingBookings && pendingBookings.length > 0) {
-                    pendingList.innerHTML = pendingBookings.map(booking => `
-                        <div class="border-l-4 border-yellow-500 pl-4 py-3">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h3 class="font-medium">${booking.venues.venue_name}</h3>
-                                    <p class="text-sm text-gray-500">Date: ${new Date(booking.date).toLocaleDateString()}</p>
-                                    <p class="text-sm text-gray-500">Time: ${booking.start_time} - ${booking.end_time}</p>
-                                    <p class="text-sm text-gray-500">Rate: £${booking.booking_rate}/hr</p>
-                                </div>
-                                <div class="flex space-x-2">
-                                    <button 
-                                        onclick="handleBookingResponse('${booking.id}', 'confirmed')"
-                                        class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 text-sm">
-                                        Accept
-                                    </button>
-                                    <button 
-                                        onclick="handleBookingResponse('${booking.id}', 'rejected')"
-                                        class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm">
-                                        Decline
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('');
-                } else {
-                    pendingList.innerHTML = `
-                        <div class="text-center text-gray-500">
-                            No pending booking requests
-                        </div>
-                    `;
-                }
-            } catch (error) {
-                console.error('Error loading pending bookings:', error);
-            }
-        }
-
-        window.handleBookingResponse = async function(bookingId, status) {
-            try {
-                // First, verify the booking exists and belongs to this performer
-                const { data: bookingCheck, error: checkError } = await supabase
-                    .from('performances')
-                    .select('*')
-                    .eq('id', bookingId)
-                    .single();
-
-                if (checkError) {
-                    console.error('Check error:', checkError);
-                    throw checkError;
-                }
-
-                console.log('Found booking:', bookingCheck);  // See what we're trying to update
-
-                // Update the booking status
-                const { data, error } = await supabase
-                    .from('performances')
-                    .update({ status: status })
-                    .eq('id', bookingId)
-                    // Removed performer_id check temporarily for testing
-                    .select();
-
-                if (error) {
-                    console.error('Update error:', error);
-                    throw error;
-                }
-
-                console.log('Update response:', data);
-
-                // Verify the update worked
-                const { data: verifyUpdate } = await supabase
-                    .from('performances')
-                    .select('*')
-                    .eq('id', bookingId)
-                    .single();
-
-                console.log('Verification check:', verifyUpdate);
-
-                // Refresh the lists immediately
-                await Promise.all([
-                    loadPendingBookings(),
-                    loadDashboardData()
-                ]);
-
-                alert(`Booking ${status === 'confirmed' ? 'accepted' : 'declined'} successfully`);
-            } catch (error) {
-                console.error('Error handling booking response:', error);
-                alert('Error updating booking status. Please try again.');
-            }
-        };
-        async function loadDashboardData() {
-            try {
-                // Get today's date in the correct format
-                const today = new Date();
-                const startOfDay = today.toISOString();
-                const endOfDay = new Date(today.setDate(today.getDate() + 1)).toISOString();
-        
-               // Query performances for this performer (not venue)
-                const { data: performances, error } = await supabase
-                    .from('performances')
-                    .select('*, venues(venue_name, id)')  // Changed from performers to venues
-                    .eq('performer_id', window.user.id)   // Changed from venue_id to performer_id
-                    .gte('date', startOfDay)
-                    .lt('date', endOfDay);
-        
-                if (error) throw error;
-
-                // Update upcoming gigs count
-                document.getElementById('upcomingGigs').textContent = performances?.length || 0;
-
-                // Display upcoming performances
-                const performancesList = document.getElementById('performancesList');
-                // In loadDashboardData function, update the performances display:
-                if (performances && performances.length > 0) {
-                    performancesList.innerHTML = performances.map(perf => `
-                        <div class="border-l-4 border-blue-500 pl-4">
-                            <p class="font-semibold">${perf.venues?.venue_name || 'Unknown Venue'}</p>
-                            <p class="text-gray-600">Date: ${new Date(perf.date).toLocaleDateString()}</p>
-                            <p class="text-sm text-gray-500">Time: ${perf.start_time} - ${perf.end_time}</p>
-                            <p class="text-sm text-gray-500">Status: ${perf.status}</p>
-                        </div>
-                    `).join('');
-                } else {
-                    performancesList.innerHTML = '<p class="text-center text-gray-500">No upcoming performances</p>';
-                }
-
-                // Load past performances and ratings
-                const { data: pastPerfs, error: pastError } = await supabase
-                    .from('performances')
-                    .select(`
-                        *,
-                        ratings (
-                            rating_value,
-                            comment
-                        ),
-                        tips (
-                            amount
-                        )
-                    `)
-                    .eq('performer_id', window.user.id)
-                    .lt('start_time', new Date().toISOString())
-                    .order('start_time', { ascending: false });
-
-                if (pastError) throw pastError;
-
-                // Calculate average rating
-                let totalRating = 0;
-                let ratingCount = 0;
-                let totalTips = 0;
-
-                pastPerfs?.forEach(perf => {
-                    perf.ratings?.forEach(rating => {
-                        totalRating += rating.rating_value;
-                        ratingCount++;
-                    });
-                    perf.tips?.forEach(tip => {
-                        totalTips += tip.amount;
-                    });
-                });
-
-                const avgRating = ratingCount > 0 ? (totalRating / ratingCount).toFixed(1) : '--';
-                document.getElementById('averageRating').textContent = avgRating;
-                document.getElementById('totalTips').textContent = `£${totalTips.toFixed(2)}`;
-
-                // Display past performances
-                const pastPerfList = document.getElementById('pastPerformancesList');
-                if (pastPerfs && pastPerfs.length > 0) {
-                    pastPerfList.innerHTML = pastPerfs.map(perf => `
-                        <div class="border-l-4 border-gray-200 pl-4">
-                            <p class="font-semibold">${new Date(perf.start_time).toLocaleDateString()} - ${perf.venue_name}</p>
-                            ${perf.ratings && perf.ratings.length > 0 ? `
-                                <div class="mt-2">
-                                    <p class="text-sm font-medium">Reviews:</p>
-                                    ${perf.ratings.map(rating => `
-                                        <div class="mt-1">
-                                            <p class="text-sm">Rating: ${rating.rating_value}/5</p>
-                                            ${rating.comment ? `<p class="text-sm text-gray-600">"${rating.comment}"</p>` : ''}
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            ` : ''}
-                            ${perf.tips && perf.tips.length > 0 ? `
-                                <p class="text-sm text-green-600 mt-2">
-                                    Tips received: £${perf.tips.reduce((sum, tip) => sum + tip.amount, 0).toFixed(2)}
-                                </p>
-                            ` : ''}
-                        </div>
-                    `).join('');
-                } else {
-                    pastPerfList.innerHTML = '<p class="text-center text-gray-500">No past performances</p>';
-                }
-
-            } catch (error) {
-                console.error('Error loading dashboard:', error);
-            }
-        }
-
-        // Add event listener for the availability form
-       document.getElementById('availabilityForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    try {
-        const dateInput = document.getElementById('availabilityDate').value;
-        const startTimeInput = document.getElementById('startTime').value;
-        const endTimeInput = document.getElementById('endTime').value;
-        const rateInput = document.getElementById('ratePerHour').value;
-
-        // Format the time fields to exclude seconds
-        const formattedStartTime = startTimeInput + ':00';
-        const formattedEndTime = endTimeInput + ':00';
-
-        const newAvailability = {
-            performer_id: window.user.id,
-            date: dateInput,
-            start_time: formattedStartTime,
-            end_time: formattedEndTime,
-            rate_per_hour: parseFloat(rateInput)
-        };
-
-        console.log('Submitting availability:', newAvailability); // Debug log
-
-        const { data, error } = await supabase
-            .from('performer_availability')
-            .insert([newAvailability]);
-
-        if (error) throw error;
-
-        closeAvailabilityModal();
-        await loadAvailability();
-    } catch (error) {
-        console.error('Error adding availability:', error);
-        alert('Error adding availability. Please try again.');
-    }
-});
-
-        // Load initial data
-        loadDashboardData();
-        loadAvailability();
-        loadPendingBookings();
-    </script>
+    <script type="module" src="./js/dashboard/performer.js"></script>
 </body>
 </html>
