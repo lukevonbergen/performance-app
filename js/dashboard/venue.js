@@ -57,22 +57,22 @@ async function loadDashboardData() {
                 } pl-4 py-3">
                     <div class="flex justify-between items-start">
                         <div>
-                            <h3 class="font-medium">${event.performers.stage_name}</h3>
-                            <p class="text-sm text-gray-500">${new Date(event.date).toLocaleDateString()}</p>
-                            <p class="text-sm text-gray-500">${event.start_time} - ${event.end_time}</p>
+                            <h3 class="font-medium text-white">${event.performers.stage_name}</h3>
+                            <p class="text-sm text-gray-300">${new Date(event.date).toLocaleDateString()}</p>
+                            <p class="text-sm text-gray-300">${event.start_time} - ${event.end_time}</p>
                         </div>
                         <div class="flex flex-col items-end">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                event.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                                event.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                'bg-gray-100 text-gray-800'
+                                event.status === 'confirmed' ? 'bg-green-500/20 text-green-400' :
+                                event.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
+                                'bg-gray-500/20 text-gray-400'
                             }">
                                 ${event.status.charAt(0).toUpperCase() + event.status.slice(1)}
                             </span>
                             ${event.status === 'pending' ? `
                                 <button 
                                     onclick="cancelBooking('${event.id}')"
-                                    class="mt-2 text-sm text-red-600 hover:text-red-800"
+                                    class="mt-2 text-sm text-red-400 hover:text-red-300"
                                 >
                                     Cancel Booking
                                 </button>
@@ -96,9 +96,9 @@ async function loadDashboardData() {
         if (todayEvents.length > 0) {
             scheduleList.innerHTML = todayEvents.map(event => `
                 <div class="border-l-4 border-blue-500 pl-4">
-                    <h3 class="font-medium">${event.performers.stage_name}</h3>
-                    <p class="text-gray-600">${event.start_time} - ${event.end_time}</p>
-                    <p class="text-sm text-gray-500">Status: ${event.status}</p>
+                    <h3 class="font-medium text-white">${event.performers.stage_name}</h3>
+                    <p class="text-gray-300">${event.start_time} - ${event.end_time}</p>
+                    <p class="text-sm text-gray-400">Status: ${event.status}</p>
                 </div>
             `).join('');
         } else {
