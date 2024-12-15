@@ -303,3 +303,13 @@ body {
     border: 1px solid rgba(239, 68, 68, 0.2);
     color: #EF4444;
 }
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+    100% { transform: translateY(0px); }
+}
+
+.animate-float-slow {
+    animation: float 6s ease-in-out infinite;
+}

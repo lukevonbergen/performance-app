@@ -138,61 +138,68 @@
                 Streamline your live entertainment management with real-time ratings, digital tipping, and seamless scheduling.
             </p>
         </div>
+    </div>
 
-        <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <!-- Venue Card -->
-            <div class="bg-black/20 backdrop-blur-lg rounded-xl p-8 border border-white/10">
-                <div class="text-center">
-                    <div class="bg-blue-500/10 p-4 rounded-xl inline-block mb-6">
-                        <svg class="h-10 w-10 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                        </svg>
-                    </div>
-                    <h2 class="text-2xl font-bold text-white mb-4">For Venues</h2>
-                    <p class="text-gray-300 mb-8">
-                        Manage your live performances, track ratings, and handle digital tipping all in one place.
-                    </p>
-                    <div class="space-y-4">
-                        <button onclick="window.location.href='v-signup'" 
-                                class="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all">
-                            Sign Up as Venue
-                        </button>
-                        <button onclick="window.location.href='login'"
-                                class="w-full bg-white/5 text-white px-6 py-3 rounded-lg hover:bg-white/10 transition-all border border-white/10">
-                            Venue Login
-                        </button>
-                    </div>
+    <!-- Add these sections before the footer -->
+
+    <!-- Trusted By Section -->
+<section class="py-16 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <p class="text-center text-gray-400 text-sm font-medium uppercase tracking-wider mb-8">Trusted by leading venues and artists</p>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 items-center justify-items-center opacity-70">
+            <!-- Replace with actual client logos -->
+            <img src="/img/client1.svg" alt="Client 1" class="h-8 w-auto grayscale">
+            <img src="/img/client2.svg" alt="Client 2" class="h-8 w-auto grayscale">
+            <img src="/img/client3.svg" alt="Client 3" class="h-8 w-auto grayscale">
+            <img src="/img/client4.svg" alt="Client 4" class="h-8 w-auto grayscale">
+        </div>
+    </div>
+</section>
+
+<!-- Features Showcase -->
+<section class="py-24 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-20">
+            <h2 class="text-3xl font-bold text-white mb-4">Everything you need to manage live entertainment</h2>
+            <p class="text-gray-400 max-w-2xl mx-auto">A complete suite of tools for venues and performers to streamline bookings, payments, and performance management.</p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="glass-card p-6 rounded-2xl">
+                <div class="bg-gradient-to-br from-blue-500/10 to-purple-500/10 p-3 rounded-xl inline-block mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
                 </div>
+                <h3 class="text-lg font-semibold text-white mb-2">Smart Scheduling</h3>
+                <p class="text-gray-400">Intelligent booking system with conflict resolution and availability management.</p>
             </div>
+            <!-- Add more feature cards -->
+        </div>
+    </div>
+</section>
 
-            <!-- Performer Card -->
-            <div class="bg-black/20 backdrop-blur-lg rounded-xl p-8 border border-white/10">
-                <div class="text-center">
-                    <div class="bg-purple-500/10 p-4 rounded-xl inline-block mb-6">
-                        <svg class="h-10 w-10 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-                        </svg>
-                    </div>
-                    <h2 class="text-2xl font-bold text-white mb-4">For Performers</h2>
-                    <p class="text-gray-300 mb-8">
-                        Find gigs, receive ratings and tips, and manage your performance schedule easily.
-                    </p>
-                    <div class="space-y-4">
-                        <button onclick="window.location.href='p-signup'"
-                                class="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all">
-                            Sign Up as Performer
-                        </button>
-                        <button onclick="window.location.href='login'"
-                                class="w-full bg-white/5 text-white px-6 py-3 rounded-lg hover:bg-white/10 transition-all border border-white/10">
-                            Performer Login
-                        </button>
+<!-- Platform Preview -->
+<section class="py-24 relative overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="relative">
+            <div class="glass-card rounded-2xl p-2 shadow-2xl">
+                <!-- Replace with your platform screenshot -->
+                <img src="/img/platform-preview.png" alt="Platform Interface" class="rounded-xl w-full">
+            </div>
+            <!-- Floating Elements -->
+            <div class="absolute -right-20 top-1/4 glass-card p-4 rounded-xl animate-float-slow">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-full bg-green-500"></div>
+                    <div>
+                        <p class="text-white font-medium">Booking Confirmed</p>
+                        <p class="text-sm text-gray-400">Jazz Night - The Blue Room</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Add these sections before the footer -->
+</section>
 
 <!-- Stats Section -->
 <section class="py-20 relative">
