@@ -15,20 +15,22 @@
         <div class="absolute w-[500px] h-[500px] bg-blue-500/30 rounded-full filter blur-3xl -bottom-32 -right-40"></div>
     </div>
 
+
     <div class="relative min-h-screen flex items-center justify-center">
-            <!-- Back button container -->
-            <div class="max-w-md w-full mb-6">
-                <a href="index" class="inline-flex items-center group text-2xl font-medium text-gray-400 hover:text-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-2 transform group-hover:-translate-x-1 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
-                    </svg>
-                    Back to Homepage
-                </a>
-            </div>
-        <div class="max-w-md w-full glass-card p-8">
-            <h2 class="text-2xl font-bold text-center mb-6 text-white">Login to Stagelink</h2>
-            
-            <form id="loginForm" class="space-y-4">
+        <div class="w-full max-w-md flex flex-col">
+            <!-- Back button -->
+            <a href="index" class="inline-flex items-center group text-gray-400 hover:text-white mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 transform group-hover:-translate-x-1 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                </svg>
+                Back to Homepage
+            </a>
+    
+            <!-- Form Card -->
+            <div class="glass-card p-8">
+                <h2 class="text-2xl font-bold text-center mb-6 text-white">Login to Stagelink</h2>
+                <!-- Rest of your form -->
+                <form id="loginForm" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-300">Email</label>
                     <input type="email" id="email" required
