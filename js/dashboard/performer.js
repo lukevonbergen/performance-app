@@ -70,6 +70,108 @@ async function loadAvailability() {
     }
 }
 
+async function loadPerformances() {
+    try {
+        const { data: performances, error } = await supabase
+            .from('performances')
+            .select(`
+                *,
+                venues (
+                    venue_name,
+                    id
+                )
+            `)
+            .eq('performer_id', window.user.id)
+            .gte('date', new Date().toISOString().split('T')[0])
+            .order('date');
+
+        if (error) throw error;
+
+        // Filter performances by status
+        const upcoming = performances?.filter(p => p.status === 'confirmed') || [];
+        const pending = performances?.filter(p => p.status === 'pending') || [];
+        const rejected = performances?.filter(p => p.status === 'rejected') || [];
+
+        // Update stats
+        document.getElementById('upcomingGigs').textContent = upcoming.length;
+
+        // Render upcoming performances
+        const upcomingList = document.getElementById('upcomingPerformancesList');
+        if (upcoming.length > 0) {
+            upcomingList.innerHTML = upcoming.map(perf => `
+                <div class="border-l-4 border-green-500 pl-4">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-medium text-white">${perf.venues?.venue_name || 'Unknown Venue'}</h3>
+                            <p class="text-gray-300">Date: ${new Date(perf.date).toLocaleDateString()}</p>
+                            <p class="text-gray-300">Time: ${formatTime(perf.start_time)} - ${formatTime(perf.end_time)}</p>
+                        </div>
+                        <button 
+                            onclick="cancelPerformance('${perf.id}')"
+                            class="text-red-400 hover:text-red-300 transition-colors duration-200"
+                        >
+                            Cancel Performance
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            upcomingList.innerHTML = '<p class="text-center text-gray-400">No upcoming performances</p>';
+        }
+
+        // Render pending performances
+        const pendingList = document.getElementById('pendingPerformancesList');
+        if (pending.length > 0) {
+            pendingList.innerHTML = pending.map(perf => `
+                <div class="border-l-4 border-yellow-500 pl-4">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-medium text-white">${perf.venues?.venue_name || 'Unknown Venue'}</h3>
+                            <p class="text-gray-300">Date: ${new Date(perf.date).toLocaleDateString()}</p>
+                            <p class="text-gray-300">Time: ${formatTime(perf.start_time)} - ${formatTime(perf.end_time)}</p>
+                            <p class="text-gray-300">Rate: £${perf.booking_rate}/hr</p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button 
+                                onclick="handleBookingResponse('${perf.id}', 'confirmed')"
+                                class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 text-sm transition-colors duration-200">
+                                Accept
+                            </button>
+                            <button 
+                                onclick="handleBookingResponse('${perf.id}', 'rejected')"
+                                class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm transition-colors duration-200">
+                                Decline
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            pendingList.innerHTML = '<p class="text-center text-gray-400">No pending requests</p>';
+        }
+
+        // Render rejected performances
+        const rejectedList = document.getElementById('rejectedPerformancesList');
+        if (rejected.length > 0) {
+            rejectedList.innerHTML = rejected.map(perf => `
+                <div class="border-l-4 border-red-500 pl-4">
+                    <div>
+                        <h3 class="font-medium text-white">${perf.venues?.venue_name || 'Unknown Venue'}</h3>
+                        <p class="text-gray-300">Date: ${new Date(perf.date).toLocaleDateString()}</p>
+                        <p class="text-gray-300">Time: ${formatTime(perf.start_time)} - ${formatTime(perf.end_time)}</p>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            rejectedList.innerHTML = '<p class="text-center text-gray-400">No rejected performances</p>';
+        }
+
+    } catch (error) {
+        console.error('Error loading performances:', error);
+        showToast('Error loading performances', 'error');
+    }
+}
+
 async function loadPendingBookings() {
     try {
         const { data: pendingBookings, error } = await supabase
@@ -128,6 +230,7 @@ async function loadPendingBookings() {
     }
 }
 
+// Update the handleBookingResponse function to handle availability
 window.handleBookingResponse = async function(bookingId, status) {
     try {
         const { data: booking, error: fetchError } = await supabase
@@ -157,9 +260,9 @@ window.handleBookingResponse = async function(bookingId, status) {
 
         if (updateError) throw updateError;
 
+        // Refresh all relevant data
         await Promise.all([
-            loadPendingBookings(),
-            loadDashboardData(),
+            loadPerformances(),
             loadAvailability()
         ]);
 
@@ -399,9 +502,8 @@ document.getElementById('availabilityForm').addEventListener('submit', async (e)
 async function initializeDashboard() {
     try {
         await Promise.all([
-            loadDashboardData(),
-            loadAvailability(),
-            loadPendingBookings()
+            loadPerformances(),
+            loadAvailability()
         ]);
     } catch (error) {
         console.error('Error initializing dashboard:', error);

@@ -82,38 +82,41 @@
             </div>
         </div>
 
-        <!-- Pending Bookings -->
-        <div class="glass-card rounded-xl border border-white/10 mb-8">
-            <div class="px-6 py-4 border-b border-white/10">
-                <h2 class="text-lg font-semibold text-white">Pending Booking Requests</h2>
-            </div>
-            <div class="p-6">
-                <div id="pendingBookingsList" class="space-y-4">
-                    <!-- Pending bookings will be loaded here -->
+        <!-- Replace the existing performance sections with this -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            <!-- Upcoming Performances -->
+            <div class="glass-card rounded-xl border border-white/10">
+                <div class="px-6 py-4 border-b border-white/10">
+                    <h2 class="text-lg font-semibold text-white">Upcoming Performances</h2>
+                </div>
+                <div class="p-6">
+                    <div id="upcomingPerformancesList" class="space-y-4">
+                        <!-- Confirmed performances will be loaded here -->
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Upcoming Performances -->
-        <div class="glass-card rounded-xl border border-white/10 mb-8">
-            <div class="px-6 py-4 border-b border-white/10">
-                <h2 class="text-lg font-semibold text-white">Upcoming Performances</h2>
-            </div>
-            <div class="p-6">
-                <div id="performancesList" class="space-y-4">
-                    <!-- Performances will be loaded here -->
+            <!-- Pending Performances -->
+            <div class="glass-card rounded-xl border border-white/10">
+                <div class="px-6 py-4 border-b border-white/10">
+                    <h2 class="text-lg font-semibold text-white">Pending Performances</h2>
+                </div>
+                <div class="p-6">
+                    <div id="pendingPerformancesList" class="space-y-4">
+                        <!-- Pending performances will be loaded here -->
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Past Performances -->
-        <div class="glass-card rounded-xl border border-white/10 mb-8">
-            <div class="px-6 py-4 border-b border-white/10">
-                <h2 class="text-lg font-semibold text-white">Past Performances & Reviews</h2>
-            </div>
-            <div class="p-6">
-                <div id="pastPerformancesList" class="space-y-4">
-                    <!-- Past performances will be loaded here -->
+            <!-- Rejected Performances -->
+            <div class="glass-card rounded-xl border border-white/10">
+                <div class="px-6 py-4 border-b border-white/10">
+                    <h2 class="text-lg font-semibold text-white">Rejected Performances</h2>
+                </div>
+                <div class="p-6">
+                    <div id="rejectedPerformancesList" class="space-y-4">
+                        <!-- Rejected performances will be loaded here -->
+                    </div>
                 </div>
             </div>
         </div>
