@@ -22,15 +22,22 @@ window.selectedPerformer = null;
 window.selectedTime = null;
 
 function formatTime(timeString) {
+    if (!timeString) return 'Invalid Time'; // Handle null/undefined safely
+
+    // Handle "HH:MM:SS" or ISO formats
     const [hours, minutes] = timeString.split(':');
+    if (!hours || !minutes) return 'Invalid Time';
+
     const time = new Date();
     time.setHours(parseInt(hours), parseInt(minutes));
+
     return time.toLocaleTimeString('en-US', { 
         hour: 'numeric', 
         minute: '2-digit', 
         hour12: true 
     });
 }
+
 
 async function loadDashboardData() {
     try {
