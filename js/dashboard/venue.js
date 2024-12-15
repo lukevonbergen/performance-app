@@ -314,7 +314,7 @@ window.confirmBooking = async function() {
             performer_id: window.selectedPerformer.id,
             date: date,
             start_time: startTime + ':00',
-            end_time: availabilitySlot.end_time, // Use the actual end time from availability
+            end_time: availabilitySlot.end_time,
             booking_rate: window.selectedPerformer.rate,
             status: 'pending'
         };
@@ -326,12 +326,45 @@ window.confirmBooking = async function() {
         if (error) throw error;
 
         closeBookingModal();
-        alert('Booking submitted successfully! Awaiting performer confirmation.');
+        
+        // Show success message
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'fixed bottom-4 right-4 bg-green-500/20 text-green-400 px-6 py-3 rounded-lg z-50 flex items-center';
+        messageDiv.innerHTML = `
+            <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            Booking submitted successfully! Awaiting performer confirmation.
+        `;
+        document.body.appendChild(messageDiv);
+        
+        // Add fade-out animation
+        setTimeout(() => {
+            messageDiv.style.transition = 'opacity 0.5s ease-in-out';
+            messageDiv.style.opacity = '0';
+            setTimeout(() => messageDiv.remove(), 500);
+        }, 3000);
+
         loadDashboardData();
         document.getElementById('searchForm').dispatchEvent(new Event('submit'));
     } catch (error) {
         console.error('Error creating booking:', error);
-        alert('Error creating booking. Please try again.');
+        
+        // Show error message
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'fixed bottom-4 right-4 bg-red-500/20 text-red-400 px-6 py-3 rounded-lg z-50 flex items-center';
+        errorDiv.innerHTML = `
+            <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            Error creating booking. Please try again.
+        `;
+        document.body.appendChild(errorDiv);
+        setTimeout(() => {
+            errorDiv.style.transition = 'opacity 0.5s ease-in-out';
+            errorDiv.style.opacity = '0';
+            setTimeout(() => errorDiv.remove(), 500);
+        }, 3000);
     }
 };
 
