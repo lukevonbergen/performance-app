@@ -47,32 +47,28 @@
     </div>
 
     <script type="module">
-        try {
-            const { supabase } = await import('./js/utils/supabase.js');
-            
-            document.getElementById('loginForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                
-                const messageDiv = document.getElementById('message');
-                const email = document.getElementById('email').value;
-                const password = document.getElementById('password').value;
-        
-                try {
-                debugDiv.innerHTML = 'Attempting login...<br>';
+        import { supabase } from './js/utils/supabase.js';
     
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const messageDiv = document.getElementById('message');
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+    
+            try {
                 // First check venues table
                 let { data: venueData, error: venueError } = await supabase
                     .from('venues')
                     .select('*');
     
-                debugDiv.innerHTML += `Checking venues table. Found ${venueData ? venueData.length : 0} records<br>`;
+                if (venueError) throw venueError;
     
                 // Check for matching venue user
                 let user = venueData?.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
                 
                 if (user) {
-                    debugDiv.innerHTML += 'Venue user found<br>';
-                    messageDiv.className = 'mt-4 text-center text-green-600';
+                    messageDiv.className = 'mt-4 text-center text-green-400';
                     messageDiv.textContent = 'Login successful! Lets book those gigs!';
                     
                     // Store user data with type
@@ -90,14 +86,13 @@
                     .from('performers')
                     .select('*');
     
-                debugDiv.innerHTML += `Checking performers table. Found ${performerData ? performerData.length : 0} records<br>`;
+                if (performerError) throw performerError;
     
                 // Check for matching performer user
                 user = performerData?.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
     
                 if (user) {
-                    debugDiv.innerHTML += 'Performer user found<br>';
-                    messageDiv.className = 'mt-4 text-center text-green-600';
+                    messageDiv.className = 'mt-4 text-center text-green-400';
                     messageDiv.textContent = 'Login successful! Lets get you performing!';
                     
                     // Store user data with type
@@ -111,18 +106,15 @@
                 }
     
                 // If we get here, no user was found
+                messageDiv.className = 'mt-4 text-center text-red-400';
                 messageDiv.textContent = 'Invalid email or password';
-                debugDiv.innerHTML += 'No matching user found in either table<br>';
     
             } catch (error) {
-                console.error('Login error:', error);
-                messageDiv.textContent = 'Error logging in. Please try again.';
+                console.error('Error:', error);
                 messageDiv.className = 'mt-4 text-center text-red-400';
+                messageDiv.textContent = 'Error logging in. Please try again.';
             }
         });
-    } catch (error) {
-        console.error('Supabase initialization error:', error);
-    }
-</script>
+    </script>
 </body>
 </html>
