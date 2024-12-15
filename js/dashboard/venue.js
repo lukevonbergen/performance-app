@@ -184,7 +184,7 @@ async function searchPerformers(date, startTime) {
                 <div class="border rounded-lg p-4 flex justify-between items-center">
                     <div>
                         <h3 class="font-medium text-white">${slot.performers.stage_name}</h3>
-                        <p class="text-sm text-gray-500">Available ${slot.start_time} - ${slot.end_time}</p>
+                        <p class="text-sm text-gray-500">Available ${formatTime(slot.start_time)} - ${formatTime(slot.end_time)}</p>
                         <p class="text-sm text-gray-500">Rate: £${slot.rate_per_hour}/hr</p>
                     </div>
                     <button 
