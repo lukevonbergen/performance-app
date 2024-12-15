@@ -11,11 +11,56 @@
     <link rel="stylesheet" href="./css/landing.css">
 </head>
 <body class="bg-[#0A0A18]">
+
     <!-- Background Elements -->
     <div class="absolute inset-0 overflow-hidden">
         <div class="absolute w-[500px] h-[500px] bg-purple-500/30 rounded-full filter blur-3xl -top-32 -left-40"></div>
         <div class="absolute w-[500px] h-[500px] bg-blue-500/30 rounded-full filter blur-3xl -bottom-32 -right-40"></div>
     </div>
+
+    <nav class="fixed w-full z-50 bg-black/20 backdrop-blur-lg border-b border-white/5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <span class="text-2xl font-bold text-white">StageLink</span>
+                </div>
+
+                <!-- Desktop/Mobile Navigation -->
+                <div class="flex items-center">
+                    <!-- Desktop Navigation -->
+                    <div class="hidden md:flex items-center space-x-6">
+                        <a href="#" class="text-gray-300 hover:text-white transition-colors duration-200">Products</a>
+                        <a href="#" class="text-gray-300 hover:text-white transition-colors duration-200">Pricing</a>
+                        <a href="#" class="text-gray-300 hover:text-white transition-colors duration-200">Resources</a>
+                        <button onclick="window.location.href='login'" 
+                                class="px-8 py-3 rounded-full bg-white/10 text-white border border-white/10 hover:bg-white/20 transition-all duration-300">
+                            Login
+                        </button>
+                    </div>
+
+                    <!-- Mobile menu button -->
+                    <div class="md:hidden">
+                        <button type="button" class="mobile-menu-button text-white p-2 hover:bg-white/10 rounded-lg">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Menu -->
+            <div class="mobile-menu hidden md:hidden">
+                <div class="px-2 pt-2 pb-3 space-y-1">
+                    <a href="#" class="text-white hover:bg-white/10 block px-3 py-2 rounded-lg transition-colors duration-200">Products</a>
+                    <a href="#" class="text-white hover:bg-white/10 block px-3 py-2 rounded-lg transition-colors duration-200">Pricing</a>
+                    <a href="#" class="text-white hover:bg-white/10 block px-3 py-2 rounded-lg transition-colors duration-200">Resources</a>
+                    <a href="login" class="text-white hover:bg-white/10 block px-3 py-2 rounded-lg transition-colors duration-200">Login</a>
+                </div>
+            </div>
+        </div>
+    </nav>
 
     <div class="relative min-h-screen flex items-center justify-center">
         <div class="max-w-md w-full glass-card p-8">
