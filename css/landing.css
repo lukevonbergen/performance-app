@@ -59,6 +59,13 @@ body {
     transition: all 0.3s ease;
 }
 
+.glass-card-noblur {
+    background: rgba(0, 0, 0, 1);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
 .glass-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
