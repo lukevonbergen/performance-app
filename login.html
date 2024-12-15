@@ -47,17 +47,17 @@
     </div>
 
     <script type="module">
-        import { supabase } from '/js/utils/supabase.js';
-    
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        try {
+            const { supabase } = await import('./js/utils/supabase.js');
             
-            const messageDiv = document.getElementById('message');
-            const debugDiv = document.getElementById('debug');
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-    
-            try {
+            document.getElementById('loginForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const messageDiv = document.getElementById('message');
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+        
+                try {
                 debugDiv.innerHTML = 'Attempting login...<br>';
     
                 // First check venues table
@@ -115,11 +115,14 @@
                 debugDiv.innerHTML += 'No matching user found in either table<br>';
     
             } catch (error) {
-                console.error('Error:', error);
-                debugDiv.innerHTML += `Error: ${error.message}<br>`;
+                console.error('Login error:', error);
                 messageDiv.textContent = 'Error logging in. Please try again.';
+                messageDiv.className = 'mt-4 text-center text-red-400';
             }
         });
-    </script>
+    } catch (error) {
+        console.error('Supabase initialization error:', error);
+    }
+</script>
 </body>
 </html>
