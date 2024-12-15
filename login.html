@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login | Stagelink</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script type="module" src="./js/utils/supabase.js"></script>
+    <script type="module" src="/js/utils/supabase.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="./css/landing.css">
 </head>
@@ -47,7 +47,7 @@
     </div>
 
     <script type="module">
-        import { supabase } from './js/utils/supabase.js';
+        import { supabase } from '/js/utils/supabase.js';
     
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
