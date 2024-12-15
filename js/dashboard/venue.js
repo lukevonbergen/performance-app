@@ -27,11 +27,11 @@ function formatTime(timeString) {
     const [hours, minutes] = timeString.split(':');
     const time = new Date(Date.UTC(1970, 0, 1, parseInt(hours), parseInt(minutes)));
 
-    return time.toLocaleTimeString('en-US', { 
+    return time.toLocaleTimeString('en-GB', { 
         hour: 'numeric', 
         minute: '2-digit', 
         hour12: true,
-        timeZone: 'UTC' // Forces display in UTC, avoids local adjustment
+        timeZone: 'GMT' // Forces display in UTC, avoids local adjustment
     });
 }
 
