@@ -75,7 +75,8 @@ async function loadDashboardData() {
                         <div>
                             <h3 class="font-medium text-white">${event.performers.stage_name}</h3>
                             <p class="text-sm text-gray-300">${new Date(event.date).toLocaleDateString()}</p>
-                            <p class="text-sm text-gray-500">Available ${formatTime(slot.start_time)} - ${formatTime(slot.end_time)}</p>
+                            <p class="text-sm text-gray-300">${formatTime(event.start_time)} - ${formatTime(event.end_time)}</p>
+
                         </div>
                         <div class="flex flex-col items-end">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
