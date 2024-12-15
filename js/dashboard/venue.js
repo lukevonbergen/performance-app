@@ -254,7 +254,7 @@ window.cancelBooking = async function(bookingId) {
 };
 
 // Modal functions
-window.openBookingModal = function(performerId, performerName, rate, startTime) {
+window.openBookingModal = async function(performerId, performerName, rate, startTime) {
     window.selectedPerformer = {
         id: performerId,
         name: performerName,
@@ -262,14 +262,25 @@ window.openBookingModal = function(performerId, performerName, rate, startTime) 
     };
     window.selectedTime = startTime;
 
-    const endTime = new Date(startTime);
-    endTime.setHours(endTime.getHours() + 1);
+    // Get the availability slot times
+    const date = new Date(startTime).toISOString().split('T')[0];
+    const { data: slot, error } = await supabase
+        .from('performer_availability')
+        .select('start_time, end_time')
+        .eq('performer_id', performerId)
+        .eq('date', date)
+        .single();
+
+    if (error) {
+        console.error('Error fetching availability:', error);
+        return;
+    }
 
     document.getElementById('bookingDetails').innerHTML = `
         <div class="space-y-2">
             <p><span class="font-medium">Performer:</span> ${performerName}</p>
             <p><span class="font-medium">Date:</span> ${new Date(startTime).toLocaleDateString()}</p>
-            <p><span class="font-medium">Time:</span> ${new Date(startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+            <p><span class="font-medium">Time:</span> ${formatTime(slot.start_time)} - ${formatTime(slot.end_time)}</p>
             <p><span class="font-medium">Rate:</span> £${rate}/hr</p>
         </div>
     `;
@@ -288,17 +299,22 @@ window.confirmBooking = async function() {
         const date = new Date(window.selectedTime).toISOString().split('T')[0];
         const startTime = document.getElementById('searchStartTime').value;
         
-        // Calculate end time (1 hour later)
-        const [hours, minutes] = startTime.split(':');
-        const endTimeHours = (parseInt(hours) + 1).toString().padStart(2, '0');
-        const endTime = `${endTimeHours}:${minutes}`;
+        // Get the availability slot end time instead of calculating it
+        const { data: availabilitySlot, error: slotError } = await supabase
+            .from('performer_availability')
+            .select('end_time')
+            .eq('performer_id', window.selectedPerformer.id)
+            .eq('date', date)
+            .single();
+
+        if (slotError) throw slotError;
 
         const bookingData = {
             venue_id: window.user.id,
             performer_id: window.selectedPerformer.id,
             date: date,
             start_time: startTime + ':00',
-            end_time: endTime + ':00',
+            end_time: availabilitySlot.end_time, // Use the actual end time from availability
             booking_rate: window.selectedPerformer.rate,
             status: 'pending'
         };
