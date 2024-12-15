@@ -24,15 +24,15 @@ window.selectedTime = null;
 function formatTime(timeString) {
     if (!timeString) return 'Invalid Time';
 
-    const [hours, minutes] = timeString.split(':');
-    const time = new Date(Date.UTC(1970, 0, 1, parseInt(hours), parseInt(minutes)));
+    // Split hours and minutes from the input time string
+    const [hours, minutes] = timeString.split(':').map(Number);
 
-    return time.toLocaleTimeString('en-GB', { 
-        hour: 'numeric', 
-        minute: '2-digit', 
-        hour12: true,
-        timeZone: 'GMT' // Forces display in UTC, avoids local adjustment
-    });
+    // Format to 12-hour time without time zone influence
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const formattedHours = hours % 12 === 0 ? 12 : hours % 12; // Handle 0 and 12 edge cases
+    const formattedMinutes = String(minutes).padStart(2, '0');
+
+    return `${formattedHours}:${formattedMinutes} ${period}`;
 }
 
 
