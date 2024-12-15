@@ -21,6 +21,17 @@ document.getElementById('searchDate').min = new Date().toISOString().split('T')[
 window.selectedPerformer = null;
 window.selectedTime = null;
 
+function formatTime(timeString) {
+    const [hours, minutes] = timeString.split(':');
+    const time = new Date();
+    time.setHours(parseInt(hours), parseInt(minutes));
+    return time.toLocaleTimeString('en-US', { 
+        hour: 'numeric', 
+        minute: '2-digit', 
+        hour12: true 
+    });
+}
+
 async function loadDashboardData() {
     try {
         const today = new Date().toISOString().split('T')[0];
@@ -59,7 +70,7 @@ async function loadDashboardData() {
                         <div>
                             <h3 class="font-medium text-white">${event.performers.stage_name}</h3>
                             <p class="text-sm text-gray-300">${new Date(event.date).toLocaleDateString()}</p>
-                            <p class="text-sm text-gray-300">${event.start_time} - ${event.end_time}</p>
+                            <p class="text-sm text-gray-300">${formatTime(event.start_time)} - ${formatTime(event.end_time)}</p>
                         </div>
                         <div class="flex flex-col items-end">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -69,14 +80,12 @@ async function loadDashboardData() {
                             }">
                                 ${event.status.charAt(0).toUpperCase() + event.status.slice(1)}
                             </span>
-                            ${event.status === 'pending' ? `
-                                <button 
-                                    onclick="cancelBooking('${event.id}')"
-                                    class="mt-2 text-sm text-red-400 hover:text-red-300"
-                                >
-                                    Cancel Booking
-                                </button>
-                            ` : ''}
+                            <button 
+                                onclick="cancelBooking('${event.id}')"
+                                class="mt-2 text-sm text-red-400 hover:text-red-300"
+                            >
+                                Cancel Booking
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -198,53 +207,44 @@ async function searchPerformers(date, startTime) {
 }
 
 window.cancelBooking = async function(bookingId) {
-    // Cache DOM elements before the operation
-    const button = event.target;
-    const bookingElement = button.closest('.border-l-4');
-    
-    // Prevent multiple clicks
-    if (button.disabled) return;
-    
-    // Show immediate feedback
-    button.disabled = true;
-    button.style.opacity = '0.5';
-    
     try {
-        const response = await Promise.race([
-            supabase
-                .from('performances')
-                .delete()
-                .eq('id', bookingId)
-                .eq('venue_id', window.user.id),
-            new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('Operation timed out')), 5000)
-            )
-        ]);
+        // First get the booking details
+        const { data: booking, error: fetchError } = await supabase
+            .from('performances')
+            .select('*')
+            .eq('id', bookingId)
+            .single();
 
-        if (response.error) throw response.error;
+        if (fetchError) throw fetchError;
 
-        // Remove the booking element from UI immediately
-        if (bookingElement) {
-            bookingElement.remove();
-        }
+        // Delete the booking
+        const { error: deleteError } = await supabase
+            .from('performances')
+            .delete()
+            .eq('id', bookingId)
+            .eq('venue_id', window.user.id);
 
-        // Refresh data in background
-        requestAnimationFrame(() => {
-            loadDashboardData();
-        });
+        if (deleteError) throw deleteError;
+
+        // Refresh the dashboard
+        loadDashboardData();
+
+        // Show success message
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'fixed bottom-4 right-4 bg-green-500/20 text-green-400 px-6 py-3 rounded-lg';
+        messageDiv.textContent = 'Booking cancelled successfully';
+        document.body.appendChild(messageDiv);
+        setTimeout(() => messageDiv.remove(), 3000);
 
     } catch (error) {
-        console.error('Cancellation error:', error);
-        button.disabled = false;
-        button.style.opacity = '1';
+        console.error('Error cancelling booking:', error);
         
-        // Show error in UI
-        const errorMsg = document.createElement('span');
-        errorMsg.className = 'text-red-500 text-sm ml-2';
-        errorMsg.textContent = 'Failed to cancel';
-        button.parentNode.appendChild(errorMsg);
-        
-        setTimeout(() => errorMsg.remove(), 3000);
+        // Show error message
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'fixed bottom-4 right-4 bg-red-500/20 text-red-400 px-6 py-3 rounded-lg';
+        errorDiv.textContent = 'Error cancelling booking';
+        document.body.appendChild(errorDiv);
+        setTimeout(() => errorDiv.remove(), 3000);
     }
 };
 
