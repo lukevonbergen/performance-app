@@ -22,21 +22,19 @@ window.selectedPerformer = null;
 window.selectedTime = null;
 
 function formatTime(timeString) {
-    if (!timeString) return 'Invalid Time'; // Handle null/undefined safely
+    if (!timeString) return 'Invalid Time';
 
-    // Handle "HH:MM:SS" or ISO formats
     const [hours, minutes] = timeString.split(':');
-    if (!hours || !minutes) return 'Invalid Time';
-
-    const time = new Date();
-    time.setHours(parseInt(hours), parseInt(minutes));
+    const time = new Date(Date.UTC(1970, 0, 1, parseInt(hours), parseInt(minutes)));
 
     return time.toLocaleTimeString('en-US', { 
         hour: 'numeric', 
         minute: '2-digit', 
-        hour12: true 
+        hour12: true,
+        timeZone: 'UTC' // Forces display in UTC, avoids local adjustment
     });
 }
+
 
 
 async function loadDashboardData() {
