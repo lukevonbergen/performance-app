@@ -395,6 +395,25 @@ document.getElementById('availabilityForm').addEventListener('submit', async (e)
     }
 });
 
+// Initialize dashboard data
+async function initializeDashboard() {
+    try {
+        await Promise.all([
+            loadDashboardData(),
+            loadAvailability(),
+            loadPendingBookings()
+        ]);
+    } catch (error) {
+        console.error('Error initializing dashboard:', error);
+        showToast('Error loading dashboard', 'error');
+    }
+}
+
+// Form submission handler
+document.getElementById('availabilityForm').addEventListener('submit', async (e) => {
+    // ... rest of your code ...
+});
+
 // Load initial data
 initializeDashboard();
 
