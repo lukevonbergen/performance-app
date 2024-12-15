@@ -1,14 +1,8 @@
 {
-    "rewrites": [
+  "rewrites": [
       {
-        "source": "/:path",
-        "destination": "/:path.html"
+          "source": "/:path",
+          "destination": "/:path.html"
       }
-    ],
-    "routes": [
-      {
-        "source": "/",
-        "destination": "/index.html"
-      }
-    ]
-  }
+  ]
+}
