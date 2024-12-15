@@ -12,7 +12,6 @@ if (!window.user || window.user.type !== 'venue') {
 
 // Display user info
 document.getElementById('venueName').textContent = window.user.venue_name;
-document.getElementById('userEmail').textContent = window.user.email;
 
 // Set minimum date to today
 document.getElementById('searchDate').min = new Date().toISOString().split('T')[0];
