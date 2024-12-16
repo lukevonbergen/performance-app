@@ -46,6 +46,24 @@ function calculateTotalCost(startTime, endTime, hourlyRate) {
     return totalCost.toFixed(2);
 }
 
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    
+    // Add ordinal suffix to day
+    const day = date.getDate();
+    const suffix = (day) => {
+        if (day > 3 && day < 21) return 'th';
+        switch (day % 10) {
+            case 1: return "st";
+            case 2: return "nd";
+            case 3: return "rd";
+            default: return "th";
+        }
+    };
+
+    return `${date.toLocaleDateString('en-GB', { weekday: 'long' })} ${day}${suffix(day)} ${date.toLocaleDateString('en-GB', { month: 'long' })}`;
+}
+
 
 async function loadDashboardData() {
     try {
@@ -90,7 +108,7 @@ async function loadDashboardData() {
                     <div class="flex justify-between items-start">
                         <div>
                             <h3 class="font-medium text-white">${event.performers.stage_name}</h3>
-                            <p class="text-sm text-gray-300">${new Date(event.date).toLocaleDateString()}</p>
+                            <p class="text-sm text-gray-300">${formatDate(event.date)}</p>
                             <p class="text-sm text-gray-300">${formatTime(event.start_time)} - ${formatTime(event.end_time)}</p>
                             <div class="flex space-x-2 text-sm text-gray-300">
                                 <p>Rate: £${event.booking_rate}/hr</p>
