@@ -67,7 +67,7 @@ async function loadAvailability() {
         
         if (filteredAvailability && filteredAvailability.length > 0) {
             availabilityList.innerHTML = filteredAvailability.map(slot => `
-                <div class="border-l-4 border-blue-500 pl-4 flex justify-between items-center" data-availability-id="${slot.id}">
+                <div class="border-l-4 border-blue-500 pl-4 flex justify-between items-center">
                     <div>
                         <p class="font-semibold text-white">${new Date(slot.date).toLocaleDateString()}</p>
                         <p class="text-gray-300">${formatTime(slot.start_time)} - ${formatTime(slot.end_time)}</p>
