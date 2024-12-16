@@ -30,6 +30,16 @@ document.addEventListener("DOMContentLoaded", () => {
         disableMobile: true, // Ensures consistent experience
         theme: "dark" // Optional themes
     });
+
+    flatpickr("#searchStartTime", {
+        enableTime: true,         // Enables time selection
+        noCalendar: true,         // Hides the date picker
+        dateFormat: "H:i",        // 24-hour format (e.g., 14:30)
+        time_24hr: true,          // Forces 24-hour format
+        minuteIncrement: 15,      // Steps of 15 minutes
+        defaultHour: 9,           // Default starting hour
+        defaultMinute: 0,         // Default starting minute
+    });
 });
 
 function formatTime(timeString) {
