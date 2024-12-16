@@ -42,6 +42,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
+function formatToISO(dateString) {
+    const [day, month, year] = dateString.split('/');
+    return `${year}-${month}-${day}`; // Rearrange to YYYY-MM-DD
+}
+
 function formatTime(timeString) {
     if (!timeString) return 'Invalid Time';
 
