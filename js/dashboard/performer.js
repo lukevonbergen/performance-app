@@ -166,11 +166,20 @@ async function loadPerformances() {
 
 function formatDate(dateString) {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-GB', { 
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long'
-    });
+    
+    // Add ordinal suffix to day
+    const day = date.getDate();
+    const suffix = (day) => {
+        if (day > 3 && day < 21) return 'th';
+        switch (day % 10) {
+            case 1: return "st";
+            case 2: return "nd";
+            case 3: return "rd";
+            default: return "th";
+        }
+    };
+
+    return `${date.toLocaleDateString('en-GB', { weekday: 'long' })} ${day}${suffix(day)} ${date.toLocaleDateString('en-GB', { month: 'long' })}`;
 }
 
 function renderAvailabilityItem(slot) {
