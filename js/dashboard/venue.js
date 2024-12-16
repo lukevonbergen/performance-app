@@ -20,33 +20,6 @@ document.getElementById('searchDate').min = new Date().toISOString().split('T')[
 window.selectedPerformer = null;
 window.selectedTime = null;
 
-
-// Custom styling for date picker
-document.addEventListener("DOMContentLoaded", () => {
-    flatpickr("#searchDate", {
-        dateFormat: "d/m/Y", // UK format
-        defaultDate: "today",
-        minDate: "today",
-        disableMobile: true, // Ensures consistent experience
-        theme: "dark" // Optional themes
-    });
-
-    flatpickr("#searchStartTime", {
-        enableTime: true,         // Enables time selection
-        noCalendar: true,         // Hides the date picker
-        dateFormat: "H:i",        // 24-hour format (e.g., 14:30)
-        time_24hr: true,          // Forces 24-hour format
-        minuteIncrement: 15,      // Steps of 15 minutes
-        defaultHour: 9,           // Default starting hour
-        defaultMinute: 0,         // Default starting minute
-    });
-});
-
-function formatToISO(dateString) {
-    const [day, month, year] = dateString.split('/');
-    return `${year}-${month}-${day}`; // Rearrange to YYYY-MM-DD
-}
-
 function formatTime(timeString) {
     if (!timeString) return 'Invalid Time';
 
