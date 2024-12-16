@@ -323,7 +323,6 @@ window.openBookingModal = async function(performerId, performerName, rate, start
         <div class="space-y-2">
             <p><span class="font-medium">Performer:</span> ${performerName}</p>
             <p><span class="font-medium">Date:</span> ${new Date(startTime).toLocaleDateString()}</p>
-            <p class="text-sm text-gray-300">${formatDate(event.date)}</p>
             <p><span class="font-medium">Time:</span> ${formatTime(slot.start_time)} - ${formatTime(slot.end_time)}</p>
             <p><span class="font-medium">Rate:</span> £${rate}/hr</p>
         </div>
