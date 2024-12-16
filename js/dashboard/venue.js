@@ -20,6 +20,18 @@ document.getElementById('searchDate').min = new Date().toISOString().split('T')[
 window.selectedPerformer = null;
 window.selectedTime = null;
 
+
+// Custom styling for date picker
+document.addEventListener("DOMContentLoaded", () => {
+    flatpickr("#searchDate", {
+        dateFormat: "d/m/Y", // UK format
+        defaultDate: "today",
+        minDate: "today",
+        disableMobile: true, // Ensures consistent experience
+        theme: "dark" // Optional themes
+    });
+});
+
 function formatTime(timeString) {
     if (!timeString) return 'Invalid Time';
 
