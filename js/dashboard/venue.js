@@ -34,6 +34,17 @@ function formatTime(timeString) {
     return `${formattedHours}:${formattedMinutes} ${period}`;
 }
 
+function calculateTotalCost(startTime, endTime, hourlyRate) {
+    const [startHours, startMinutes] = startTime.split(':').map(Number);
+    const [endHours, endMinutes] = endTime.split(':').map(Number);
+    
+    const startTotalMinutes = (startHours * 60) + startMinutes;
+    const endTotalMinutes = (endHours * 60) + endMinutes;
+    
+    const durationHours = (endTotalMinutes - startTotalMinutes) / 60;
+    const totalCost = durationHours * hourlyRate;
+    return totalCost.toFixed(2);
+}
 
 
 async function loadDashboardData() {
@@ -60,6 +71,12 @@ async function loadDashboardData() {
         }
 
         console.log('Fresh events data:', upcomingEvents);
+        const confirmedEvents = upcomingEvents?.filter(event => event.status === 'confirmed') || [];
+        const totalCost = confirmedEvents.reduce((sum, event) => {
+            return sum + parseFloat(calculateTotalCost(event.start_time, event.end_time, event.booking_rate));
+        }, 0);
+
+        document.getElementById('totalCost').textContent = `£${totalCost.toFixed(2)}`;
 
         const upcomingEventsList = document.getElementById('upcomingEventsList');
         
@@ -75,7 +92,11 @@ async function loadDashboardData() {
                             <h3 class="font-medium text-white">${event.performers.stage_name}</h3>
                             <p class="text-sm text-gray-300">${new Date(event.date).toLocaleDateString()}</p>
                             <p class="text-sm text-gray-300">${formatTime(event.start_time)} - ${formatTime(event.end_time)}</p>
-
+                            <div class="flex space-x-2 text-sm text-gray-300">
+                                <p>Rate: £${event.booking_rate}/hr</p>
+                                <span>•</span>
+                                <p>Total: £${calculateTotalCost(event.start_time, event.end_time, event.booking_rate)}</p>
+                            </div>
                         </div>
                         <div class="flex flex-col items-end">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -179,16 +200,20 @@ async function searchPerformers(date, startTime) {
         
         if (availablePerformers.length > 0) {
             resultsDiv.innerHTML = availablePerformers.map(slot => `
-                <div class="border rounded-lg p-4 flex justify-between items-center">
+                <div class="border rounded-lg p-4 flex justify-between items-center bg-black/20 backdrop-blur-lg">
                     <div>
                         <h3 class="font-medium text-white">${slot.performers.stage_name}</h3>
-                        <p class="text-sm text-gray-500">Available ${formatTime(slot.start_time)} - ${formatTime(slot.end_time)}</p>
-                        <p class="text-sm text-gray-500">Rate: £${slot.rate_per_hour}/hr</p>
+                        <p class="text-sm text-gray-300">Available ${formatTime(slot.start_time)} - ${formatTime(slot.end_time)}</p>
+                        <div class="flex space-x-2 text-sm text-gray-300">
+                            <p>Rate: £${slot.rate_per_hour}/hr</p>
+                            <span>•</span>
+                            <p>Total: £${calculateTotalCost(slot.start_time, slot.end_time, slot.rate_per_hour)}</p>
+                        </div>
                     </div>
                     <button 
                         id="book-${slot.performer_id}"
                         onclick="openBookingModal(\`${slot.performer_id}\`, \`${slot.performers.stage_name}\`, ${slot.rate_per_hour}, \`${searchDateTime.toISOString()}\`)"
-                        class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all duration-200"
+                        class="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-all duration-200"
                     >
                         Book Now
                     </button>
