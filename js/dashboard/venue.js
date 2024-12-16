@@ -393,6 +393,53 @@ window.confirmBooking = async function() {
     }
 };
 
+// Add these to your existing venue.js file
+
+// Navigation handling
+document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+        // Update active states
+        document.querySelectorAll('.nav-link').forEach(el => {
+            el.classList.remove('bg-white/10');
+        });
+        link.classList.add('bg-white/10');
+
+        // Show correct content
+        const tabId = link.getAttribute('data-tab');
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.add('hidden');
+        });
+        document.getElementById(`${tabId}-tab`).classList.remove('hidden');
+
+        // Close mobile menu if open
+        if (window.innerWidth < 1024) {
+            document.getElementById('sidebar').classList.add('-translate-x-full');
+        }
+    });
+});
+
+// Mobile menu toggle
+document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('-translate-x-full');
+});
+
+// Close sidebar when clicking outside on mobile
+document.addEventListener('click', (e) => {
+    const sidebar = document.getElementById('sidebar');
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    
+    if (window.innerWidth < 1024 && 
+        !sidebar.contains(e.target) && 
+        !mobileMenuBtn.contains(e.target) && 
+        !sidebar.classList.contains('-translate-x-full')) {
+        sidebar.classList.add('-translate-x-full');
+    }
+});
+
+// Set initial active tab
+document.querySelector('[data-tab="dashboard"]').classList.add('bg-white/10');
+
 // Logout function
 window.logout = function() {
     sessionStorage.removeItem('user');
