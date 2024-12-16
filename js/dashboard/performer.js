@@ -34,18 +34,9 @@ function showToast(message, type = 'success') {
     }, 3000);
 }
 
+// Update loadAvailability to use the new rendering function
 async function loadAvailability() {
     try {
-        // First get all performances that are pending or confirmed
-        const { data: bookings, error: bookingsError } = await supabase
-            .from('performances')
-            .select('date, start_time')
-            .eq('performer_id', window.user.id)
-            .in('status', ['pending', 'confirmed']);
-
-        if (bookingsError) throw bookingsError;
-
-        // Get all availability
         const { data: availability, error } = await supabase
             .from('performer_availability')
             .select('*')
@@ -55,30 +46,13 @@ async function loadAvailability() {
 
         if (error) throw error;
 
-        // Filter out availability that has pending or confirmed bookings
-        const filteredAvailability = availability.filter(slot => {
-            return !bookings.some(booking => 
-                booking.date === slot.date && 
-                booking.start_time === slot.start_time
-            );
-        });
-
         const availabilityList = document.getElementById('availabilityList');
-        
-        if (filteredAvailability && filteredAvailability.length > 0) {
-            availabilityList.innerHTML = filteredAvailability.map(slot => `
-                <div class="border-l-4 border-blue-500 pl-4 flex justify-between items-center">
-                    <div>
-                        <p class="font-semibold text-white">${new Date(slot.date).toLocaleDateString()}</p>
-                        <p class="text-gray-300">${formatTime(slot.start_time)} - ${formatTime(slot.end_time)}</p>
-                        <p class="text-sm text-gray-400">£${slot.rate_per_hour} per hour</p>
-                    </div>
-                    <button onclick="deleteAvailability('${slot.id}')"
-                        class="text-red-400 hover:text-red-300 transition-colors duration-200">
-                        Delete
-                    </button>
-                </div>
-            `).join('');
+        availabilityList.innerHTML = '';
+
+        if (availability && availability.length > 0) {
+            availability.forEach(slot => {
+                availabilityList.appendChild(renderAvailabilityItem(slot));
+            });
         } else {
             availabilityList.innerHTML = '<p class="text-center text-gray-400">No availability set</p>';
         }
@@ -189,6 +163,30 @@ async function loadPerformances() {
         showToast('Error loading performances', 'error');
     }
 }
+
+// Update how we render availability items to improve performance
+function renderAvailabilityItem(slot) {
+    const div = document.createElement('div');
+    div.className = 'border-l-4 border-blue-500 pl-4 flex justify-between items-center';
+    div.dataset.availabilityId = slot.id;
+
+    div.innerHTML = `
+        <div>
+            <p class="font-semibold text-white">${new Date(slot.date).toLocaleDateString()}</p>
+            <p class="text-gray-300">${formatTime(slot.start_time)} - ${formatTime(slot.end_time)}</p>
+            <p class="text-sm text-gray-400">£${slot.rate_per_hour} per hour</p>
+        </div>
+        <button 
+            class="text-red-400 hover:text-red-300 transition-colors duration-200"
+            onclick="deleteAvailability('${slot.id}')"
+        >
+            Delete
+        </button>
+    `;
+
+    return div;
+}
+
 
 async function loadPendingBookings() {
     try {
@@ -546,6 +544,47 @@ async function initializeDashboard() {
         showToast('Error loading dashboard', 'error');
     }
 }
+
+// Add these functions for modal handling
+let availabilityToDelete = null;
+
+function openConfirmationModal(id) {
+    availabilityToDelete = id;
+    document.getElementById('confirmationModal').classList.remove('hidden');
+}
+
+function closeConfirmationModal() {
+    availabilityToDelete = null;
+    document.getElementById('confirmationModal').classList.add('hidden');
+}
+
+// Update the delete function
+window.deleteAvailability = async function(id) {
+    openConfirmationModal(id);
+};
+
+// Add event listener for confirmation
+document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+    if (!availabilityToDelete) return;
+    
+    try {
+        const id = availabilityToDelete;
+        const { error } = await supabase
+            .from('performer_availability')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+
+        // Reload availability data
+        await loadAvailability();
+        closeConfirmationModal();
+        showToast('Availability deleted successfully');
+    } catch (error) {
+        console.error('Error deleting availability:', error);
+        showToast('Error deleting availability', 'error');
+    }
+});
 
 // Form submission handler
 document.getElementById('availabilityForm').addEventListener('submit', async (e) => {
