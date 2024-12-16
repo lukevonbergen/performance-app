@@ -36,6 +36,16 @@ function showToast(message, type = 'success') {
 
 async function loadAvailability() {
     try {
+        // First get all performances that are pending or confirmed
+        const { data: bookings, error: bookingsError } = await supabase
+            .from('performances')
+            .select('date, start_time')
+            .eq('performer_id', window.user.id)
+            .in('status', ['pending', 'confirmed']);
+
+        if (bookingsError) throw bookingsError;
+
+        // Get all availability
         const { data: availability, error } = await supabase
             .from('performer_availability')
             .select('*')
@@ -45,10 +55,18 @@ async function loadAvailability() {
 
         if (error) throw error;
 
+        // Filter out availability that has pending or confirmed bookings
+        const filteredAvailability = availability.filter(slot => {
+            return !bookings.some(booking => 
+                booking.date === slot.date && 
+                booking.start_time === slot.start_time
+            );
+        });
+
         const availabilityList = document.getElementById('availabilityList');
         
-        if (availability && availability.length > 0) {
-            availabilityList.innerHTML = availability.map(slot => `
+        if (filteredAvailability && filteredAvailability.length > 0) {
+            availabilityList.innerHTML = filteredAvailability.map(slot => `
                 <div class="border-l-4 border-blue-500 pl-4 flex justify-between items-center">
                     <div>
                         <p class="font-semibold text-white">${new Date(slot.date).toLocaleDateString()}</p>
@@ -241,8 +259,8 @@ window.handleBookingResponse = async function(bookingId, status) {
 
         if (fetchError) throw fetchError;
 
+        // If confirming booking, remove the availability
         if (status === 'confirmed') {
-            // Remove availability for this time slot
             const { error: availError } = await supabase
                 .from('performer_availability')
                 .delete()
@@ -253,6 +271,7 @@ window.handleBookingResponse = async function(bookingId, status) {
             if (availError) throw availError;
         }
 
+        // Update the booking status
         const { error: updateError } = await supabase
             .from('performances')
             .update({ status: status })
@@ -260,7 +279,7 @@ window.handleBookingResponse = async function(bookingId, status) {
 
         if (updateError) throw updateError;
 
-        // Refresh all relevant data
+        // Refresh all data
         await Promise.all([
             loadPerformances(),
             loadAvailability()
@@ -392,6 +411,7 @@ async function loadDashboardData() {
 
 window.cancelPerformance = async function(performanceId) {
     try {
+        // Get the performance details before deleting
         const { data: performance, error: fetchError } = await supabase
             .from('performances')
             .select('*')
@@ -400,6 +420,7 @@ window.cancelPerformance = async function(performanceId) {
 
         if (fetchError) throw fetchError;
 
+        // Delete the performance
         const { error: deleteError } = await supabase
             .from('performances')
             .delete()
@@ -408,7 +429,7 @@ window.cancelPerformance = async function(performanceId) {
 
         if (deleteError) throw deleteError;
 
-        // Restore availability
+        // Restore the availability
         const availabilityData = {
             performer_id: window.user.id,
             date: performance.date,
@@ -423,8 +444,9 @@ window.cancelPerformance = async function(performanceId) {
 
         if (availError) throw availError;
 
+        // Refresh all data
         await Promise.all([
-            loadDashboardData(),
+            loadPerformances(),
             loadAvailability()
         ]);
 
