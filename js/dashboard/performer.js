@@ -182,7 +182,24 @@ function formatDate(dateString) {
     return `${date.toLocaleDateString('en-GB', { weekday: 'long' })} ${day}${suffix(day)} ${date.toLocaleDateString('en-GB', { month: 'long' })}`;
 }
 
+function calculateDuration(startTime, endTime) {
+    // Convert times to minutes for easier calculation
+    const [startHours, startMinutes] = startTime.split(':').map(Number);
+    const [endHours, endMinutes] = endTime.split(':').map(Number);
+    
+    // Convert to total minutes
+    const startTotalMinutes = (startHours * 60) + startMinutes;
+    const endTotalMinutes = (endHours * 60) + endMinutes;
+    
+    // Get difference in hours (rounded to nearest 0.5)
+    const durationHours = (endTotalMinutes - startTotalMinutes) / 60;
+    return durationHours;
+}
+
 function renderAvailabilityItem(slot) {
+    const duration = calculateDuration(slot.start_time, slot.end_time);
+    const totalCost = duration * slot.rate_per_hour;
+
     const div = document.createElement('div');
     div.className = 'border-l-4 border-blue-500 pl-4 flex justify-between items-center';
     div.dataset.availabilityId = slot.id;
@@ -191,7 +208,11 @@ function renderAvailabilityItem(slot) {
         <div>
             <p class="font-semibold text-white">${formatDate(slot.date)}</p>
             <p class="text-gray-300">${formatTime(slot.start_time)} - ${formatTime(slot.end_time)}</p>
-            <p class="text-sm text-gray-400">£${slot.rate_per_hour} per hour</p>
+            <div class="flex space-x-2 text-sm text-gray-400">
+                <p>Rate: £${slot.rate_per_hour}/hr</p>
+                <span>•</span>
+                <p>Total: £${totalCost.toFixed(2)}</p>
+            </div>
         </div>
         <button 
             class="text-red-400 hover:text-red-300 transition-colors duration-200"
