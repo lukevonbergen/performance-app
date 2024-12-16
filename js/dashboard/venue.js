@@ -325,6 +325,7 @@ window.openBookingModal = async function(performerId, performerName, rate, start
             <p><span class="font-medium">Date:</span> ${new Date(startTime).toLocaleDateString()}</p>
             <p><span class="font-medium">Time:</span> ${formatTime(slot.start_time)} - ${formatTime(slot.end_time)}</p>
             <p><span class="font-medium">Rate:</span> £${rate}/hr</p>
+            <p><span class="font-medium">Total Cost:</span> £${calculateTotalCost(slot.start_time, slot.end_time, slot.rate_per_hour)}</p>
         </div>
     `;
 
