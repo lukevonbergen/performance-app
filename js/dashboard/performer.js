@@ -67,7 +67,7 @@ async function loadAvailability() {
         
         if (filteredAvailability && filteredAvailability.length > 0) {
             availabilityList.innerHTML = filteredAvailability.map(slot => `
-                <div class="border-l-4 border-blue-500 pl-4 flex justify-between items-center">
+                <div class="border-l-4 border-blue-500 pl-4 flex justify-between items-center" data-availability-id="${slot.id}">
                     <div>
                         <p class="font-semibold text-white">${new Date(slot.date).toLocaleDateString()}</p>
                         <p class="text-gray-300">${formatTime(slot.start_time)} - ${formatTime(slot.end_time)}</p>
@@ -470,58 +470,33 @@ window.closeAvailabilityModal = function() {
 };
 
 window.deleteAvailability = async function(id) {
-    try {
-        // First check if there are any pending bookings for this slot
-        const { data: availability, error: fetchError } = await supabase
-            .from('performer_availability')
-            .select('date, start_time')
-            .eq('id', id)
-            .single();
+    if (confirm('Are you sure you want to delete this availability?')) {
+        try {
+            // Delete the availability
+            const { error } = await supabase
+                .from('performer_availability')
+                .delete()
+                .eq('id', id);
 
-        if (fetchError) throw fetchError;
+            if (error) throw error;
 
-        // Check for any pending bookings for this time slot
-        const { data: pendingBookings, error: checkError } = await supabase
-            .from('performances')
-            .select('id, status')
-            .eq('performer_id', window.user.id)
-            .eq('date', availability.date)
-            .eq('start_time', availability.start_time)
-            .eq('status', 'pending');
+            // Instead of reloading data, directly remove the element from the UI
+            const availabilityElement = document.querySelector(`[data-availability-id="${id}"]`);
+            if (availabilityElement) {
+                availabilityElement.remove();
+            }
 
-        if (checkError) throw checkError;
+            // Update empty state if no more availabilities
+            const availabilityList = document.getElementById('availabilityList');
+            if (availabilityList.children.length === 0) {
+                availabilityList.innerHTML = '<p class="text-center text-gray-400">No availability set</p>';
+            }
 
-        // If there are pending bookings, we need to update their status to rejected
-        if (pendingBookings && pendingBookings.length > 0) {
-            const { error: updateError } = await supabase
-                .from('performances')
-                .update({ status: 'rejected' })
-                .eq('performer_id', window.user.id)
-                .eq('date', availability.date)
-                .eq('start_time', availability.start_time)
-                .eq('status', 'pending');
-
-            if (updateError) throw updateError;
+            showToast('Availability deleted successfully');
+        } catch (error) {
+            console.error('Error deleting availability:', error);
+            showToast('Error deleting availability', 'error');
         }
-
-        // Delete the availability
-        const { error: deleteError } = await supabase
-            .from('performer_availability')
-            .delete()
-            .eq('id', id);
-
-        if (deleteError) throw deleteError;
-        
-        // Refresh all relevant data
-        await Promise.all([
-            loadPerformances(),
-            loadAvailability()
-        ]);
-
-        showToast('Availability deleted successfully');
-    } catch (error) {
-        console.error('Error deleting availability:', error);
-        showToast('Error deleting availability', 'error');
     }
 };
 
