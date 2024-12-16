@@ -471,14 +471,53 @@ window.closeAvailabilityModal = function() {
 
 window.deleteAvailability = async function(id) {
     try {
-        const { error } = await supabase
+        // First check if there are any pending bookings for this slot
+        const { data: availability, error: fetchError } = await supabase
+            .from('performer_availability')
+            .select('date, start_time')
+            .eq('id', id)
+            .single();
+
+        if (fetchError) throw fetchError;
+
+        // Check for any pending bookings for this time slot
+        const { data: pendingBookings, error: checkError } = await supabase
+            .from('performances')
+            .select('id, status')
+            .eq('performer_id', window.user.id)
+            .eq('date', availability.date)
+            .eq('start_time', availability.start_time)
+            .eq('status', 'pending');
+
+        if (checkError) throw checkError;
+
+        // If there are pending bookings, we need to update their status to rejected
+        if (pendingBookings && pendingBookings.length > 0) {
+            const { error: updateError } = await supabase
+                .from('performances')
+                .update({ status: 'rejected' })
+                .eq('performer_id', window.user.id)
+                .eq('date', availability.date)
+                .eq('start_time', availability.start_time)
+                .eq('status', 'pending');
+
+            if (updateError) throw updateError;
+        }
+
+        // Delete the availability
+        const { error: deleteError } = await supabase
             .from('performer_availability')
             .delete()
             .eq('id', id);
 
-        if (error) throw error;
+        if (deleteError) throw deleteError;
         
-        await loadAvailability();
+        // Refresh all relevant data
+        await Promise.all([
+            loadPerformances(),
+            loadAvailability()
+        ]);
+
         showToast('Availability deleted successfully');
     } catch (error) {
         console.error('Error deleting availability:', error);
