@@ -254,6 +254,42 @@ async function searchPerformers(date, startTime) {
     }
 }
 
+// Select all buttons with a data-tab attribute
+const tabButtons = document.querySelectorAll('[data-tab]');
+const tabContent = document.getElementById('tab-content');
+
+// Tab Content Mapping
+const contentMap = {
+    dashboard: '<h2>Dashboard</h2><p>Welcome to your dashboard. Here is an overview.</p>',
+    book: '<h2>Book Performers</h2><p>Find and book performers for your venue.</p>',
+    reports: '<h2>Reports</h2><p>View detailed reports and analytics here.</p>'
+};
+
+// Function to simulate a loader and replace content
+function loadTabContent(tabKey) {
+    // Show loader
+    tabContent.innerHTML = `
+        <div class="loader">
+            <div class="spinner"></div>
+        </div>
+    `;
+
+    // Simulate loading delay (e.g., fetching content)
+    setTimeout(() => {
+        // Update tab content dynamically
+        tabContent.innerHTML = contentMap[tabKey] || '<p>Content not found.</p>';
+    }, 1000); // 1-second loading delay
+}
+
+// Add event listeners to all tab buttons
+tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        const tabKey = button.getAttribute('data-tab');
+        loadTabContent(tabKey);
+    });
+});
+
+
 window.cancelBooking = async function(bookingId) {
     try {
         // First get the booking details
