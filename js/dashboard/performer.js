@@ -164,7 +164,15 @@ async function loadPerformances() {
     }
 }
 
-// Update how we render availability items to improve performance
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-GB', { 
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long'
+    });
+}
+
 function renderAvailabilityItem(slot) {
     const div = document.createElement('div');
     div.className = 'border-l-4 border-blue-500 pl-4 flex justify-between items-center';
@@ -172,7 +180,7 @@ function renderAvailabilityItem(slot) {
 
     div.innerHTML = `
         <div>
-            <p class="font-semibold text-white">${new Date(slot.date).toLocaleDateString()}</p>
+            <p class="font-semibold text-white">${formatDate(slot.date)}</p>
             <p class="text-gray-300">${formatTime(slot.start_time)} - ${formatTime(slot.end_time)}</p>
             <p class="text-sm text-gray-400">£${slot.rate_per_hour} per hour</p>
         </div>
