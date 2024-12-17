@@ -75,7 +75,6 @@ function formatDate(dateString) {
 // Add these new functions to your venue.js
 async function loadReportsData() {
     try {
-        // Get all performances for this venue
         const { data: performances, error } = await supabase
             .from('performances')
             .select(`
@@ -91,7 +90,7 @@ async function loadReportsData() {
         // Process the data
         let totalConfirmedCost = 0;
         let confirmedCount = 0;
-        const monthlyRevenue = {};
+        const monthlyCosts = {};  // Changed from monthlyRevenue
         const performerStats = {};
         const timeStats = {};
 
@@ -104,19 +103,19 @@ async function loadReportsData() {
             if (booking.status === 'confirmed') {
                 totalConfirmedCost += cost;
                 confirmedCount++;
-            }
 
-            // Monthly revenue
-            const month = new Date(booking.date).toLocaleString('default', { month: 'short' });
-            monthlyRevenue[month] = (monthlyRevenue[month] || 0) + revenue;
+                // Monthly costs (only for confirmed bookings)
+                const month = new Date(booking.date).toLocaleString('default', { month: 'short' });
+                monthlyCosts[month] = (monthlyCosts[month] || 0) + cost;
+            }
 
             // Performer stats
             const performerName = booking.performers.stage_name;
             if (!performerStats[performerName]) {
-                performerStats[performerName] = { bookings: 0, revenue: 0 };
+                performerStats[performerName] = { bookings: 0, cost: 0 };  // Changed revenue to cost
             }
             performerStats[performerName].bookings++;
-            performerStats[performerName].revenue += revenue;
+            performerStats[performerName].cost += cost;  // Changed revenue to cost
 
             // Time stats
             const hour = booking.start_time.split(':')[0];
@@ -131,13 +130,62 @@ async function loadReportsData() {
             `${((confirmedCount / performances.length) * 100).toFixed(1)}%`;
 
         // Create charts
-        createRevenueChart(monthlyRevenue);
+        createCostChart(monthlyCosts);  // Changed from createRevenueChart
         createTimesChart(timeStats);
         updateTopPerformersTable(performerStats);
 
-   } catch (error) {
+    } catch (error) {
         console.error('Error loading reports data:', error);
     }
+}
+
+function createCostChart(monthlyCosts) {  // Changed from createRevenueChart
+    const ctx = document.getElementById('revenueChart');  // You might want to rename this ID in your HTML too
+    const months = Object.keys(monthlyCosts);
+    const costs = Object.values(monthlyCosts);  // Changed from revenues
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: months,
+            datasets: [{
+                label: 'Cost',  // Changed from Revenue
+                data: costs,
+                borderColor: '#8B5CF6',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    }
+                }
+            }
+        }
+    });
 }
 
 function createRevenueChart(monthlyRevenue) {
@@ -247,7 +295,7 @@ function updateTopPerformersTable(performerStats) {
         <tr class="border-t border-white/10">
             <td class="py-4">${name}</td>
             <td class="py-4">${stats.bookings}</td>
-            <td class="py-4">£${stats.revenue.toFixed(2)}</td>
+            <td class="py-4">£${stats.cost.toFixed(2)}</td>  <!-- Changed from revenue to cost -->
             <td class="py-4">9.2</td>
         </tr>
     `).join('');
