@@ -299,6 +299,7 @@ async function loadReportsData() {
         createEarningsChart(stats.monthlyEarnings);
         createTimesChart(stats.timeStats);
         updateVenuePerformanceTable(stats.venueStats);
+        updatePerformanceHistoryTable(performances);
 
     } catch (error) {
         console.error('Error loading reports data:', error);
@@ -706,6 +707,41 @@ document.getElementById('confirmDeleteBtn').addEventListener('click', async () =
         showToast('Error deleting availability', 'error');
     }
 });
+
+function updatePerformanceHistoryTable(performances) {
+    const tableBody = document.getElementById('performanceHistoryTable');
+    
+    // Sort performances by date, newest first
+    const sortedPerformances = [...performances].sort((a, b) => 
+        new Date(b.date) - new Date(a.date)
+    );
+
+    tableBody.innerHTML = sortedPerformances.map(perf => {
+        const duration = calculateDuration(perf.start_time, perf.end_time);
+        const totalCost = duration * perf.booking_rate;
+        
+        const statusColors = {
+            confirmed: 'bg-green-500/20 text-green-400',
+            pending: 'bg-yellow-500/20 text-yellow-400',
+            rejected: 'bg-red-500/20 text-red-400'
+        };
+
+        return `
+            <tr class="border-t border-white/10">
+                <td class="py-4">${formatDate(perf.date)}</td>
+                <td class="py-4">${perf.venues.venue_name}</td>
+                <td class="py-4">${formatTime(perf.start_time)} - ${formatTime(perf.end_time)}</td>
+                <td class="py-4">£${perf.booking_rate}/hr</td>
+                <td class="py-4">£${totalCost.toFixed(2)}</td>
+                <td class="py-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColors[perf.status]}">
+                        ${perf.status.charAt(0).toUpperCase() + perf.status.slice(1)}
+                    </span>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
 
 // Navigation Event Listeners
 document.addEventListener('DOMContentLoaded', function() {
