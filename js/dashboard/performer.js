@@ -1,16 +1,19 @@
+// Import and Global Setup
 import { supabase } from '../utils/supabase.js';
 
 // Make supabase and user globally available
 window.supabase = supabase;
 window.user = JSON.parse(sessionStorage.getItem('user'));
 
+// Authentication Check
 if (!window.user || window.user.type !== 'performer') {
     window.location.href = 'login';
 }
 
-// Display user info
+// Initialize UI
 document.getElementById('performerName').textContent = window.user.stage_name || 'Performer Dashboard';
 
+// Utility Functions
 function formatTime(timeString) {
     if (!timeString) return 'Invalid Time';
     const [hours, minutes] = timeString.split(':').map(Number);
@@ -18,6 +21,29 @@ function formatTime(timeString) {
     const formattedHours = hours % 12 === 0 ? 12 : hours % 12;
     const formattedMinutes = String(minutes).padStart(2, '0');
     return `${formattedHours}:${formattedMinutes} ${period}`;
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const suffix = (day) => {
+        if (day > 3 && day < 21) return 'th';
+        switch (day % 10) {
+            case 1: return "st";
+            case 2: return "nd";
+            case 3: return "rd";
+            default: return "th";
+        }
+    };
+    return `${date.toLocaleDateString('en-GB', { weekday: 'long' })} ${day}${suffix(day)} ${date.toLocaleDateString('en-GB', { month: 'long' })}`;
+}
+
+function calculateDuration(startTime, endTime) {
+    const [startHours, startMinutes] = startTime.split(':').map(Number);
+    const [endHours, endMinutes] = endTime.split(':').map(Number);
+    const startTotalMinutes = (startHours * 60) + startMinutes;
+    const endTotalMinutes = (endHours * 60) + endMinutes;
+    return (endTotalMinutes - startTotalMinutes) / 60;
 }
 
 function showToast(message, type = 'success') {
@@ -34,34 +60,126 @@ function showToast(message, type = 'success') {
     }, 3000);
 }
 
-// Update loadAvailability to use the new rendering function
-async function loadAvailability() {
+// Dashboard Functions
+async function loadDashboardData() {
     try {
-        const { data: availability, error } = await supabase
-            .from('performer_availability')
-            .select('*')
-            .eq('performer_id', window.user.id)
-            .gte('date', new Date().toISOString().split('T')[0])
-            .order('date');
+        const { data: performances, error } = await supabase
+            .from('performances')
+            .select(`
+                *,
+                venues (
+                    venue_name,
+                    id
+                ),
+                ratings (
+                    rating_value,
+                    comment
+                ),
+                tips (
+                    amount
+                )
+            `)
+            .eq('performer_id', window.user.id);
 
         if (error) throw error;
 
-        const availabilityList = document.getElementById('availabilityList');
-        availabilityList.innerHTML = '';
+        updateDashboardStats(performances);
+        updateRecentActivity(performances);
 
-        if (availability && availability.length > 0) {
-            availability.forEach(slot => {
-                availabilityList.appendChild(renderAvailabilityItem(slot));
-            });
-        } else {
-            availabilityList.innerHTML = '<p class="text-center text-gray-400">No availability set</p>';
-        }
     } catch (error) {
-        console.error('Error loading availability:', error);
-        showToast('Error loading availability', 'error');
+        console.error('Error loading dashboard:', error);
+        showToast('Error loading dashboard data', 'error');
     }
 }
 
+function updateDashboardStats(performances) {
+    const today = new Date().toISOString().split('T')[0];
+    const upcomingPerformances = performances.filter(perf => perf.date >= today && perf.status === 'confirmed');
+    
+    let totalRating = 0;
+    let ratingCount = 0;
+    let totalTips = 0;
+
+    performances.forEach(perf => {
+        perf.ratings?.forEach(rating => {
+            totalRating += rating.rating_value;
+            ratingCount++;
+        });
+        perf.tips?.forEach(tip => {
+            totalTips += tip.amount;
+        });
+    });
+
+    // Update UI elements
+    document.getElementById('upcomingGigs').textContent = upcomingPerformances.length;
+    document.getElementById('averageRating').textContent = 
+        ratingCount > 0 ? (totalRating / ratingCount).toFixed(1) : '--';
+    document.getElementById('totalTips').textContent = `£${totalTips.toFixed(2)}`;
+}
+
+function updateRecentActivity(performances) {
+    const recentActivityList = document.getElementById('recentActivityList');
+    const today = new Date().toISOString().split('T')[0];
+    const recentPerformances = performances
+        .filter(perf => perf.date >= today)
+        .sort((a, b) => new Date(a.date) - new Date(b.date))
+        .slice(0, 5);
+
+    if (recentPerformances.length > 0) {
+        recentActivityList.innerHTML = recentPerformances.map(perf => `
+            <div class="border-l-4 ${
+                perf.status === 'confirmed' ? 'border-green-500' :
+                perf.status === 'pending' ? 'border-yellow-500' :
+                'border-red-500'
+            } pl-4">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="font-medium text-white">${perf.venues.venue_name}</h3>
+                        <p class="text-gray-300">${formatDate(perf.date)}</p>
+                        <p class="text-gray-300">${formatTime(perf.start_time)} - ${formatTime(perf.end_time)}</p>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            perf.status === 'confirmed' ? 'bg-green-500/20 text-green-400' :
+                            perf.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
+                            'bg-red-500/20 text-red-400'
+                        }">
+                            ${perf.status.charAt(0).toUpperCase() + perf.status.slice(1)}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    } else {
+        recentActivityList.innerHTML = '<p class="text-center text-gray-400">No recent activity</p>';
+    }
+}
+
+// Navigation Functions
+function setActiveTab(tabId) {
+    // Remove active class from all tabs
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('bg-white/5');
+    });
+    
+    // Add active class to current tab
+    const activeTab = document.querySelector(`[data-tab="${tabId}"]`);
+    if (activeTab) {
+        activeTab.classList.add('bg-white/5');
+    }
+
+    // Show/hide content
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.add('hidden');
+    });
+    document.getElementById(`${tabId}-tab`).classList.remove('hidden');
+}
+
+// Authentication Functions
+window.logout = function() {
+    sessionStorage.removeItem('user');
+    window.location.href = 'login';
+};
+
+// Performance Management Functions
 async function loadPerformances() {
     try {
         const { data: performances, error } = await supabase
@@ -84,79 +202,7 @@ async function loadPerformances() {
         const pending = performances?.filter(p => p.status === 'pending') || [];
         const rejected = performances?.filter(p => p.status === 'rejected') || [];
 
-        // Update stats
-        document.getElementById('upcomingGigs').textContent = upcoming.length;
-
-        // Render upcoming performances
-        const upcomingList = document.getElementById('upcomingPerformancesList');
-        if (upcoming.length > 0) {
-            upcomingList.innerHTML = upcoming.map(perf => `
-                <div class="border-l-4 border-green-500 pl-4">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h3 class="font-medium text-white">${perf.venues?.venue_name || 'Unknown Venue'}</h3>
-                            <p class="text-gray-300">Date: ${new Date(perf.date).toLocaleDateString()}</p>
-                            <p class="text-gray-300">Time: ${formatTime(perf.start_time)} - ${formatTime(perf.end_time)}</p>
-                        </div>
-                        <button 
-                            onclick="cancelPerformance('${perf.id}')"
-                            class="text-red-400 hover:text-red-300 transition-colors duration-200"
-                        >
-                            Cancel Performance
-                        </button>
-                    </div>
-                </div>
-            `).join('');
-        } else {
-            upcomingList.innerHTML = '<p class="text-center text-gray-400">No upcoming performances</p>';
-        }
-
-        // Render pending performances
-        const pendingList = document.getElementById('pendingPerformancesList');
-        if (pending.length > 0) {
-            pendingList.innerHTML = pending.map(perf => `
-                <div class="border-l-4 border-yellow-500 pl-4">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h3 class="font-medium text-white">${perf.venues?.venue_name || 'Unknown Venue'}</h3>
-                            <p class="text-gray-300">Date: ${new Date(perf.date).toLocaleDateString()}</p>
-                            <p class="text-gray-300">Time: ${formatTime(perf.start_time)} - ${formatTime(perf.end_time)}</p>
-                            <p class="text-gray-300">Rate: £${perf.booking_rate}/hr</p>
-                        </div>
-                        <div class="flex space-x-2">
-                            <button 
-                                onclick="handleBookingResponse('${perf.id}', 'confirmed')"
-                                class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 text-sm transition-colors duration-200">
-                                Accept
-                            </button>
-                            <button 
-                                onclick="handleBookingResponse('${perf.id}', 'rejected')"
-                                class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm transition-colors duration-200">
-                                Decline
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        } else {
-            pendingList.innerHTML = '<p class="text-center text-gray-400">No pending requests</p>';
-        }
-
-        // Render rejected performances
-        const rejectedList = document.getElementById('rejectedPerformancesList');
-        if (rejected.length > 0) {
-            rejectedList.innerHTML = rejected.map(perf => `
-                <div class="border-l-4 border-red-500 pl-4">
-                    <div>
-                        <h3 class="font-medium text-white">${perf.venues?.venue_name || 'Unknown Venue'}</h3>
-                        <p class="text-gray-300">Date: ${new Date(perf.date).toLocaleDateString()}</p>
-                        <p class="text-gray-300">Time: ${formatTime(perf.start_time)} - ${formatTime(perf.end_time)}</p>
-                    </div>
-                </div>
-            `).join('');
-        } else {
-            rejectedList.innerHTML = '<p class="text-center text-gray-400">No rejected performances</p>';
-        }
+        updatePerformancesUI(upcoming, pending, rejected);
 
     } catch (error) {
         console.error('Error loading performances:', error);
@@ -164,127 +210,99 @@ async function loadPerformances() {
     }
 }
 
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    
-    // Add ordinal suffix to day
-    const day = date.getDate();
-    const suffix = (day) => {
-        if (day > 3 && day < 21) return 'th';
-        switch (day % 10) {
-            case 1: return "st";
-            case 2: return "nd";
-            case 3: return "rd";
-            default: return "th";
-        }
-    };
-
-    return `${date.toLocaleDateString('en-GB', { weekday: 'long' })} ${day}${suffix(day)} ${date.toLocaleDateString('en-GB', { month: 'long' })}`;
-}
-
-function calculateDuration(startTime, endTime) {
-    // Convert times to minutes for easier calculation
-    const [startHours, startMinutes] = startTime.split(':').map(Number);
-    const [endHours, endMinutes] = endTime.split(':').map(Number);
-    
-    // Convert to total minutes
-    const startTotalMinutes = (startHours * 60) + startMinutes;
-    const endTotalMinutes = (endHours * 60) + endMinutes;
-    
-    // Get difference in hours (rounded to nearest 0.5)
-    const durationHours = (endTotalMinutes - startTotalMinutes) / 60;
-    return durationHours;
-}
-
-function renderAvailabilityItem(slot) {
-    const duration = calculateDuration(slot.start_time, slot.end_time);
-    const totalCost = duration * slot.rate_per_hour;
-
-    const div = document.createElement('div');
-    div.className = 'border-l-4 border-blue-500 pl-4 flex justify-between items-center';
-    div.dataset.availabilityId = slot.id;
-
-    div.innerHTML = `
-        <div>
-            <p class="font-semibold text-white">${formatDate(slot.date)}</p>
-            <p class="text-gray-300">${formatTime(slot.start_time)} - ${formatTime(slot.end_time)}</p>
-            <div class="flex space-x-2 text-sm text-gray-400">
-                <p>Rate: £${slot.rate_per_hour}/hr</p>
-                <span>•</span>
-                <p>Total: £${totalCost.toFixed(2)}</p>
-            </div>
-        </div>
-        <button 
-            class="text-red-400 hover:text-red-300 transition-colors duration-200"
-            onclick="deleteAvailability('${slot.id}')"
-        >
-            Delete
-        </button>
-    `;
-
-    return div;
-}
-
-
-async function loadPendingBookings() {
-    try {
-        const { data: pendingBookings, error } = await supabase
-            .from('performances')
-            .select(`
-                *,
-                venues (
-                    venue_name,
-                    id
-                )
-            `)
-            .eq('performer_id', window.user.id)
-            .eq('status', 'pending')
-            .gte('date', new Date().toISOString().split('T')[0])
-            .order('date');
-
-        if (error) throw error;
-
-        const pendingList = document.getElementById('pendingBookingsList');
-        
-        if (pendingBookings && pendingBookings.length > 0) {
-            pendingList.innerHTML = pendingBookings.map(booking => `
-                <div class="border-l-4 border-yellow-500 pl-4 py-3">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h3 class="font-medium text-white">${booking.venues.venue_name}</h3>
-                            <p class="text-gray-300">Date: ${new Date(booking.date).toLocaleDateString()}</p>
-                            <p class="text-gray-300">Time: ${formatTime(booking.start_time)} - ${formatTime(booking.end_time)}</p>
-                            <p class="text-gray-300">Rate: £${booking.booking_rate}/hr</p>
-                        </div>
-                        <div class="flex space-x-2">
-                            <button 
-                                onclick="handleBookingResponse('${booking.id}', 'confirmed')"
-                                class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 text-sm transition-colors duration-200">
-                                Accept
-                            </button>
-                            <button 
-                                onclick="handleBookingResponse('${booking.id}', 'rejected')"
-                                class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm transition-colors duration-200">
-                                Decline
-                            </button>
+function updatePerformancesUI(upcoming, pending, rejected) {
+    // Update Upcoming Performances
+    const upcomingList = document.getElementById('upcomingPerformancesList');
+    if (upcoming.length > 0) {
+        upcomingList.innerHTML = upcoming.map(perf => `
+            <div class="border-l-4 border-green-500 pl-4">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="font-medium text-white">${perf.venues?.venue_name || 'Unknown Venue'}</h3>
+                        <p class="text-gray-300">${formatDate(perf.date)}</p>
+                        <p class="text-gray-300">${formatTime(perf.start_time)} - ${formatTime(perf.end_time)}</p>
+                        <div class="flex space-x-2 text-sm text-gray-400">
+                            <p>Rate: £${perf.booking_rate}/hr</p>
+                            <span>•</span>
+                            <p>Total: £${calculatePerformanceTotal(perf)}</p>
                         </div>
                     </div>
+                    <button 
+                        onclick="cancelPerformance('${perf.id}')"
+                        class="text-red-400 hover:text-red-300 transition-colors duration-200"
+                    >
+                        Cancel Performance
+                    </button>
                 </div>
-            `).join('');
-        } else {
-            pendingList.innerHTML = `
-                <div class="text-center text-gray-400">
-                    No pending booking requests
+            </div>
+        `).join('');
+    } else {
+        upcomingList.innerHTML = '<p class="text-center text-gray-400">No upcoming performances</p>';
+    }
+
+    // Update Pending Performances
+    const pendingList = document.getElementById('pendingPerformancesList');
+    if (pending.length > 0) {
+        pendingList.innerHTML = pending.map(perf => `
+            <div class="border-l-4 border-yellow-500 pl-4">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="font-medium text-white">${perf.venues?.venue_name || 'Unknown Venue'}</h3>
+                        <p class="text-gray-300">${formatDate(perf.date)}</p>
+                        <p class="text-gray-300">${formatTime(perf.start_time)} - ${formatTime(perf.end_time)}</p>
+                        <div class="flex space-x-2 text-sm text-gray-400">
+                            <p>Rate: £${perf.booking_rate}/hr</p>
+                            <span>•</span>
+                            <p>Total: £${calculatePerformanceTotal(perf)}</p>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button 
+                            onclick="handleBookingResponse('${perf.id}', 'confirmed')"
+                            class="px-4 py-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 text-sm transition-colors duration-200">
+                            Accept
+                        </button>
+                        <button 
+                            onclick="handleBookingResponse('${perf.id}', 'rejected')"
+                            class="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 text-sm transition-colors duration-200">
+                            Decline
+                        </button>
+                    </div>
                 </div>
-            `;
-        }
-    } catch (error) {
-        console.error('Error loading pending bookings:', error);
-        showToast('Error loading pending bookings', 'error');
+            </div>
+        `).join('');
+    } else {
+        pendingList.innerHTML = '<p class="text-center text-gray-400">No pending requests</p>';
+    }
+
+    // Update Rejected Performances
+    const rejectedList = document.getElementById('rejectedPerformancesList');
+    if (rejected.length > 0) {
+        rejectedList.innerHTML = rejected.map(perf => `
+            <div class="border-l-4 border-red-500 pl-4">
+                <div>
+                    <h3 class="font-medium text-white">${perf.venues?.venue_name || 'Unknown Venue'}</h3>
+                    <p class="text-gray-300">${formatDate(perf.date)}</p>
+                    <p class="text-gray-300">${formatTime(perf.start_time)} - ${formatTime(perf.end_time)}</p>
+                    <div class="flex space-x-2 text-sm text-gray-400">
+                        <p>Rate: £${perf.booking_rate}/hr</p>
+                        <span>•</span>
+                        <p>Total: £${calculatePerformanceTotal(perf)}</p>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    } else {
+        rejectedList.innerHTML = '<p class="text-center text-gray-400">No rejected performances</p>';
     }
 }
 
-// Update the handleBookingResponse function to handle availability
+function calculatePerformanceTotal(performance) {
+    const duration = calculateDuration(performance.start_time, performance.end_time);
+    return (duration * performance.booking_rate).toFixed(2);
+}
+
+// Booking Response Functions
 window.handleBookingResponse = async function(bookingId, status) {
     try {
         const { data: booking, error: fetchError } = await supabase
@@ -315,135 +333,14 @@ window.handleBookingResponse = async function(bookingId, status) {
 
         if (updateError) throw updateError;
 
-        // Refresh all data
-        await Promise.all([
-            loadPerformances(),
-            loadAvailability()
-        ]);
-
+        // Refresh data
+        await refreshPerformanceData();
         showToast(`Booking ${status === 'confirmed' ? 'accepted' : 'declined'} successfully`);
     } catch (error) {
         console.error('Error handling booking response:', error);
         showToast('Error updating booking status', 'error');
     }
 };
-
-async function loadDashboardData() {
-    try {
-        const { data: performances, error } = await supabase
-            .from('performances')
-            .select(`
-                *,
-                venues (
-                    venue_name,
-                    id
-                )
-            `)
-            .eq('performer_id', window.user.id)
-            .gte('date', new Date().toISOString().split('T')[0])
-            .order('date');
-
-        if (error) throw error;
-
-        document.getElementById('upcomingGigs').textContent = performances?.length || 0;
-
-        const performancesList = document.getElementById('performancesList');
-        
-        if (performances && performances.length > 0) {
-            performancesList.innerHTML = performances.map(perf => `
-                <div class="border-l-4 ${
-                    perf.status === 'confirmed' ? 'border-green-500' : 'border-blue-500'
-                } pl-4">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h3 class="font-medium text-white">${perf.venues?.venue_name || 'Unknown Venue'}</h3>
-                            <p class="text-gray-300">Date: ${new Date(perf.date).toLocaleDateString()}</p>
-                            <p class="text-gray-300">Time: ${formatTime(perf.start_time)} - ${formatTime(perf.end_time)}</p>
-                            <p class="text-sm text-gray-400">Status: ${perf.status}</p>
-                        </div>
-                        ${perf.status === 'confirmed' ? `
-                            <button 
-                                onclick="cancelPerformance('${perf.id}')"
-                                class="text-red-400 hover:text-red-300 transition-colors duration-200"
-                            >
-                                Cancel Performance
-                            </button>
-                        ` : ''}
-                    </div>
-                </div>
-            `).join('');
-        } else {
-            performancesList.innerHTML = '<p class="text-center text-gray-400">No upcoming performances</p>';
-        }
-
-        // Load past performances and calculate stats
-        const { data: pastPerfs, error: pastError } = await supabase
-            .from('performances')
-            .select(`
-                *,
-                ratings (
-                    rating_value,
-                    comment
-                ),
-                tips (
-                    amount
-                )
-            `)
-            .eq('performer_id', window.user.id)
-            .lt('date', new Date().toISOString().split('T')[0])
-            .order('date', { ascending: false });
-
-        if (pastError) throw pastError;
-
-        let totalRating = 0;
-        let ratingCount = 0;
-        let totalTips = 0;
-
-        pastPerfs?.forEach(perf => {
-            perf.ratings?.forEach(rating => {
-                totalRating += rating.rating_value;
-                ratingCount++;
-            });
-            perf.tips?.forEach(tip => {
-                totalTips += tip.amount;
-            });
-        });
-
-        document.getElementById('averageRating').textContent = 
-            ratingCount > 0 ? (totalRating / ratingCount).toFixed(1) : '--';
-        document.getElementById('totalTips').textContent = `£${totalTips.toFixed(2)}`;
-
-        const pastPerfList = document.getElementById('pastPerformancesList');
-        if (pastPerfs && pastPerfs.length > 0) {
-            pastPerfList.innerHTML = pastPerfs.map(perf => `
-                <div class="border-l-4 border-gray-500 pl-4">
-                    <h3 class="font-medium text-white">${new Date(perf.date).toLocaleDateString()} - ${perf.venue_name}</h3>
-                    ${perf.ratings && perf.ratings.length > 0 ? `
-                        <div class="mt-2">
-                            <p class="text-sm font-medium text-gray-300">Reviews:</p>
-                            ${perf.ratings.map(rating => `
-                                <div class="mt-1">
-                                    <p class="text-sm text-gray-300">Rating: ${rating.rating_value}/5</p>
-                                    ${rating.comment ? `<p class="text-sm text-gray-400">"${rating.comment}"</p>` : ''}
-                                </div>
-                            `).join('')}
-                        </div>
-                    ` : ''}
-                    ${perf.tips && perf.tips.length > 0 ? `
-                        <p class="text-sm text-green-400 mt-2">
-                            Tips received: £${perf.tips.reduce((sum, tip) => sum + tip.amount, 0).toFixed(2)}
-                        </p>
-                    ` : ''}
-                </div>
-            `).join('');
-        } else {
-            pastPerfList.innerHTML = '<p class="text-center text-gray-400">No past performances</p>';
-        }
-    } catch (error) {
-        console.error('Error loading dashboard:', error);
-        showToast('Error loading dashboard data', 'error');
-    }
-}
 
 window.cancelPerformance = async function(performanceId) {
     try {
@@ -480,12 +377,8 @@ window.cancelPerformance = async function(performanceId) {
 
         if (availError) throw availError;
 
-        // Refresh all data
-        await Promise.all([
-            loadPerformances(),
-            loadAvailability()
-        ]);
-
+        // Refresh data
+        await refreshPerformanceData();
         showToast('Performance cancelled successfully');
     } catch (error) {
         console.error('Error cancelling performance:', error);
@@ -493,7 +386,77 @@ window.cancelPerformance = async function(performanceId) {
     }
 };
 
-// Modal functions
+async function refreshPerformanceData() {
+    await Promise.all([
+        loadPerformances(),
+        loadAvailability()
+    ]);
+}
+
+// Availability Management Functions
+async function loadAvailability() {
+    try {
+        const { data: availability, error } = await supabase
+            .from('performer_availability')
+            .select('*')
+            .eq('performer_id', window.user.id)
+            .gte('date', new Date().toISOString().split('T')[0])
+            .order('date');
+
+        if (error) throw error;
+
+        updateAvailabilityUI(availability);
+    } catch (error) {
+        console.error('Error loading availability:', error);
+        showToast('Error loading availability', 'error');
+    }
+}
+
+function updateAvailabilityUI(availability) {
+    const availabilityList = document.getElementById('availabilityList');
+    
+    if (availability && availability.length > 0) {
+        availabilityList.innerHTML = '';
+        availability.forEach(slot => {
+            availabilityList.appendChild(renderAvailabilityItem(slot));
+        });
+    } else {
+        availabilityList.innerHTML = '<p class="text-center text-gray-400">No availability set</p>';
+    }
+}
+
+function renderAvailabilityItem(slot) {
+    const duration = calculateDuration(slot.start_time, slot.end_time);
+    const totalCost = duration * slot.rate_per_hour;
+
+    const div = document.createElement('div');
+    div.className = 'border-l-4 border-blue-500 pl-4 flex justify-between items-center';
+    div.dataset.availabilityId = slot.id;
+
+    div.innerHTML = `
+        <div>
+            <p class="font-semibold text-white">${formatDate(slot.date)}</p>
+            <p class="text-gray-300">${formatTime(slot.start_time)} - ${formatTime(slot.end_time)}</p>
+            <div class="flex space-x-2 text-sm text-gray-400">
+                <p>Rate: £${slot.rate_per_hour}/hr</p>
+                <span>•</span>
+                <p>Total: £${totalCost.toFixed(2)}</p>
+            </div>
+        </div>
+        <button 
+            class="text-red-400 hover:text-red-300 transition-colors duration-200"
+            onclick="deleteAvailability('${slot.id}')"
+        >
+            Delete
+        </button>
+    `;
+
+    return div;
+}
+
+// Modal Management Functions
+let availabilityToDelete = null;
+
 window.openAvailabilityModal = function() {
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('availabilityDate').min = today;
@@ -505,44 +468,22 @@ window.closeAvailabilityModal = function() {
     document.getElementById('availabilityForm').reset();
 };
 
+function openConfirmationModal(id) {
+    availabilityToDelete = id;
+    document.getElementById('confirmationModal').classList.remove('hidden');
+}
+
+function closeConfirmationModal() {
+    availabilityToDelete = null;
+    document.getElementById('confirmationModal').classList.add('hidden');
+}
+
+// Availability Delete Functions
 window.deleteAvailability = async function(id) {
-    if (confirm('Are you sure you want to delete this availability?')) {
-        try {
-            // Delete the availability
-            const { error } = await supabase
-                .from('performer_availability')
-                .delete()
-                .eq('id', id);
-
-            if (error) throw error;
-
-            // Instead of reloading data, directly remove the element from the UI
-            const availabilityElement = document.querySelector(`[data-availability-id="${id}"]`);
-            if (availabilityElement) {
-                availabilityElement.remove();
-            }
-
-            // Update empty state if no more availabilities
-            const availabilityList = document.getElementById('availabilityList');
-            if (availabilityList.children.length === 0) {
-                availabilityList.innerHTML = '<p class="text-center text-gray-400">No availability set</p>';
-            }
-
-            showToast('Availability deleted successfully');
-        } catch (error) {
-            console.error('Error deleting availability:', error);
-            showToast('Error deleting availability', 'error');
-        }
-    }
+    openConfirmationModal(id);
 };
 
-// Logout function
-window.logout = function() {
-    sessionStorage.removeItem('user');
-    window.location.href = 'login';
-};
-
-// Form submission handler
+// Form Handlers
 document.getElementById('availabilityForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -570,51 +511,18 @@ document.getElementById('availabilityForm').addEventListener('submit', async (e)
     }
 });
 
-// Initialize dashboard data
-async function initializeDashboard() {
-    try {
-        await Promise.all([
-            loadPerformances(),
-            loadAvailability()
-        ]);
-    } catch (error) {
-        console.error('Error initializing dashboard:', error);
-        showToast('Error loading dashboard', 'error');
-    }
-}
-
-// Add these functions for modal handling
-let availabilityToDelete = null;
-
-function openConfirmationModal(id) {
-    availabilityToDelete = id;
-    document.getElementById('confirmationModal').classList.remove('hidden');
-}
-
-function closeConfirmationModal() {
-    availabilityToDelete = null;
-    document.getElementById('confirmationModal').classList.add('hidden');
-}
-
-// Update the delete function
-window.deleteAvailability = async function(id) {
-    openConfirmationModal(id);
-};
-
-// Add event listener for confirmation
+// Confirmation Modal Handler
 document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
     if (!availabilityToDelete) return;
     
     try {
-        const id = availabilityToDelete;
         const { error } = await supabase
             .from('performer_availability')
             .delete()
-            .eq('id', id);
+            .eq('id', availabilityToDelete);
 
         if (error) throw error;
 
-        // Reload availability data
         await loadAvailability();
         closeConfirmationModal();
         showToast('Availability deleted successfully');
@@ -624,12 +532,58 @@ document.getElementById('confirmDeleteBtn').addEventListener('click', async () =
     }
 });
 
-// Form submission handler
-document.getElementById('availabilityForm').addEventListener('submit', async (e) => {
-    // ... rest of your code ...
+// Navigation Event Listeners
+document.addEventListener('DOMContentLoaded', function() {
+    // Set up navigation
+    const currentTab = window.location.hash.slice(1) || 'dashboard';
+    setActiveTab(currentTab);
+
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', () => {
+            const tabId = link.getAttribute('data-tab');
+            setActiveTab(tabId);
+            
+            // Handle mobile menu
+            if (window.innerWidth < 1024) {
+                document.getElementById('sidebar').classList.add('-translate-x-full');
+            }
+        });
+    });
+
+    // Mobile menu handlers
+    document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('-translate-x-full');
+    });
+
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', (e) => {
+        const sidebar = document.getElementById('sidebar');
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        
+        if (window.innerWidth < 1024 && 
+            !sidebar.contains(e.target) && 
+            !mobileMenuBtn.contains(e.target) && 
+            !sidebar.classList.contains('-translate-x-full')) {
+            sidebar.classList.add('-translate-x-full');
+        }
+    });
 });
 
-// Load initial data
+// Initialize Dashboard
+async function initializeDashboard() {
+    try {
+        await Promise.all([
+            loadDashboardData(),
+            loadPerformances(),
+            loadAvailability()
+        ]);
+    } catch (error) {
+        console.error('Error initializing dashboard:', error);
+        showToast('Error loading dashboard', 'error');
+    }
+}
+
+// Start the application
 initializeDashboard();
 
 // Refresh data every minute
