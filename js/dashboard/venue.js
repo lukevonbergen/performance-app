@@ -10,8 +10,16 @@ if (!window.user || window.user.type !== 'venue') {
     window.location.href = 'login';
 }
 
+// Near the top of your venue.js where you get user data
+window.user = JSON.parse(sessionStorage.getItem('user'));
+if (!window.user || window.user.type !== 'venue') {
+    window.location.href = 'login';
+}
+
 // Display user info
 document.getElementById('venueName').textContent = window.user.venue_name;
+// Add this line to update the welcome message
+document.getElementById('welcomeMessage').textContent = `Welcome back, ${window.user.first_name}`;
 
 // Set minimum date to today
 document.getElementById('searchDate').min = new Date().toISOString().split('T')[0];
