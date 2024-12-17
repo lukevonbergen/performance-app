@@ -627,10 +627,14 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Mobile menu handlers
+    // Mobile menu toggle
+if (document.getElementById('mobileMenuBtn')) {
     document.getElementById('mobileMenuBtn').addEventListener('click', () => {
-        document.getElementById('sidebar').classList.toggle('-translate-x-full');
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('-translate-x-full');
     });
+}
+    
 
     document.addEventListener('click', (e) => {
         const sidebar = document.getElementById('sidebar');
