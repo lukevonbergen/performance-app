@@ -364,12 +364,21 @@ function updateReportsSummary(stats) {
     document.getElementById('confirmationRate').textContent = `${stats.confirmationRate.toFixed(1)}%`;
 }
 
+let earningsChartInstance = null; // Declare a global variable to track the chart instance
+
 function createEarningsChart(monthlyEarnings) {
     const ctx = document.getElementById('earningsChart');
+
+    // Check if an existing chart instance exists and destroy it
+    if (earningsChartInstance) {
+        earningsChartInstance.destroy();
+    }
+
     const months = Object.keys(monthlyEarnings);
     const earnings = Object.values(monthlyEarnings);
 
-    new Chart(ctx, {
+    // Create a new chart instance and assign it to the global variable
+    earningsChartInstance = new Chart(ctx, {
         type: 'line',
         data: {
             labels: months,
@@ -413,6 +422,7 @@ function createEarningsChart(monthlyEarnings) {
         }
     });
 }
+
 
 function createTimesChart(timeStats) {
     const ctx = document.getElementById('timesChart');
