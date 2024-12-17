@@ -1,4 +1,5 @@
 import { supabase } from '../utils/supabase.js';
+import Chart from 'chart.js/auto';
 // Rest of your JavaScript code
     
 // Make supabase globally available
@@ -70,6 +71,185 @@ function formatDate(dateString) {
     };
 
     return `${date.toLocaleDateString('en-GB', { weekday: 'long' })} ${day}${suffix(day)} ${date.toLocaleDateString('en-GB', { month: 'long' })}`;
+}
+
+// Add these new functions to your venue.js
+async function loadReportsData() {
+    try {
+        // Get all performances for this venue
+        const { data: performances, error } = await supabase
+            .from('performances')
+            .select(`
+                *,
+                performers (
+                    stage_name
+                )
+            `)
+            .eq('venue_id', window.user.id);
+
+        if (error) throw error;
+
+        // Process the data
+        let totalRevenue = 0;
+        let confirmedCount = 0;
+        const monthlyRevenue = {};
+        const performerStats = {};
+        const timeStats = {};
+
+        performances.forEach(booking => {
+            // Calculate booking revenue
+            const hours = (new Date(`2000/01/01 ${booking.end_time}`) - new Date(`2000/01/01 ${booking.start_time}`)) / 3600000;
+            const revenue = hours * booking.booking_rate;
+
+            // Update totals
+            totalRevenue += revenue;
+            if (booking.status === 'confirmed') confirmedCount++;
+
+            // Monthly revenue
+            const month = new Date(booking.date).toLocaleString('default', { month: 'short' });
+            monthlyRevenue[month] = (monthlyRevenue[month] || 0) + revenue;
+
+            // Performer stats
+            const performerName = booking.performers.stage_name;
+            if (!performerStats[performerName]) {
+                performerStats[performerName] = { bookings: 0, revenue: 0 };
+            }
+            performerStats[performerName].bookings++;
+            performerStats[performerName].revenue += revenue;
+
+            // Time stats
+            const hour = booking.start_time.split(':')[0];
+            timeStats[hour] = (timeStats[hour] || 0) + 1;
+        });
+
+        // Update summary stats
+        document.getElementById('totalRevenue').textContent = `£${totalRevenue.toFixed(2)}`;
+        document.getElementById('totalBookings').textContent = performances.length;
+        document.getElementById('confirmedBookings').textContent = confirmedCount;
+        document.getElementById('confirmationRate').textContent = 
+            `${((confirmedCount / performances.length) * 100).toFixed(1)}%`;
+
+        // Create charts
+        createRevenueChart(monthlyRevenue);
+        createTimesChart(timeStats);
+        updateTopPerformersTable(performerStats);
+
+    } catch (error) {
+        console.error('Error loading reports data:', error);
+    }
+}
+
+function createRevenueChart(monthlyRevenue) {
+    const ctx = document.getElementById('revenueChart');
+    const months = Object.keys(monthlyRevenue);
+    const revenues = Object.values(monthlyRevenue);
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: months,
+            datasets: [{
+                label: 'Revenue',
+                data: revenues,
+                borderColor: '#8B5CF6',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    }
+                }
+            }
+        }
+    });
+}
+
+function createTimesChart(timeStats) {
+    const ctx = document.getElementById('timesChart');
+    const hours = Object.keys(timeStats).sort();
+    const counts = hours.map(hour => timeStats[hour]);
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: hours.map(hour => `${hour}:00`),
+            datasets: [{
+                label: 'Bookings',
+                data: counts,
+                backgroundColor: '#10B981'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    }
+                }
+            }
+        }
+    });
+}
+
+function updateTopPerformersTable(performerStats) {
+    const tableBody = document.getElementById('topPerformersTable');
+    const performers = Object.entries(performerStats)
+        .sort((a, b) => b[1].bookings - a[1].bookings)
+        .slice(0, 5);
+
+    tableBody.innerHTML = performers.map(([name, stats]) => `
+        <tr class="border-t border-white/10">
+            <td class="py-4">${name}</td>
+            <td class="py-4">${stats.bookings}</td>
+            <td class="py-4">£${stats.revenue.toFixed(2)}</td>
+            <td class="py-4">9.2</td>
+        </tr>
+    `).join('');
 }
 
 
@@ -438,6 +618,11 @@ document.querySelectorAll('.nav-link').forEach(link => {
             content.classList.add('hidden');
         });
         document.getElementById(`${tabId}-tab`).classList.remove('hidden');
+
+        // Load reports data if reports tab is clicked
+        if (tabId === 'reports') {
+            loadReportsData();
+        }
 
         // Close mobile menu if open
         if (window.innerWidth < 1024) {
