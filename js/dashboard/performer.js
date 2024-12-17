@@ -298,7 +298,6 @@ async function loadReportsData() {
         updateReportsSummary(stats);
         createEarningsChart(stats.monthlyEarnings);
         createTimesChart(stats.timeStats);
-        updateVenuePerformanceTable(stats.venueStats);
         updatePerformanceHistoryTable(performances);
 
     } catch (error) {
