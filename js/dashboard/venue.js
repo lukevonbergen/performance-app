@@ -661,6 +661,15 @@ document.querySelectorAll('.nav-link').forEach(link => {
         });
         link.classList.add('bg-white/10');
 
+        link.addEventListener('click', () => {
+            // Remove active class from all links
+            document.querySelectorAll('.nav-link').forEach(el => {
+                el.classList.remove('active');
+            });
+            // Add active class to clicked link
+            link.classList.add('active');
+        });
+
         // Show correct content
         const tabId = link.getAttribute('data-tab');
         document.querySelectorAll('.tab-content').forEach(content => {
