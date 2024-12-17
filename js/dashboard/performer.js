@@ -713,14 +713,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const currentTab = window.location.hash.slice(1) || 'dashboard';
     setActiveTab(currentTab);
 
-    if (tabId === 'reports') {
-        loadReportsData();
-    }
-
     document.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', () => {
             const tabId = link.getAttribute('data-tab');
             setActiveTab(tabId);
+
+            // Load reports data if reports tab is clicked
+            if (tabId === 'reports') {
+                loadReportsData();
+            }
             
             // Handle mobile menu
             if (window.innerWidth < 1024) {
