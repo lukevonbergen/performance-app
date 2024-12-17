@@ -20,10 +20,12 @@
     <!-- Sidebar Navigation -->
     <aside id="sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full lg:translate-x-0">
         <div class="h-full px-3 py-4 overflow-y-auto bg-black/20 backdrop-blur-lg border-r border-white/10">
-            <!-- Logo -->
-            <div class="flex items-center mb-8 px-2">
-                <img src="/img/logo_v1.svg" alt="StageLink Logo" class="h-12 w-auto">
-            </div>
+        <!-- Logo -->
+        <div class="flex items-center mb-8 px-2 lg:px-2">
+            <img src="/img/logo_v1.svg" alt="StageLink Logo" class="h-12 w-auto hidden lg:block">
+            <!-- Mobile Logo (positioned to the right of hamburger) -->
+            <img src="/img/logo_v1.svg" alt="StageLink Logo" class="h-12 w-auto fixed top-2 left-16 lg:hidden">
+        </div>
             
             <!-- Navigation Links -->
             <ul class="space-y-2">
