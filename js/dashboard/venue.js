@@ -1,5 +1,4 @@
 import { supabase } from '../utils/supabase.js';
-import Chart from 'chart.js/auto';
 // Rest of your JavaScript code
     
 // Make supabase globally available
