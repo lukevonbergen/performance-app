@@ -89,20 +89,22 @@ async function loadReportsData() {
         if (error) throw error;
 
         // Process the data
-        let totalRevenue = 0;
+        let totalConfirmedCost = 0;
         let confirmedCount = 0;
         const monthlyRevenue = {};
         const performerStats = {};
         const timeStats = {};
 
         performances.forEach(booking => {
-            // Calculate booking revenue
+            // Calculate booking cost
             const hours = (new Date(`2000/01/01 ${booking.end_time}`) - new Date(`2000/01/01 ${booking.start_time}`)) / 3600000;
-            const revenue = hours * booking.booking_rate;
+            const cost = hours * booking.booking_rate;
 
-            // Update totals
-            totalRevenue += revenue;
-            if (booking.status === 'confirmed') confirmedCount++;
+            // Only add to total if booking is confirmed
+            if (booking.status === 'confirmed') {
+                totalConfirmedCost += cost;
+                confirmedCount++;
+            }
 
             // Monthly revenue
             const month = new Date(booking.date).toLocaleString('default', { month: 'short' });
@@ -122,7 +124,7 @@ async function loadReportsData() {
         });
 
         // Update summary stats
-        document.getElementById('totalRevenue').textContent = `£${totalRevenue.toFixed(2)}`;
+        document.getElementById('reportsTotalCost').textContent = `£${totalConfirmedCost.toFixed(2)}`;
         document.getElementById('totalBookings').textContent = performances.length;
         document.getElementById('confirmedBookings').textContent = confirmedCount;
         document.getElementById('confirmationRate').textContent = 
@@ -133,7 +135,7 @@ async function loadReportsData() {
         createTimesChart(timeStats);
         updateTopPerformersTable(performerStats);
 
-    } catch (error) {
+   } catch (error) {
         console.error('Error loading reports data:', error);
     }
 }
