@@ -70,25 +70,22 @@
     </aside>
 
     <!-- Main Content Area -->
-    <div class="lg:ml-64 p-4">
-        <!-- Content sections -->
-        <div id="dashboard-tab" class="tab-content">
-            <!-- Main Content -->
-            <main class="max-w-7xl mx-auto py-20 px-4 sm:px-6 lg:px-8">
-               <!-- Welcome Banner -->
-                <div class="glass-card rounded-xl p-6 mb-8 border border-white/10">
+    <div class="lg:ml-64 min-h-screen">
+        <!-- Wrapper for all tab content with consistent padding -->
+        <div class="p-4 pt-16 lg:pt-4">
+            <!-- Dashboard Tab -->
+            <div id="dashboard-tab" class="tab-content space-y-8">
+                <!-- Welcome Banner -->
+                <div class="glass-card rounded-xl p-6 border border-white/10">
                     <div class="flex items-center space-x-1">
-                        <h2 class="text-2xl font-bold text-white mb-2" id="welcomeMessage">
-                            Loading...
-                        </h2>
+                        <h2 class="text-2xl font-bold text-white" id="welcomeMessage">Loading...</h2>
                         <img src="/img/wave.svg" alt="" class="h-10 w-auto transform -translate-y-1/4">
                     </div>
                     <p class="text-gray-300 mt-4">Here's what's happening at your venue today</p>
                 </div>
 
-
                 <!-- Stats Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <!-- Tonight's Acts -->
                     <div class="glass-card rounded-xl p-6 border border-white/10">
                         <div class="flex items-center">
@@ -114,12 +111,12 @@
                             </div>
                             <div class="ml-5">
                                 <p class="text-sm font-medium text-gray-300">Performer Score</p>
-                                <p class="text-3xl font-bold text-white mt-1" id="">9.2</p>
+                                <p class="text-3xl font-bold text-white mt-1">9.2</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Total Tips -->
+                    <!-- Total Cost -->
                     <div class="glass-card rounded-xl p-6 border border-white/10">
                         <div class="flex items-center">
                             <div class="p-3 rounded-full bg-blue-500/10 border border-blue-500/20">
@@ -135,42 +132,37 @@
                     </div>
                 </div>
 
-                <!-- Three Column Layout -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <!-- Calendar and Events (Left and Middle) -->
-                    <div class="lg:col-span-3 space-y-8">
-                        <!-- Upcoming Events Section -->
-                        <div class="glass-card rounded-xl border border-white/10">
-                            <div class="px-6 py-4 border-b border-white/10">
-                                <h2 class="text-lg font-semibold text-white">Upcoming Events</h2>
-                            </div>
-                            <div class="p-6">
-                                <div id="upcomingEventsList" class="space-y-4">
-                                    <!-- Events will be loaded here -->
-                                </div>
+                <!-- Events Sections -->
+                <div class="space-y-8">
+                    <!-- Upcoming Events -->
+                    <div class="glass-card rounded-xl border border-white/10">
+                        <div class="px-6 py-4 border-b border-white/10">
+                            <h2 class="text-lg font-semibold text-white">Upcoming Events</h2>
+                        </div>
+                        <div class="p-6">
+                            <div id="upcomingEventsList" class="space-y-4">
+                                <!-- Events will be loaded here -->
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Tonight's Schedule -->
-                        <div class="glass-card rounded-xl border border-white/10">
-                            <div class="px-6 py-4 border-b border-white/10">
-                                <h2 class="text-lg font-semibold text-white">Tonight's Schedule</h2>
-                            </div>
-                            <div class="p-6">
-                                <div id="scheduleList" class="space-y-4">
-                                    <!-- Performances will be loaded here -->
-                                </div>
+                    <!-- Tonight's Schedule -->
+                    <div class="glass-card rounded-xl border border-white/10">
+                        <div class="px-6 py-4 border-b border-white/10">
+                            <h2 class="text-lg font-semibold text-white">Tonight's Schedule</h2>
+                        </div>
+                        <div class="p-6">
+                            <div id="scheduleList" class="space-y-4">
+                                <!-- Performances will be loaded here -->
                             </div>
                         </div>
                     </div>
                 </div>
-            </main>
-        </div>
+            </div>
 
-        <div id="book-tab" class="tab-content hidden">
-            <!-- Enhanced booking interface -->
-            <div class="max-w-4xl mx-auto">
-                <div class="glass-card rounded-xl border border-white/10 mb-8">
+            <!-- Book Tab -->
+            <div id="book-tab" class="tab-content hidden space-y-8">
+                <div class="glass-card rounded-xl border border-white/10">
                     <div class="px-6 py-4 border-b border-white/10">
                         <h2 class="text-xl font-semibold text-white">Book a Performer</h2>
                     </div>
@@ -200,122 +192,120 @@
                     <!-- Results will be populated here -->
                 </div>
             </div>
-        </div>
 
-       <div id="reports-tab" class="tab-content hidden">
-        <div class="p-4 space-y-6">
-            <!-- Summary Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div class="glass-card rounded-xl p-6 border border-white/10">
-                    <div class="flex items-center">
-                        <div class="p-3 rounded-full bg-green-500/10 border border-green-500/20">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+            <!-- Reports Tab -->
+            <div id="reports-tab" class="tab-content hidden space-y-8">
+                <!-- Summary Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="glass-card rounded-xl p-6 border border-white/10">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-green-500/10 border border-green-500/20">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div class="ml-5">
+                                <p class="text-sm font-medium text-gray-300">Total Cost (Confirmed)</p>
+                                <p class="text-3xl font-bold text-white mt-1" id="reportsTotalCost">£--</p>
+                            </div>
                         </div>
-                        <div class="ml-5">
-                            <p class="text-sm font-medium text-gray-300">Total Cost (Confirmed)</p>
-                            <p class="text-3xl font-bold text-white mt-1" id="reportsTotalCost">£--</p>
+                    </div>
+
+                    <div class="glass-card rounded-xl p-6 border border-white/10">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-blue-500/10 border border-blue-500/20">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <div class="ml-5">
+                                <p class="text-sm font-medium text-gray-300">Total Bookings</p>
+                                <p class="text-3xl font-bold text-white mt-1" id="totalBookings">--</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-card rounded-xl p-6 border border-white/10">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-purple-500/10 border border-purple-500/20">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div class="ml-5">
+                                <p class="text-sm font-medium text-gray-300">Confirmed Bookings</p>
+                                <p class="text-3xl font-bold text-white mt-1" id="confirmedBookings">--</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-card rounded-xl p-6 border border-white/10">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-yellow-500/10 border border-yellow-500/20">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                                </svg>
+                            </div>
+                            <div class="ml-5">
+                                <p class="text-sm font-medium text-gray-300">Confirmation Rate</p>
+                                <p class="text-3xl font-bold text-white mt-1" id="confirmationRate">--%</p>
+                            </div>
                         </div>
                     </div>
                 </div>
-    
-                <div class="glass-card rounded-xl p-6 border border-white/10">
-                    <div class="flex items-center">
-                        <div class="p-3 rounded-full bg-blue-500/10 border border-blue-500/20">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
+
+                <!-- Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Monthly Cost -->
+                    <div class="glass-card rounded-xl border border-white/10">
+                        <div class="px-6 py-4 border-b border-white/10">
+                            <h2 class="text-lg font-semibold text-white">Monthly Cost</h2>
                         </div>
-                        <div class="ml-5">
-                            <p class="text-sm font-medium text-gray-300">Total Bookings</p>
-                            <p class="text-3xl font-bold text-white mt-1" id="totalBookings">--</p>
+                        <div class="p-6">
+                            <canvas id="revenueChart" class="w-full h-64"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Popular Times -->
+                    <div class="glass-card rounded-xl border border-white/10">
+                        <div class="px-6 py-4 border-b border-white/10">
+                            <h2 class="text-lg font-semibold text-white">Popular Performance Times</h2>
+                        </div>
+                        <div class="p-6">
+                            <canvas id="timesChart" class="w-full h-64"></canvas>
                         </div>
                     </div>
                 </div>
-    
-                <div class="glass-card rounded-xl p-6 border border-white/10">
-                    <div class="flex items-center">
-                        <div class="p-3 rounded-full bg-purple-500/10 border border-purple-500/20">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <div class="ml-5">
-                            <p class="text-sm font-medium text-gray-300">Confirmed Bookings</p>
-                            <p class="text-3xl font-bold text-white mt-1" id="confirmedBookings">--</p>
-                        </div>
-                    </div>
-                </div>
-    
-                <div class="glass-card rounded-xl p-6 border border-white/10">
-                    <div class="flex items-center">
-                        <div class="p-3 rounded-full bg-yellow-500/10 border border-yellow-500/20">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                            </svg>
-                        </div>
-                        <div class="ml-5">
-                            <p class="text-sm font-medium text-gray-300">Confirmation Rate</p>
-                            <p class="text-3xl font-bold text-white mt-1" id="confirmationRate">--%</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-    
-            <!-- Charts -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Monthly Revenue -->
+
+                <!-- Top Performers Table -->
                 <div class="glass-card rounded-xl border border-white/10">
                     <div class="px-6 py-4 border-b border-white/10">
-                        <h2 class="text-lg font-semibold text-white">Monthly Revenue</h2>
+                        <h2 class="text-lg font-semibold text-white">Top Performers</h2>
                     </div>
                     <div class="p-6">
-                        <canvas id="revenueChart" class="w-full h-64"></canvas>
-                    </div>
-                </div>
-    
-                <!-- Popular Times -->
-                <div class="glass-card rounded-xl border border-white/10">
-                    <div class="px-6 py-4 border-b border-white/10">
-                        <h2 class="text-lg font-semibold text-white">Popular Performance Times</h2>
-                    </div>
-                    <div class="p-6">
-                        <canvas id="timesChart" class="w-full h-64"></canvas>
-                    </div>
-                </div>
-            </div>
-    
-            <!-- Top Performers Table -->
-            <div class="glass-card rounded-xl border border-white/10">
-                <div class="px-6 py-4 border-b border-white/10">
-                    <h2 class="text-lg font-semibold text-white">Top Performers</h2>
-                </div>
-                <div class="p-6">
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead>
-                                <tr class="text-left text-sm text-gray-400">
-                                    <th class="pb-4">Performer</th>
-                                    <th class="pb-4">Total Bookings</th>
-                                    <th class="pb-4">Revenue Generated</th>
-                                    <th class="pb-4">Average Rating</th>
-                                </tr>
-                            </thead>
-                            <tbody id="topPerformersTable" class="text-white">
-                                <!-- Will be populated by JavaScript -->
-                            </tbody>
-                        </table>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="text-left text-sm text-gray-400">
+                                        <th class="pb-4">Performer</th>
+                                        <th class="pb-4">Total Bookings</th>
+                                        <th class="pb-4">Cost Generated</th>
+                                        <th class="pb-4">Average Rating</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="topPerformersTable" class="text-white">
+                                    <!-- Will be populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    </div>
 
-    <!-- Keep your existing modal -->
     <!-- Booking Modal -->
-    <div id="bookingModal" class="fixed inset-0 bg-black/50 hidden overflow-y-auto h-full w-full backdrop-blur-sm">
+    <div id="bookingModal" class="fixed inset-0 bg-black/50 hidden overflow-y-auto h-full w-full backdrop-blur-sm z-50">
         <div class="relative top-20 mx-auto p-6 border w-full max-w-md glass-card rounded-xl border-white/10">
             <h3 class="text-xl font-semibold text-white mb-4">Confirm Booking</h3>
             <div id="bookingDetails" class="mb-6 text-gray-300">
@@ -333,6 +323,7 @@
             </div>
         </div>
     </div>
+
     <!-- Scripts -->
     <script type="module" src="./js/dashboard/venue.js"></script>
 </body>
