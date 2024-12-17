@@ -7,6 +7,7 @@
     <link rel="icon" type="image/x-icon" href="./img/favicon/fav.ico">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-[#0A0A18] min-h-screen">
     <!-- Mobile Navigation Toggle -->
@@ -52,6 +53,14 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                             <span class="font-medium text-base">Availability</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button data-tab="reports" class="nav-link w-full flex items-center px-4 py-3 text-white/90 rounded-xl hover:bg-white/10">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span class="font-medium text-base">Reports</span>
                         </button>
                     </li>
                 </ul>
@@ -195,6 +204,119 @@
                     <div class="p-6">
                         <div id="availabilityList" class="space-y-4">
                             <!-- Availability will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Reports Tab -->
+            <div id="reports-tab" class="tab-content hidden space-y-8">
+                <!-- Summary Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Total Earnings -->
+                    <div class="glass-card rounded-xl p-6 border border-white/10">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-green-500/10 border border-green-500/20">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div class="ml-5">
+                                <p class="text-sm font-medium text-gray-300">Total Earnings</p>
+                                <p class="text-3xl font-bold text-white mt-1" id="totalEarnings">£--</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Total Performances -->
+                    <div class="glass-card rounded-xl p-6 border border-white/10">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-blue-500/10 border border-blue-500/20">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.318l-1.318 2.637L8.59 7.956l2.318 1.318L11.318 12l2.637-1.318L16.41 9.956l-2.318-1.318L13.682 6z" />
+                                </svg>
+                            </div>
+                            <div class="ml-5">
+                                <p class="text-sm font-medium text-gray-300">Total Performances</p>
+                                <p class="text-3xl font-bold text-white mt-1" id="totalPerformances">--</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Most Popular Venue -->
+                    <div class="glass-card rounded-xl p-6 border border-white/10">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-purple-500/10 border border-purple-500/20">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </div>
+                            <div class="ml-5">
+                                <p class="text-sm font-medium text-gray-300">Top Venue</p>
+                                <p class="text-3xl font-bold text-white mt-1" id="topVenue">--</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Confirmation Rate -->
+                    <div class="glass-card rounded-xl p-6 border border-white/10">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-yellow-500/10 border border-yellow-500/20">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div class="ml-5">
+                                <p class="text-sm font-medium text-gray-300">Confirmation Rate</p>
+                                <p class="text-3xl font-bold text-white mt-1" id="confirmationRate">--%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Monthly Earnings -->
+                    <div class="glass-card rounded-xl border border-white/10">
+                        <div class="px-6 py-4 border-b border-white/10">
+                            <h2 class="text-lg font-semibold text-white">Monthly Earnings</h2>
+                        </div>
+                        <div class="p-6">
+                            <canvas id="earningsChart" class="w-full h-64"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Popular Performance Times -->
+                    <div class="glass-card rounded-xl border border-white/10">
+                        <div class="px-6 py-4 border-b border-white/10">
+                            <h2 class="text-lg font-semibold text-white">Popular Performance Times</h2>
+                        </div>
+                        <div class="p-6">
+                            <canvas id="timesChart" class="w-full h-64"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Venue Performance Table -->
+                <div class="glass-card rounded-xl border border-white/10">
+                    <div class="px-6 py-4 border-b border-white/10">
+                        <h2 class="text-lg font-semibold text-white">Venue Performance</h2>
+                    </div>
+                    <div class="p-6">
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="text-left text-sm text-gray-400">
+                                        <th class="pb-4">Venue</th>
+                                        <th class="pb-4">Total Performances</th>
+                                        <th class="pb-4">Total Earnings</th>
+                                        <th class="pb-4">Average Rate</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="venuePerformanceTable" class="text-white">
+                                    <!-- Will be populated by JavaScript -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>

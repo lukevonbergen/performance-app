@@ -278,6 +278,205 @@ function calculatePerformanceTotal(performance) {
     return (duration * performance.booking_rate).toFixed(2);
 }
 
+// Reports Functions
+async function loadReportsData() {
+    try {
+        const { data: performances, error } = await supabase
+            .from('performances')
+            .select(`
+                *,
+                venues (
+                    venue_name,
+                    id
+                )
+            `)
+            .eq('performer_id', window.user.id);
+
+        if (error) throw error;
+
+        const stats = processReportsData(performances);
+        updateReportsSummary(stats);
+        createEarningsChart(stats.monthlyEarnings);
+        createTimesChart(stats.timeStats);
+        updateVenuePerformanceTable(stats.venueStats);
+
+    } catch (error) {
+        console.error('Error loading reports data:', error);
+        showToast('Error loading reports data', 'error');
+    }
+}
+
+function processReportsData(performances) {
+    let totalEarnings = 0;
+    let confirmedCount = 0;
+    const monthlyEarnings = {};
+    const venueStats = {};
+    const timeStats = {};
+
+    performances.forEach(perf => {
+        if (perf.status === 'confirmed') {
+            // Calculate earnings
+            const duration = calculateDuration(perf.start_time, perf.end_time);
+            const earnings = duration * perf.booking_rate;
+            totalEarnings += earnings;
+            confirmedCount++;
+
+            // Monthly earnings
+            const month = new Date(perf.date).toLocaleString('default', { month: 'short' });
+            monthlyEarnings[month] = (monthlyEarnings[month] || 0) + earnings;
+
+            // Venue stats
+            const venueName = perf.venues?.venue_name || 'Unknown Venue';
+            if (!venueStats[venueName]) {
+                venueStats[venueName] = { 
+                    performances: 0, 
+                    earnings: 0, 
+                    totalRate: 0 
+                };
+            }
+            venueStats[venueName].performances++;
+            venueStats[venueName].earnings += earnings;
+            venueStats[venueName].totalRate += perf.booking_rate;
+
+            // Time stats
+            const hour = perf.start_time.split(':')[0];
+            timeStats[hour] = (timeStats[hour] || 0) + 1;
+        }
+    });
+
+    return {
+        totalEarnings,
+        totalPerformances: performances.length,
+        confirmedPerformances: confirmedCount,
+        confirmationRate: ((confirmedCount / performances.length) * 100) || 0,
+        monthlyEarnings,
+        venueStats,
+        timeStats,
+        topVenue: Object.entries(venueStats)
+            .sort((a, b) => b[1].performances - a[1].performances)[0]?.[0] || '--'
+    };
+}
+
+function updateReportsSummary(stats) {
+    document.getElementById('totalEarnings').textContent = `£${stats.totalEarnings.toFixed(2)}`;
+    document.getElementById('totalPerformances').textContent = stats.totalPerformances;
+    document.getElementById('topVenue').textContent = stats.topVenue;
+    document.getElementById('confirmationRate').textContent = `${stats.confirmationRate.toFixed(1)}%`;
+}
+
+function createEarningsChart(monthlyEarnings) {
+    const ctx = document.getElementById('earningsChart');
+    const months = Object.keys(monthlyEarnings);
+    const earnings = Object.values(monthlyEarnings);
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: months,
+            datasets: [{
+                label: 'Earnings',
+                data: earnings,
+                borderColor: '#8B5CF6',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: 'rgba(255, 255, 255, 0.7)',
+                        callback: value => `£${value}`
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    }
+                }
+            }
+        }
+    });
+}
+
+function createTimesChart(timeStats) {
+    const ctx = document.getElementById('timesChart');
+    const hours = Object.keys(timeStats).sort();
+    const counts = hours.map(hour => timeStats[hour]);
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: hours.map(hour => `${hour}:00`),
+            datasets: [{
+                label: 'Performances',
+                data: counts,
+                backgroundColor: '#10B981'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    }
+                }
+            }
+        }
+    });
+}
+
+function updateVenuePerformanceTable(venueStats) {
+    const tableBody = document.getElementById('venuePerformanceTable');
+    const venues = Object.entries(venueStats)
+        .sort((a, b) => b[1].performances - a[1].performances);
+
+    tableBody.innerHTML = venues.map(([name, stats]) => `
+        <tr class="border-t border-white/10">
+            <td class="py-4">${name}</td>
+            <td class="py-4">${stats.performances}</td>
+            <td class="py-4">£${stats.earnings.toFixed(2)}</td>
+            <td class="py-4">£${(stats.totalRate / stats.performances).toFixed(2)}/hr</td>
+        </tr>
+    `).join('');
+}
+
 // Booking Response Functions
 window.handleBookingResponse = async function(bookingId, status) {
     try {
@@ -513,6 +712,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Set up navigation
     const currentTab = window.location.hash.slice(1) || 'dashboard';
     setActiveTab(currentTab);
+
+    if (tabId === 'reports') {
+        loadReportsData();
+    }
 
     document.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', () => {
