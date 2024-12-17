@@ -424,12 +424,21 @@ function createEarningsChart(monthlyEarnings) {
 }
 
 
+let timesChartInstance = null; // Global variable to track the chart instance
+
 function createTimesChart(timeStats) {
     const ctx = document.getElementById('timesChart');
+
+    // Destroy existing chart instance, if it exists
+    if (timesChartInstance) {
+        timesChartInstance.destroy();
+    }
+
     const hours = Object.keys(timeStats).sort();
     const counts = hours.map(hour => timeStats[hour]);
 
-    new Chart(ctx, {
+    // Create new chart and save the instance
+    timesChartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: hours.map(hour => `${hour}:00`),
@@ -471,6 +480,7 @@ function createTimesChart(timeStats) {
         }
     });
 }
+
 
 function updateVenuePerformanceTable(venueStats) {
     const tableBody = document.getElementById('venuePerformanceTable');
