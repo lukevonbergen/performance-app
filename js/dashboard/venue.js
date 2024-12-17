@@ -223,11 +223,12 @@ function updateSearchResults(availability, bookedPerformerIds, startTime, search
                     </div>
                 </div>
                 <button 
-                    onclick="openBookingModal('${slot.performer_id}', '${slot.performers.stage_name}', ${slot.rate_per_hour}, '${searchDateTime.toISOString()}')"
+                    onclick="openBookingModal('${slot.performer_id}', '${slot.performers.stage_name.replace(/'/g, "\\'")}', ${slot.rate_per_hour}, '${searchDateTime.toISOString()}')"
                     class="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-all duration-200"
                 >
                     Book Now
                 </button>
+
             </div>
         `).join('');
     } else {
