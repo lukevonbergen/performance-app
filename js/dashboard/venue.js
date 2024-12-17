@@ -103,10 +103,10 @@ function updateUpcomingEventsList(upcomingEvents) {
             } pl-4 py-3">
                 <div class="flex justify-between items-start">
                     <div>
-                        <h3 class="font-medium text-white">${event.performers.stage_name}</h3>
-                        <p class="text-sm text-gray-300">${formatDate(event.date)}</p>
-                        <p class="text-sm text-gray-300">${formatTime(event.start_time)} - ${formatTime(event.end_time)}</p>
-                        <div class="flex space-x-2 text-sm text-gray-300">
+                        <h3 class="font-medium text-black">${event.performers.stage_name}</h3>
+                        <p class="text-sm text-black">${formatDate(event.date)}</p>
+                        <p class="text-sm text-black">${formatTime(event.start_time)} - ${formatTime(event.end_time)}</p>
+                        <div class="flex space-x-2 text-sm text-black">
                             <p>Rate: £${event.booking_rate}/hr</p>
                             <span>•</span>
                             <p>Total: £${calculateTotalCost(event.start_time, event.end_time, event.booking_rate)}</p>
@@ -147,7 +147,7 @@ function updateTodaySchedule(upcomingEvents, today) {
         scheduleList.innerHTML = todayEvents.map(event => `
             <div class="border-l-4 border-blue-500 pl-4">
                 <h3 class="font-medium text-white">${event.performers.stage_name}</h3>
-                <p class="text-gray-300">${formatTime(event.start_time)} - ${formatTime(event.end_time)}</p>
+                <p class="text-black">${formatTime(event.start_time)} - ${formatTime(event.end_time)}</p>
                 <p class="text-sm text-gray-400">Status: ${event.status}</p>
             </div>
         `).join('');
@@ -215,8 +215,8 @@ function updateSearchResults(availability, bookedPerformerIds, startTime, search
             <div class="border rounded-lg p-4 flex justify-between items-center bg-black/20 backdrop-blur-lg">
                 <div>
                     <h3 class="font-medium text-white">${slot.performers.stage_name}</h3>
-                    <p class="text-sm text-gray-300">Available ${formatTime(slot.start_time)} - ${formatTime(slot.end_time)}</p>
-                    <div class="flex space-x-2 text-sm text-gray-300">
+                    <p class="text-sm text-black">Available ${formatTime(slot.start_time)} - ${formatTime(slot.end_time)}</p>
+                    <div class="flex space-x-2 text-sm text-black">
                         <p>Rate: £${slot.rate_per_hour}/hr</p>
                         <span>•</span>
                         <p>Total: £${calculateTotalCost(slot.start_time, slot.end_time, slot.rate_per_hour)}</p>
