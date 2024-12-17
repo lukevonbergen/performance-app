@@ -570,10 +570,12 @@ window.cancelBooking = async function(bookingId) {
 
 // Navigation Functions
 function setActiveTab(tabId) {
+    // Remove active class from all tabs
     document.querySelectorAll('.nav-link').forEach(link => {
-        link.classList.remove('bg-white/5');
+        link.classList.remove('bg-white/5', 'bg-white/10');
     });
     
+    // Add active class to current tab
     const activeTab = document.querySelector(`[data-tab="${tabId}"]`);
     if (activeTab) {
         activeTab.classList.add('bg-white/5');
@@ -596,7 +598,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Navigation setup
     const currentTab = window.location.hash.slice(1) || 'dashboard';
     setActiveTab(currentTab);
-    document.querySelector('[data-tab="dashboard"]').classList.add('bg-white/10');
 
     // Form handlers
     document.getElementById('searchForm').addEventListener('submit', async (e) => {
