@@ -60,7 +60,6 @@ function showToast(message, type = 'success') {
     }, 3000);
 }
 
-// Dashboard Functions
 async function loadDashboardData() {
     try {
         const { data: performances, error } = await supabase
@@ -70,9 +69,6 @@ async function loadDashboardData() {
                 venues (
                     venue_name,
                     id
-                ),
-                tips (
-                    amount
                 )
             `)
             .eq('performer_id', window.user.id);
@@ -92,25 +88,9 @@ function updateDashboardStats(performances) {
     const today = new Date().toISOString().split('T')[0];
     const upcomingPerformances = performances.filter(perf => perf.date >= today && perf.status === 'confirmed');
     
-    let totalRating = 0;
-    let ratingCount = 0;
-    let totalTips = 0;
-
-    performances.forEach(perf => {
-        perf.ratings?.forEach(rating => {
-            totalRating += rating.rating_value;
-            ratingCount++;
-        });
-        perf.tips?.forEach(tip => {
-            totalTips += tip.amount;
-        });
-    });
-
     // Update UI elements
     document.getElementById('upcomingGigs').textContent = upcomingPerformances.length;
-    document.getElementById('averageRating').textContent = 
-        ratingCount > 0 ? (totalRating / ratingCount).toFixed(1) : '--';
-    document.getElementById('totalTips').textContent = `£${totalTips.toFixed(2)}`;
+    document.getElementById('averageRating').textContent = '--'; // We can keep this for future use
 }
 
 function updateRecentActivity(performances) {
