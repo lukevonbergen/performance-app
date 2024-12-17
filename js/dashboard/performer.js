@@ -71,7 +71,6 @@ async function loadDashboardData() {
                     venue_name,
                     id
                 ),
-                // Remove the ratings selection for now
                 tips (
                     amount
                 )
@@ -80,16 +79,7 @@ async function loadDashboardData() {
 
         if (error) throw error;
 
-        // If you need ratings, you can make a separate query for them
-        const { data: ratings, error: ratingsError } = await supabase
-            .from('ratings')
-            .select('*')
-            .eq('performer_id', window.user.id);
-
-        if (ratingsError) throw ratingsError;
-
-        // Combine the data as needed
-        updateDashboardStats(performances, ratings);
+        updateDashboardStats(performances);
         updateRecentActivity(performances);
 
     } catch (error) {
