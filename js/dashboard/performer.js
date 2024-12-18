@@ -198,6 +198,9 @@ async function loadPerformances() {
         const pending = performances?.filter(p => p.status === 'pending') || [];
         const rejected = performances?.filter(p => p.status === 'rejected') || [];
 
+        // Update the badge with pending count
+        updatePendingBadge(pending.length);
+
         updatePerformancesUI(upcoming, pending, rejected);
 
     } catch (error) {
@@ -772,6 +775,17 @@ function updatePerformanceHistoryTable(performances) {
             </tr>
         `;
     }).join('');
+}
+
+// Performance Notification Badle
+function updatePendingBadge(pendingCount) {
+    const badge = document.getElementById('pendingBadge');
+    if (pendingCount > 0) {
+        badge.textContent = pendingCount;
+        badge.classList.remove('hidden');
+    } else {
+        badge.classList.add('hidden');
+    }
 }
 
 // Navigation Event Listeners
