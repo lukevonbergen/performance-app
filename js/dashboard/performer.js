@@ -110,7 +110,7 @@ function updateRecentActivity(performances) {
             } pl-4">
                 <div class="flex justify-between items-start">
                     <div>
-                        <h3 class="font-medium text-white">${perf.venues.venue_name}</h3>
+                        <h3 class="font-medium text-black">${perf.venues.venue_name}</h3>
                         <p class="text-gray-300">${formatDate(perf.date)}</p>
                         <p class="text-gray-300">${formatTime(perf.start_time)} - ${formatTime(perf.end_time)}</p>
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -133,13 +133,13 @@ function updateRecentActivity(performances) {
 function setActiveTab(tabId) {
     // Remove active class from all tabs
     document.querySelectorAll('.nav-link').forEach(link => {
-        link.classList.remove('bg-white/5');
+        link.classList.remove('bg-black/5');
     });
     
     // Add active class to current tab
     const activeTab = document.querySelector(`[data-tab="${tabId}"]`);
     if (activeTab) {
-        activeTab.classList.add('bg-white/5');
+        activeTab.classList.add('bg-black/5');
     }
 
     // Show/hide content
@@ -194,7 +194,7 @@ function updatePerformancesUI(upcoming, pending, rejected) {
             <div class="border-l-4 border-green-500 pl-4">
                 <div class="flex justify-between items-start">
                     <div>
-                        <h3 class="font-medium text-white">${perf.venues?.venue_name || 'Unknown Venue'}</h3>
+                        <h3 class="font-medium text-black">${perf.venues?.venue_name || 'Unknown Venue'}</h3>
                         <p class="text-gray-300">${formatDate(perf.date)}</p>
                         <p class="text-gray-300">${formatTime(perf.start_time)} - ${formatTime(perf.end_time)}</p>
                         <div class="flex space-x-2 text-sm text-gray-400">
@@ -223,7 +223,7 @@ function updatePerformancesUI(upcoming, pending, rejected) {
             <div class="border-l-4 border-yellow-500 pl-4">
                 <div class="flex justify-between items-start">
                     <div>
-                        <h3 class="font-medium text-white">${perf.venues?.venue_name || 'Unknown Venue'}</h3>
+                        <h3 class="font-medium text-black">${perf.venues?.venue_name || 'Unknown Venue'}</h3>
                         <p class="text-gray-300">${formatDate(perf.date)}</p>
                         <p class="text-gray-300">${formatTime(perf.start_time)} - ${formatTime(perf.end_time)}</p>
                         <div class="flex space-x-2 text-sm text-gray-400">
@@ -257,7 +257,7 @@ function updatePerformancesUI(upcoming, pending, rejected) {
         rejectedList.innerHTML = rejected.map(perf => `
             <div class="border-l-4 border-red-500 pl-4">
                 <div>
-                    <h3 class="font-medium text-white">${perf.venues?.venue_name || 'Unknown Venue'}</h3>
+                    <h3 class="font-medium text-black">${perf.venues?.venue_name || 'Unknown Venue'}</h3>
                     <p class="text-gray-300">${formatDate(perf.date)}</p>
                     <p class="text-gray-300">${formatTime(perf.start_time)} - ${formatTime(perf.end_time)}</p>
                     <div class="flex space-x-2 text-sm text-gray-400">
@@ -488,7 +488,7 @@ function updateVenuePerformanceTable(venueStats) {
         .sort((a, b) => b[1].performances - a[1].performances);
 
     tableBody.innerHTML = venues.map(([name, stats]) => `
-        <tr class="border-t border-white/10">
+        <tr class="border-t border-black/10">
             <td class="py-4">${name}</td>
             <td class="py-4">${stats.performances}</td>
             <td class="py-4">£${stats.earnings.toFixed(2)}</td>
@@ -630,7 +630,7 @@ function renderAvailabilityItem(slot) {
 
     div.innerHTML = `
         <div>
-            <p class="font-semibold text-white">${formatDate(slot.date)}</p>
+            <p class="font-semibold text-black">${formatDate(slot.date)}</p>
             <p class="text-gray-300">${formatTime(slot.start_time)} - ${formatTime(slot.end_time)}</p>
             <div class="flex space-x-2 text-sm text-gray-400">
                 <p>Rate: £${slot.rate_per_hour}/hr</p>
@@ -746,7 +746,7 @@ function updatePerformanceHistoryTable(performances) {
         };
 
         return `
-            <tr class="border-t border-white/10">
+            <tr class="border-t border-black/10">
                 <td class="py-4">${formatDate(perf.date)}</td>
                 <td class="py-4">${perf.venues.venue_name}</td>
                 <td class="py-4">${formatTime(perf.start_time)} - ${formatTime(perf.end_time)}</td>
