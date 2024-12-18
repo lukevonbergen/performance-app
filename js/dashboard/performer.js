@@ -1,5 +1,6 @@
 // Import and Global Setup
 import { supabase } from '../utils/supabase.js';
+let performanceToCancel = null;
 
 // Make supabase and user globally available
 window.supabase = supabase;
@@ -583,48 +584,14 @@ window.handleBookingResponse = async function(bookingId, status) {
     }
 };
 
-window.cancelPerformance = async function(performanceId) {
-    try {
-        // Get the performance details before deleting
-        const { data: performance, error: fetchError } = await supabase
-            .from('performances')
-            .select('*')
-            .eq('id', performanceId)
-            .single();
+window.cancelPerformance = function(performanceId) {
+    performanceToCancel = performanceId;
+    document.getElementById('cancelPerformanceModal').classList.remove('hidden');
+};
 
-        if (fetchError) throw fetchError;
-
-        // Delete the performance
-        const { error: deleteError } = await supabase
-            .from('performances')
-            .delete()
-            .eq('id', performanceId)
-            .eq('performer_id', window.user.id);
-
-        if (deleteError) throw deleteError;
-
-        // Restore the availability
-        const availabilityData = {
-            performer_id: window.user.id,
-            date: performance.date,
-            start_time: performance.start_time,
-            end_time: performance.end_time,
-            rate_per_hour: performance.booking_rate
-        };
-
-        const { error: availError } = await supabase
-            .from('performer_availability')
-            .insert([availabilityData]);
-
-        if (availError) throw availError;
-
-        // Refresh data
-        await refreshPerformanceData();
-        showToast('Performance cancelled successfully');
-    } catch (error) {
-        console.error('Error cancelling performance:', error);
-        showToast('Error cancelling performance', 'error');
-    }
+window.closeCancelPerformanceModal = function() {
+    performanceToCancel = null;
+    document.getElementById('cancelPerformanceModal').classList.add('hidden');
 };
 
 async function refreshPerformanceData() {
@@ -848,7 +815,56 @@ document.addEventListener('DOMContentLoaded', function() {
             sidebar.classList.add('-translate-x-full');
         }
     });
-});
+
+
+    document.getElementById('confirmCancelBtn').addEventListener('click', async () => {
+        if (!performanceToCancel) return;
+        
+        try {
+            // Get the performance details before deleting
+            const { data: performance, error: fetchError } = await supabase
+                .from('performances')
+                .select('*')
+                .eq('id', performanceToCancel)
+                .single();
+
+            if (fetchError) throw fetchError;
+
+            // Delete the performance
+            const { error: deleteError } = await supabase
+                .from('performances')
+                .delete()
+                .eq('id', performanceToCancel)
+                .eq('performer_id', window.user.id);
+
+            if (deleteError) throw deleteError;
+
+            // Restore the availability
+            const availabilityData = {
+                performer_id: window.user.id,
+                date: performance.date,
+                start_time: performance.start_time,
+                end_time: performance.end_time,
+                rate_per_hour: performance.booking_rate
+            };
+
+            const { error: availError } = await supabase
+                .from('performer_availability')
+                .insert([availabilityData]);
+
+            if (availError) throw availError;
+
+            // Refresh data and close modal
+            await refreshPerformanceData();
+            showToast('Performance cancelled successfully');
+            closeCancelPerformanceModal();
+        } catch (error) {
+            console.error('Error cancelling performance:', error);
+            showToast('Error cancelling performance', 'error');
+            closeCancelPerformanceModal();
+        }
+    });
+    });
 
 // Initialize Dashboard
 async function initializeDashboard() {
