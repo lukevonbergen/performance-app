@@ -38,6 +38,20 @@ function formatDate(dateString) {
     return `${date.toLocaleDateString('en-GB', { weekday: 'long' })} ${day}${suffix(day)} ${date.toLocaleDateString('en-GB', { month: 'long' })}`;
 }
 
+function createMapsUrl(venue) {
+    if (!venue) return '#';
+    
+    const address = [
+        venue.address_line1,
+        venue.address_line2,
+        venue.city,
+        venue.county,
+        venue.postcode
+    ].filter(Boolean).join(', ');
+
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+}
+
 function calculateDuration(startTime, endTime) {
     const [startHours, startMinutes] = startTime.split(':').map(Number);
     const [endHours, endMinutes] = endTime.split(':').map(Number);
@@ -164,7 +178,12 @@ async function loadPerformances() {
                 *,
                 venues (
                     venue_name,
-                    id
+                    id,
+                    address_line1,
+                    address_line2,
+                    city,
+                    county,
+                    postcode
                 )
             `)
             .eq('performer_id', window.user.id)
@@ -202,6 +221,15 @@ function updatePerformancesUI(upcoming, pending, rejected) {
                             <span>•</span>
                             <p>Total: £${calculatePerformanceTotal(perf)}</p>
                         </div>
+                        <a href="${createMapsUrl(perf.venues)}" 
+                           target="_blank" 
+                           rel="noopener noreferrer" 
+                           class="inline-flex items-center mt-2 text-indigo-500 hover:text-indigo-400 text-sm">
+                            Get directions
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </a>
                     </div>
                     <button 
                         onclick="cancelPerformance('${perf.id}')"
@@ -231,6 +259,15 @@ function updatePerformancesUI(upcoming, pending, rejected) {
                             <span>•</span>
                             <p>Total: £${calculatePerformanceTotal(perf)}</p>
                         </div>
+                        <a href="${createMapsUrl(perf.venues)}" 
+                           target="_blank" 
+                           rel="noopener noreferrer" 
+                           class="inline-flex items-center mt-2 text-indigo-500 hover:text-indigo-400 text-sm">
+                            Get directions
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </a>
                     </div>
                     <div class="flex space-x-2">
                         <button 
@@ -265,6 +302,15 @@ function updatePerformancesUI(upcoming, pending, rejected) {
                         <span>•</span>
                         <p>Total: £${calculatePerformanceTotal(perf)}</p>
                     </div>
+                    <a href="${createMapsUrl(perf.venues)}" 
+                       target="_blank" 
+                       rel="noopener noreferrer" 
+                       class="inline-flex items-center mt-2 text-indigo-500 hover:text-indigo-400 text-sm">
+                        Get directions
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </a>
                 </div>
             </div>
         `).join('');
