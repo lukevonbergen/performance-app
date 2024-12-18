@@ -814,57 +814,62 @@ document.addEventListener('DOMContentLoaded', function() {
             !sidebar.classList.contains('-translate-x-full')) {
             sidebar.classList.add('-translate-x-full');
         }
-    }); 
+    });
 
 
-    document.getElementById('confirmCancelBtn').addEventListener('click', async () => {
-        if (!performanceToCancel) return;
+document.getElementById('confirmCancelBtn').addEventListener('click', async () => {
+    if (!performanceToCancel) return;
+    
+    try {
+        // Get the performance details before deleting
+        const { data: performances, error: fetchError } = await supabase
+            .from('performances')
+            .select('*')
+            .eq('id', performanceToCancel);
+
+        if (fetchError) throw fetchError;
         
-        try {
-            // Get the performance details before deleting
-            const { data: performance, error: fetchError } = await supabase
-                .from('performances')
-                .select('*')
-                .eq('id', performanceToCancel)
-                .single();
-
-            if (fetchError) throw fetchError;
-
-            // Delete the performance
-            const { error: deleteError } = await supabase
-                .from('performances')
-                .delete()
-                .eq('id', performanceToCancel)
-                .eq('performer_id', window.user.id);
-
-            if (deleteError) throw deleteError;
-
-            // Restore the availability
-            const availabilityData = {
-                performer_id: window.user.id,
-                date: performance.date,
-                start_time: performance.start_time,
-                end_time: performance.end_time,
-                rate_per_hour: performance.booking_rate
-            };
-
-            const { error: availError } = await supabase
-                .from('performer_availability')
-                .insert([availabilityData]);
-
-            if (availError) throw availError;
-
-            // Refresh data and close modal
-            await refreshPerformanceData();
-            showToast('Performance cancelled successfully');
-            closeCancelPerformanceModal();
-        } catch (error) {
-            console.error('Error cancelling performance:', error);
-            showToast('Error cancelling performance', 'error');
-            closeCancelPerformanceModal();
+        // Check if we found the performance
+        if (!performances || performances.length === 0) {
+            throw new Error('Performance not found');
         }
-    });
-    });
+
+        const performance = performances[0]; // Get the first (and should be only) performance
+
+        // Delete the performance
+        const { error: deleteError } = await supabase
+            .from('performances')
+            .delete()
+            .eq('id', performanceToCancel)
+            .eq('performer_id', window.user.id);
+
+        if (deleteError) throw deleteError;
+
+        // Restore the availability
+        const availabilityData = {
+            performer_id: window.user.id,
+            date: performance.date,
+            start_time: performance.start_time,
+            end_time: performance.end_time,
+            rate_per_hour: performance.booking_rate
+        };
+
+        const { error: availError } = await supabase
+            .from('performer_availability')
+            .insert([availabilityData]);
+
+        if (availError) throw availError;
+
+        // Refresh data and close modal
+        await refreshPerformanceData();
+        showToast('Performance cancelled successfully');
+        closeCancelPerformanceModal();
+    } catch (error) {
+        console.error('Error cancelling performance:', error);
+        showToast('Error cancelling performance', 'error');
+        closeCancelPerformanceModal();
+    }
+});
 
 // Initialize Dashboard
 async function initializeDashboard() {
