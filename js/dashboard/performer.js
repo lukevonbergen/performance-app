@@ -130,7 +130,7 @@ function updateRecentActivity(performances) {
                         <p class="text-black">${formatTime(perf.start_time)} - ${formatTime(perf.end_time)}</p>
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                             perf.status === 'confirmed' ? 'bg-green-500/20 text-green-400' :
-                            perf.status === 'pending' ? 'bg-yellow-700/20 text-yellow-400' :
+                            perf.status === 'pending' ? 'bg-yellow-700/20 text-yellow-700' :
                             'bg-red-500/20 text-red-400'
                         }">
                             ${perf.status.charAt(0).toUpperCase() + perf.status.slice(1)}
@@ -756,7 +756,7 @@ function updatePerformanceHistoryTable(performances) {
         
         const statusColors = {
             confirmed: 'bg-green-500/20 text-green-400',
-            pending: 'bg-yellow-700/20 text-yellow-400',
+            pending: 'bg-yellow-700/20 text-yellow-700',
             rejected: 'bg-red-500/20 text-red-400'
         };
 
