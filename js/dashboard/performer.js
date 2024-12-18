@@ -814,7 +814,7 @@ document.addEventListener('DOMContentLoaded', function() {
             !sidebar.classList.contains('-translate-x-full')) {
             sidebar.classList.add('-translate-x-full');
         }
-    });
+    }); 
 
 
     document.getElementById('confirmCancelBtn').addEventListener('click', async () => {
