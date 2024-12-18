@@ -542,6 +542,70 @@ function updateTopPerformersTable(performerStats) {
     `).join('');
 }
 
+// Settings Functions
+async function loadSettings() {
+    try {
+        const { data: venue, error } = await supabase
+            .from('venues')
+            .select('*')
+            .eq('id', window.user.id)
+            .single();
+
+        if (error) throw error;
+
+        // Populate form fields
+        document.getElementById('settingsFirstName').value = venue.first_name;
+        document.getElementById('settingsLastName').value = venue.last_name;
+        document.getElementById('settingsVenueName').value = venue.venue_name;
+        document.getElementById('settingsEmail').value = venue.email;
+        document.getElementById('settingsAddressLine1').value = venue.address_line1;
+        document.getElementById('settingsAddressLine2').value = venue.address_line2 || '';
+        document.getElementById('settingsCity').value = venue.city;
+        document.getElementById('settingsCounty').value = venue.county || '';
+        document.getElementById('settingsPostcode').value = venue.postcode;
+
+    } catch (error) {
+        console.error('Error loading settings:', error);
+        showErrorMessage('Error loading settings. Please try again.');
+    }
+}
+
+async function updateSettings(formData) {
+    try {
+        const { error } = await supabase
+            .from('venues')
+            .update({
+                first_name: formData.firstName,
+                last_name: formData.lastName,
+                venue_name: formData.venueName,
+                email: formData.email,
+                address_line1: formData.addressLine1,
+                address_line2: formData.addressLine2 || null,
+                city: formData.city,
+                county: formData.county || null,
+                postcode: formData.postcode
+            })
+            .eq('id', window.user.id);
+
+        if (error) throw error;
+
+        // Update session storage with new data
+        const user = JSON.parse(sessionStorage.getItem('user'));
+        user.first_name = formData.firstName;
+        user.venue_name = formData.venueName;
+        sessionStorage.setItem('user', JSON.stringify(user));
+
+        // Update UI elements
+        document.getElementById('venueName').textContent = formData.venueName;
+        document.getElementById('welcomeMessage').textContent = `Welcome back, ${formData.firstName}`;
+
+        showSuccessMessage('Settings updated successfully');
+    } catch (error) {
+        console.error('Error updating settings:', error);
+        showErrorMessage('Error updating settings. Please try again.');
+    }
+}
+
 // Cancellation Functions
 window.cancelBooking = async function(bookingId) {
     try {
@@ -608,6 +672,28 @@ document.addEventListener('DOMContentLoaded', function() {
         await searchPerformers(date, startTime);
     });
 
+    // Settings form handler
+    document.getElementById('settingsForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = {
+            firstName: document.getElementById('settingsFirstName').value,
+            lastName: document.getElementById('settingsLastName').value,
+            venueName: document.getElementById('settingsVenueName').value,
+            email: document.getElementById('settingsEmail').value,
+            addressLine1: document.getElementById('settingsAddressLine1').value,
+            addressLine2: document.getElementById('settingsAddressLine2').value,
+            city: document.getElementById('settingsCity').value,
+            county: document.getElementById('settingsCounty').value,
+            postcode: document.getElementById('settingsPostcode').value
+        };
+
+        await updateSettings(formData);
+    });
+
+    // Load settings when tab is clicked
+    document.querySelector('[data-tab="settings"]').addEventListener('click', loadSettings);
+
     // Navigation handlers
     document.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', () => {
@@ -621,6 +707,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (tabId === 'reports') {
                 loadReportsData();
+            } else if (tabId === 'settings') {
+                loadSettings();
             }
 
             if (window.innerWidth < 1024) {
