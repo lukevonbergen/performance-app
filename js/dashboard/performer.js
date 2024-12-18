@@ -111,8 +111,8 @@ function updateRecentActivity(performances) {
                 <div class="flex justify-between items-start">
                     <div>
                         <h3 class="font-medium text-black">${perf.venues.venue_name}</h3>
-                        <p class="text-gray-300">${formatDate(perf.date)}</p>
-                        <p class="text-gray-300">${formatTime(perf.start_time)} - ${formatTime(perf.end_time)}</p>
+                        <p class="text-black">${formatDate(perf.date)}</p>
+                        <p class="text-black">${formatTime(perf.start_time)} - ${formatTime(perf.end_time)}</p>
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                             perf.status === 'confirmed' ? 'bg-green-500/20 text-green-400' :
                             perf.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
@@ -195,8 +195,8 @@ function updatePerformancesUI(upcoming, pending, rejected) {
                 <div class="flex justify-between items-start">
                     <div>
                         <h3 class="font-medium text-black">${perf.venues?.venue_name || 'Unknown Venue'}</h3>
-                        <p class="text-gray-300">${formatDate(perf.date)}</p>
-                        <p class="text-gray-300">${formatTime(perf.start_time)} - ${formatTime(perf.end_time)}</p>
+                        <p class="text-black">${formatDate(perf.date)}</p>
+                        <p class="text-black">${formatTime(perf.start_time)} - ${formatTime(perf.end_time)}</p>
                         <div class="flex space-x-2 text-sm text-gray-400">
                             <p>Rate: £${perf.booking_rate}/hr</p>
                             <span>•</span>
@@ -224,8 +224,8 @@ function updatePerformancesUI(upcoming, pending, rejected) {
                 <div class="flex justify-between items-start">
                     <div>
                         <h3 class="font-medium text-black">${perf.venues?.venue_name || 'Unknown Venue'}</h3>
-                        <p class="text-gray-300">${formatDate(perf.date)}</p>
-                        <p class="text-gray-300">${formatTime(perf.start_time)} - ${formatTime(perf.end_time)}</p>
+                        <p class="text-black">${formatDate(perf.date)}</p>
+                        <p class="text-black">${formatTime(perf.start_time)} - ${formatTime(perf.end_time)}</p>
                         <div class="flex space-x-2 text-sm text-gray-400">
                             <p>Rate: £${perf.booking_rate}/hr</p>
                             <span>•</span>
@@ -258,8 +258,8 @@ function updatePerformancesUI(upcoming, pending, rejected) {
             <div class="border-l-4 border-red-500 pl-4">
                 <div>
                     <h3 class="font-medium text-black">${perf.venues?.venue_name || 'Unknown Venue'}</h3>
-                    <p class="text-gray-300">${formatDate(perf.date)}</p>
-                    <p class="text-gray-300">${formatTime(perf.start_time)} - ${formatTime(perf.end_time)}</p>
+                    <p class="text-black">${formatDate(perf.date)}</p>
+                    <p class="text-black">${formatTime(perf.start_time)} - ${formatTime(perf.end_time)}</p>
                     <div class="flex space-x-2 text-sm text-gray-400">
                         <p>Rate: £${perf.booking_rate}/hr</p>
                         <span>•</span>
@@ -631,7 +631,7 @@ function renderAvailabilityItem(slot) {
     div.innerHTML = `
         <div>
             <p class="font-semibold text-black">${formatDate(slot.date)}</p>
-            <p class="text-gray-300">${formatTime(slot.start_time)} - ${formatTime(slot.end_time)}</p>
+            <p class="text-black">${formatTime(slot.start_time)} - ${formatTime(slot.end_time)}</p>
             <div class="flex space-x-2 text-sm text-gray-400">
                 <p>Rate: £${slot.rate_per_hour}/hr</p>
                 <span>•</span>
