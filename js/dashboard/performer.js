@@ -719,7 +719,7 @@ document.getElementById('availabilityForm').addEventListener('submit', async (e)
     }
 });
 
-// Confirmation Modal Handler
+// Confirmation Modal Handler for Availability
 document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
     if (!availabilityToDelete) return;
     
@@ -743,7 +743,6 @@ document.getElementById('confirmDeleteBtn').addEventListener('click', async () =
 function updatePerformanceHistoryTable(performances) {
     const tableBody = document.getElementById('performanceHistoryTable');
     
-    // Sort performances by date, newest first
     const sortedPerformances = [...performances].sort((a, b) => 
         new Date(b.date) - new Date(a.date)
     );
@@ -786,12 +785,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const tabId = link.getAttribute('data-tab');
             setActiveTab(tabId);
 
-            // Load reports data if reports tab is clicked
             if (tabId === 'reports') {
                 loadReportsData();
             }
             
-            // Handle mobile menu
             if (window.innerWidth < 1024) {
                 document.getElementById('sidebar').classList.add('-translate-x-full');
             }
@@ -816,59 +813,61 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-
-document.getElementById('confirmCancelBtn').addEventListener('click', async () => {
-    if (!performanceToCancel) return;
-    
-    try {
-        // Get the performance details before deleting
-        const { data: performances, error: fetchError } = await supabase
-            .from('performances')
-            .select('*')
-            .eq('id', performanceToCancel);
-
-        if (fetchError) throw fetchError;
+    // Performance cancellation handler
+    document.getElementById('confirmCancelBtn').addEventListener('click', async () => {
+        if (!performanceToCancel) return;
         
-        // Check if we found the performance
-        if (!performances || performances.length === 0) {
-            throw new Error('Performance not found');
+        try {
+            console.log('Querying for performance:', performanceToCancel);
+            
+            const { data: performances, error: fetchError } = await supabase
+                .from('performances')
+                .select('*')
+                .eq('id', performanceToCancel);
+
+            console.log('Query results:', { performances, fetchError });
+
+            if (fetchError) throw fetchError;
+            
+            if (!performances || performances.length === 0) {
+                throw new Error('Performance not found');
+            }
+
+            const performance = performances[0];
+            
+            console.log('Attempting to delete performance:', performance);
+
+            const { error: deleteError } = await supabase
+                .from('performances')
+                .delete()
+                .eq('id', performanceToCancel)
+                .eq('performer_id', window.user.id);
+
+            if (deleteError) throw deleteError;
+
+            const availabilityData = {
+                performer_id: window.user.id,
+                date: performance.date,
+                start_time: performance.start_time,
+                end_time: performance.end_time,
+                rate_per_hour: performance.booking_rate
+            };
+
+            const { error: availError } = await supabase
+                .from('performer_availability')
+                .insert([availabilityData]);
+
+            if (availError) throw availError;
+
+            await refreshPerformanceData();
+            showToast('Performance cancelled successfully');
+            closeCancelPerformanceModal();
+        } catch (error) {
+            console.error('Error cancelling performance:', error);
+            showToast('Error cancelling performance', 'error');
+            closeCancelPerformanceModal();
         }
-
-        const performance = performances[0]; // Get the first (and should be only) performance
-
-        // Delete the performance
-        const { error: deleteError } = await supabase
-            .from('performances')
-            .delete()
-            .eq('id', performanceToCancel)
-            .eq('performer_id', window.user.id);
-
-        if (deleteError) throw deleteError;
-
-        // Restore the availability
-        const availabilityData = {
-            performer_id: window.user.id,
-            date: performance.date,
-            start_time: performance.start_time,
-            end_time: performance.end_time,
-            rate_per_hour: performance.booking_rate
-        };
-
-        const { error: availError } = await supabase
-            .from('performer_availability')
-            .insert([availabilityData]);
-
-        if (availError) throw availError;
-
-        // Refresh data and close modal
-        await refreshPerformanceData();
-        showToast('Performance cancelled successfully');
-        closeCancelPerformanceModal();
-    } catch (error) {
-        console.error('Error cancelling performance:', error);
-        showToast('Error cancelling performance', 'error');
-        closeCancelPerformanceModal();
-    }
+    });
 });
 
 // Initialize Dashboard
