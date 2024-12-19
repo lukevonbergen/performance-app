@@ -17,7 +17,7 @@ class RatingManager {
     async loadVenueInfo() {
         const { data: venue, error } = await supabase
             .from('venues')
-            .select('name')
+            .select('venue_name')
             .eq('id', this.venueId)
             .single();
     
