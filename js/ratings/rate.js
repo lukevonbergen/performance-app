@@ -15,18 +15,25 @@ class RatingManager {
     }
     
     async loadVenueInfo() {
-        const { data: venue, error } = await supabase
-            .from('venues')
-            .select('venue_name')
-            .eq('id', this.venueId)
-            .single();
+        try {
+            const { data: venue, error } = await supabase
+                .from('venues')
+                .select('venue_name')
+                .eq('id', this.venueId)
+                .single();
     
-        if (error || !venue) {
-            document.getElementById('venueName').textContent = "Unknown Venue";
-            document.getElementById('venueNameConfirm').textContent = "Unknown Venue";
-        } else {
-            document.getElementById('venueName').textContent = venue.venue_name; // Changed from venue.name
-            document.getElementById('venueNameConfirm').textContent = venue.venue_name;
+            if (error) throw error;
+    
+            const venueNameElement = document.getElementById('venueName');
+            if (venueNameElement) {
+                venueNameElement.textContent = venue.venue_name;
+            }
+        } catch (error) {
+            console.error('Error loading venue info:', error);
+            const venueNameElement = document.getElementById('venueName');
+            if (venueNameElement) {
+                venueNameElement.textContent = 'Unknown Venue';
+            }
         }
     }
     
@@ -76,8 +83,9 @@ class RatingManager {
 
     renderPerformances(performances) {
         const container = document.getElementById('performerList');
-        container.innerHTML = ''; // Clear existing content
         const now = new Date();
+    
+        let html = '';
     
         // Create category sections
         const categorySections = {
@@ -101,62 +109,63 @@ class RatingManager {
         // Sort performances into categories
         performances.forEach(perf => {
             const status = this.getPerformanceStatus(perf, now);
-            categorySections[status.category].performances.push({perf, status});
+            if (categorySections[status.category]) {
+                categorySections[status.category].performances.push({perf, status});
+            }
         });
     
-        // Render each category
+        // Build HTML for each category
         Object.entries(categorySections).forEach(([key, section]) => {
-            const sectionDiv = document.createElement('div');
-            sectionDiv.className = 'mb-8';
-            
-            // Add section header
-            sectionDiv.innerHTML = `
-                <h3 class="text-lg font-semibold mb-2 ${
-                    key === 'current' ? 'text-green-600' :
-                    key === 'upcoming' ? 'text-blue-600' :
-                    'text-gray-600'
-                }">${section.title}</h3>
-                <p class="text-sm text-gray-500 mb-4">${section.description}</p>
-                <div class="space-y-4" id="${key}List">
-                    ${section.performances.length === 0 ? 
-                        `<p class="text-center text-gray-500 py-4">No ${key} events</p>` :
-                        section.performances.map(({perf, status}) => {
-                            const hasRated = this.checkIfRated(perf.id);
-                            return `
-                                <div class="rounded-lg shadow-sm p-4 bg-white border border-gray-200">
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <h3 class="text-lg font-semibold text-gray-900">${perf.performers.stage_name}</h3>
-                                            <p class="text-sm text-gray-600">${this.formatTimeSlot(perf.start_time, perf.end_time)}</p>
-                                            <span class="inline-block px-2 py-1 mt-2 text-xs font-medium rounded-full ${
-                                                status.label === "Currently Playing" ? "bg-green-100 text-green-800" :
-                                                status.label === "Recently Finished" ? "bg-green-100 text-green-800" :
-                                                status.label === "Upcoming" ? "bg-blue-100 text-blue-800" :
-                                                "bg-gray-100 text-gray-800"
-                                            }">
-                                                ${status.label}
-                                            </span>
+            html += `
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold mb-2 ${
+                        key === 'current' ? 'text-green-600' :
+                        key === 'upcoming' ? 'text-blue-600' :
+                        'text-gray-600'
+                    }">${section.title}</h3>
+                    <p class="text-sm text-gray-500 mb-4">${section.description}</p>
+                    <div class="space-y-4">
+                        ${section.performances.length === 0 ? 
+                            `<p class="text-center text-gray-500 py-4">No ${key} events</p>` :
+                            section.performances.map(({perf, status}) => {
+                                const hasRated = this.checkIfRated(perf.id);
+                                return `
+                                    <div class="rounded-lg shadow-sm p-4 bg-white border border-gray-200">
+                                        <div class="flex justify-between items-center">
+                                            <div>
+                                                <h3 class="text-lg font-semibold text-gray-900">${perf.performers.stage_name}</h3>
+                                                <p class="text-sm text-gray-600">${this.formatTimeSlot(perf.start_time, perf.end_time)}</p>
+                                                <span class="inline-block px-2 py-1 mt-2 text-xs font-medium rounded-full ${
+                                                    status.label === "Currently Playing" ? "bg-green-100 text-green-800" :
+                                                    status.label === "Recently Finished" ? "bg-green-100 text-green-800" :
+                                                    status.label === "Upcoming" ? "bg-blue-100 text-blue-800" :
+                                                    "bg-gray-100 text-gray-800"
+                                                }">
+                                                    ${status.label}
+                                                </span>
+                                            </div>
+                                            ${status.canRate && !hasRated ? `
+                                                <button 
+                                                    data-perf-id="${perf.id}" 
+                                                    class="rate-now-btn bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                                                >
+                                                    Rate Performance
+                                                </button>
+                                            ` : hasRated ? `
+                                                <span class="text-sm text-gray-500">Already Rated</span>
+                                            ` : ''}
                                         </div>
-                                        ${status.canRate && !hasRated ? `
-                                            <button 
-                                                data-perf-id="${perf.id}" 
-                                                class="rate-now-btn bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-                                            >
-                                                Rate Performance
-                                            </button>
-                                        ` : hasRated ? `
-                                            <span class="text-sm text-gray-500">Already Rated</span>
-                                        ` : ''}
                                     </div>
-                                </div>
-                            `;
-                        }).join('')
-                    }
+                                `;
+                            }).join('')
+                        }
+                    </div>
                 </div>
             `;
-            
-            container.appendChild(sectionDiv);
         });
+    
+        // Set the inner HTML once after building all content
+        container.innerHTML = html;
     }
 
     setupStarRatings() {
