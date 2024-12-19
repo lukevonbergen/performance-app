@@ -5,6 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rate Performers | Stagelink</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .star {
+            font-size: 24px;
+            color: #D1D5DB;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .star:hover, .star.active {
+            color: #FBBF24;
+        }
+    </style>
 </head>
 <body class="bg-gray-50">
     <!-- Step 1: Performer Selection -->
@@ -21,19 +32,43 @@
             <!-- Overall Rating -->
             <div class="rating-section">
                 <h3>Overall Performance</h3>
-                <div class="star-rating" data-category="overall"></div>
+                <div class="star-rating" data-category="overall">
+                    <div class="flex space-x-1">
+                        <button class="star" data-value="1">★</button>
+                        <button class="star" data-value="2">★</button>
+                        <button class="star" data-value="3">★</button>
+                        <button class="star" data-value="4">★</button>
+                        <button class="star" data-value="5">★</button>
+                    </div>
+                </div>
             </div>
 
             <!-- Stage Presence -->
             <div class="rating-section">
                 <h3>Stage Presence</h3>
-                <div class="star-rating" data-category="presence"></div>
+                <div class="star-rating" data-category="presence">
+                    <div class="flex space-x-1">
+                        <button class="star" data-value="1">★</button>
+                        <button class="star" data-value="2">★</button>
+                        <button class="star" data-value="3">★</button>
+                        <button class="star" data-value="4">★</button>
+                        <button class="star" data-value="5">★</button>
+                    </div>
+                </div>
             </div>
 
             <!-- Song Selection -->
             <div class="rating-section">
                 <h3>Song Selection</h3>
-                <div class="star-rating" data-category="songs"></div>
+                <div class="star-rating" data-category="songs">
+                    <div class="flex space-x-1">
+                        <button class="star" data-value="1">★</button>
+                        <button class="star" data-value="2">★</button>
+                        <button class="star" data-value="3">★</button>
+                        <button class="star" data-value="4">★</button>
+                        <button class="star" data-value="5">★</button>
+                    </div>
+                </div>
             </div>
 
             <!-- Comments -->

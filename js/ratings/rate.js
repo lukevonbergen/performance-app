@@ -25,9 +25,21 @@ class RatingManager {
             document.getElementById('venueName').textContent = "Unknown Venue";
             document.getElementById('venueNameConfirm').textContent = "Unknown Venue";
         } else {
-            document.getElementById('venueName').textContent = venue.name;
-            document.getElementById('venueNameConfirm').textContent = venue.name;
+            document.getElementById('venueName').textContent = venue.venue_name; // Changed from venue.name
+            document.getElementById('venueNameConfirm').textContent = venue.venue_name;
         }
+    }
+    
+    validateRating(data) {
+        if (!document.getElementById('venueVerification').checked) {
+            alert('Please confirm you are at the venue');
+            return false;
+        }
+        if (!data.overall || !data.presence || !data.songs) {
+            alert('Please provide all ratings');
+            return false;
+        }
+        return true;
     }
 
     getVenueIdFromUrl() {
@@ -65,34 +77,77 @@ class RatingManager {
     renderPerformances(performances) {
         const container = document.getElementById('performerList');
         const now = new Date();
-
-        performances.forEach(perf => {
+    
+        container.innerHTML = performances.map(perf => {
             const status = this.getPerformanceStatus(perf, now);
             const hasRated = this.checkIfRated(perf.id);
-
-            container.innerHTML += `
-                <div class="performance-card ${status.class} ${hasRated ? 'rated' : ''}">
-                    <h3>${perf.performers.stage_name}</h3>
-                    <p>${this.formatTimeSlot(perf.start_time, perf.end_time)}</p>
-                    <span class="status-badge">${status.label}</span>
-                    ${!hasRated && status.canRate ? 
-                        `<button data-perf-id="${perf.id}" class="rate-now-btn">Rate Now</button>` : 
-                        ''}
+    
+            return `
+                <div class="rounded-lg shadow-sm p-4 ${status.class} transition-all duration-200">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900">${perf.performers.stage_name}</h3>
+                            <p class="text-sm text-gray-600">${this.formatTimeSlot(perf.start_time, perf.end_time)}</p>
+                            <span class="inline-block px-2 py-1 mt-2 text-xs font-medium rounded-full ${
+                                status.label === "Currently Playing" ? "bg-green-100 text-green-800" :
+                                status.label === "Upcoming" ? "bg-blue-100 text-blue-800" :
+                                "bg-gray-100 text-gray-800"
+                            }">
+                                ${status.label}
+                            </span>
+                        </div>
+                        ${!hasRated && status.canRate ? `
+                            <button 
+                                data-perf-id="${perf.id}"
+                                class="rate-now-btn bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+                            >
+                                Rate Now
+                            </button>
+                        ` : hasRated ? `
+                            <span class="text-sm text-gray-500">Already Rated</span>
+                        ` : ''}
+                    </div>
                 </div>
             `;
+        }).join('');
+    }
+
+    setupStarRatings() {
+        document.querySelectorAll('.star-rating').forEach(container => {
+            const category = container.dataset.category;
+            container.addEventListener('click', (e) => {
+                if (e.target.classList.contains('star')) {
+                    const value = e.target.dataset.value;
+                    this.setRating(category, value);
+                }
+            });
+        });
+    }
+    
+    setRating(category, value) {
+        const container = document.querySelector(`.star-rating[data-category="${category}"]`);
+        container.setAttribute('data-value', value);
+        container.querySelectorAll('.star').forEach((star, index) => {
+            star.classList.toggle('text-yellow-400', index < value);
+            star.classList.toggle('text-gray-300', index >= value);
         });
     }
 
     getPerformanceStatus(perf, now) {
-        const start = new Date(perf.start_time);
-        const end = new Date(perf.end_time);
+        const performanceDate = new Date(perf.date);
+        const start = new Date(performanceDate.setHours(
+            ...perf.start_time.split(':').map(Number)
+        ));
+        const end = new Date(performanceDate.setHours(
+            ...perf.end_time.split(':').map(Number)
+        ));
     
         if (now < start) {
-            return { label: "Upcoming", class: "bg-blue-200", canRate: false };
+            return { label: "Upcoming", class: "bg-blue-100", canRate: false };
         } else if (now >= start && now <= end) {
-            return { label: "Currently Playing", class: "bg-green-200", canRate: true };
+            return { label: "Currently Playing", class: "bg-green-100", canRate: true };
         } else {
-            return { label: "Finished", class: "bg-gray-200", canRate: true };
+            return { label: "Finished", class: "bg-gray-100", canRate: true };
         }
     }
 
