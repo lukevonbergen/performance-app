@@ -357,6 +357,145 @@ function calculatePerformanceTotal(performance) {
     return (duration * performance.booking_rate).toFixed(2);
 }
 
+// Availability Management Functions
+async function loadAvailability() {
+    try {
+        const { data: availability, error } = await supabase
+            .from('performer_availability')
+            .select('*')
+            .eq('performer_id', window.user.id)
+            .gte('date', new Date().toISOString().split('T')[0])
+            .order('date');
+
+        if (error) throw error;
+
+        updateAvailabilityUI(availability);
+    } catch (error) {
+        console.error('Error loading availability:', error);
+        showToast('Error loading availability', 'error');
+    }
+}
+
+function updateAvailabilityUI(availability) {
+    const availabilityList = document.getElementById('availabilityList');
+    
+    if (availability && availability.length > 0) {
+        availabilityList.innerHTML = '';
+        availability.forEach(slot => {
+            availabilityList.appendChild(renderAvailabilityItem(slot));
+        });
+    } else {
+        availabilityList.innerHTML = '<p class="text-center text-gray-400">No availability set</p>';
+    }
+}
+
+function renderAvailabilityItem(slot) {
+    const duration = calculateDuration(slot.start_time, slot.end_time);
+    const totalCost = duration * slot.rate_per_hour;
+
+    const div = document.createElement('div');
+    div.className = 'border-l-4 border-blue-500 pl-4 flex justify-between items-center';
+    div.dataset.availabilityId = slot.id;
+
+    div.innerHTML = `
+        <div>
+            <p class="font-semibold text-black">${formatDate(slot.date)}</p>
+            <p class="text-black">${formatTime(slot.start_time)} - ${formatTime(slot.end_time)}</p>
+            <div class="flex space-x-2 text-sm text-gray-400">
+                <p>Rate: £${slot.rate_per_hour}/hr</p>
+                <span>•</span>
+                <p>Total: £${totalCost.toFixed(2)}</p>
+            </div>
+        </div>
+        <button 
+            class="text-red-400 hover:text-red-300 transition-colors duration-200"
+            onclick="deleteAvailability('${slot.id}')"
+        >
+            Delete
+        </button>
+    `;
+
+    return div;
+}
+
+// Modal Management Functions
+let availabilityToDelete = null;
+
+window.openAvailabilityModal = function() {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('availabilityDate').min = today;
+    document.getElementById('availabilityModal').classList.remove('hidden');
+};
+
+window.closeAvailabilityModal = function() {
+    document.getElementById('availabilityModal').classList.add('hidden');
+    document.getElementById('availabilityForm').reset();
+};
+
+function openConfirmationModal(id) {
+    availabilityToDelete = id;
+    document.getElementById('confirmationModal').classList.remove('hidden');
+}
+
+function closeConfirmationModal() {
+    availabilityToDelete = null;
+    document.getElementById('confirmationModal').classList.add('hidden');
+}
+
+// Availability Delete Functions
+window.deleteAvailability = async function(id) {
+    openConfirmationModal(id);
+};
+
+// Form Handlers
+document.getElementById('availabilityForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    try {
+        const formData = {
+            performer_id: window.user.id,
+            date: document.getElementById('availabilityDate').value,
+            start_time: document.getElementById('startTime').value + ':00',
+            end_time: document.getElementById('endTime').value + ':00',
+            rate_per_hour: parseFloat(document.getElementById('ratePerHour').value)
+        };
+
+        const { error } = await supabase
+            .from('performer_availability')
+            .insert([formData]);
+
+        if (error) throw error;
+
+        closeAvailabilityModal();
+        await loadAvailability();
+        showToast('Availability added successfully');
+    } catch (error) {
+        console.error('Error adding availability:', error);
+        showToast('Error adding availability', 'error');
+    }
+});
+
+// Confirmation Modal Handler for Availability
+document.getElementById('confirmDeleteBtn')?.addEventListener('click', async () => {
+    if (!availabilityToDelete) return;
+    
+    try {
+        const { error } = await supabase
+            .from('performer_availability')
+            .delete()
+            .eq('id', availabilityToDelete);
+
+        if (error) throw error;
+
+        await loadAvailability();
+        closeConfirmationModal();
+        showToast('Availability deleted successfully');
+    } catch (error) {
+        console.error('Error deleting availability:', error);
+        showToast('Error deleting availability', 'error');
+    }
+});
+
 // Reports Functions
 async function loadReportsData() {
     try {
