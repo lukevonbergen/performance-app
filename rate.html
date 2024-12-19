@@ -10,20 +10,13 @@
     <!-- Step 1: Performer Selection -->
     <div id="performerSelect" class="max-w-lg mx-auto p-6">
         <h2 class="text-xl font-bold mb-4">Tonight's Performers at <span id="venueName">...</span></h2>
-        
         <div class="space-y-4" id="performerList">
             <!-- Performers will be listed here -->
-            <!-- Each performer card shows:
-                 - Name
-                 - Time slot
-                 - Status (Upcoming/Currently Playing/Finished)
-            -->
         </div>
     </div>
 
     <!-- Step 2: Rating Form (initially hidden) -->
     <div id="ratingForm" class="max-w-lg mx-auto p-6 hidden">
-        <!-- Rating Categories -->
         <div class="space-y-6">
             <!-- Overall Rating -->
             <div class="rating-section">
@@ -46,7 +39,7 @@
             <!-- Comments -->
             <div>
                 <label>Additional Comments</label>
-                <textarea class="w-full"></textarea>
+                <textarea class="w-full" id="comments"></textarea>
             </div>
 
             <!-- Venue Verification -->
@@ -56,6 +49,8 @@
                     I confirm I'm currently at <span id="venueNameConfirm">...</span>
                 </label>
             </div>
+
+            <button id="submitRating" class="bg-blue-500 text-white py-2 px-4 rounded">Submit Rating</button>
         </div>
     </div>
 
