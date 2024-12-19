@@ -667,6 +667,19 @@ window.logout = function() {
     window.location.href = 'login';
 };
 
+// Ratings Feature
+function generateVenueQR(venueId) {
+    const ratingUrl = `${window.location.origin}/rate/venue/${venueId}`;
+    return QRCode.toDataURL(ratingUrl);
+}
+
+// Add to venue settings page:
+async function displayVenueQR() {
+    const qrCode = await generateVenueQR(window.user.id);
+    document.getElementById('venueQR').src = qrCode;
+    // Also add download button for venue to save QR
+}
+
 // Event Listeners
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize UI

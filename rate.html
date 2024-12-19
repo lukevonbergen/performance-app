@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rate Performers | Stagelink</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <!-- Step 1: Performer Selection -->
+    <div id="performerSelect" class="max-w-lg mx-auto p-6">
+        <h2 class="text-xl font-bold mb-4">Tonight's Performers at <span id="venueName">...</span></h2>
+        
+        <div class="space-y-4" id="performerList">
+            <!-- Performers will be listed here -->
+            <!-- Each performer card shows:
+                 - Name
+                 - Time slot
+                 - Status (Upcoming/Currently Playing/Finished)
+            -->
+        </div>
+    </div>
+
+    <!-- Step 2: Rating Form (initially hidden) -->
+    <div id="ratingForm" class="max-w-lg mx-auto p-6 hidden">
+        <!-- Rating Categories -->
+        <div class="space-y-6">
+            <!-- Overall Rating -->
+            <div class="rating-section">
+                <h3>Overall Performance</h3>
+                <div class="star-rating" data-category="overall"></div>
+            </div>
+
+            <!-- Stage Presence -->
+            <div class="rating-section">
+                <h3>Stage Presence</h3>
+                <div class="star-rating" data-category="presence"></div>
+            </div>
+
+            <!-- Song Selection -->
+            <div class="rating-section">
+                <h3>Song Selection</h3>
+                <div class="star-rating" data-category="songs"></div>
+            </div>
+
+            <!-- Comments -->
+            <div>
+                <label>Additional Comments</label>
+                <textarea class="w-full"></textarea>
+            </div>
+
+            <!-- Venue Verification -->
+            <div class="flex items-center space-x-2">
+                <input type="checkbox" id="venueVerification">
+                <label for="venueVerification">
+                    I confirm I'm currently at <span id="venueNameConfirm">...</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="./js/ratings/rate.js"></script>
+</body>
+</html>

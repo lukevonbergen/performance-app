@@ -694,6 +694,28 @@ function createTimesChart(timeStats) {
     });
 }
 
+
+// Performer Ratings
+async function loadPerformerRatings(performanceId) {
+    // Only load if performance is finished
+    const { data: performance } = await supabase
+        .from('performances')
+        .select('*')
+        .eq('id', performanceId)
+        .single();
+
+    if (new Date() < new Date(`${performance.date} ${performance.end_time}`)) {
+        return { message: 'Ratings will be available after the performance' };
+    }
+
+    const { data: ratings } = await supabase
+        .from('ratings')
+        .select('*')
+        .eq('performance_id', performanceId);
+
+    return calculateRatingStats(ratings);
+}
+
 function updatePerformanceHistoryTable(performances) {
     const tableBody = document.getElementById('performanceHistoryTable');
     
