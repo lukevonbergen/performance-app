@@ -99,6 +99,53 @@ async function loadDashboardData() {
     }
 }
 
+// Dropdown toggle functionality
+document.getElementById('userMenuBtn').addEventListener('click', function(e) {
+    e.stopPropagation();
+    document.getElementById('userDropdown').classList.toggle('hidden');
+});
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('userDropdown');
+    const button = document.getElementById('userMenuBtn');
+    if (!button.contains(event.target) && !dropdown.contains(event.target)) {
+        dropdown.classList.add('hidden');
+    }
+});
+
+// Modified setActiveTab function
+function setActiveTab(tabId) {
+    // Remove active class from all tabs
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('bg-white/5', 'bg-white/10');
+    });
+    
+    // Add active class to current tab
+    const activeTab = document.querySelector(`[data-tab="${tabId}"]`);
+    if (activeTab) {
+        activeTab.classList.add('bg-white/5');
+    }
+
+    // Show/hide content
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.add('hidden');
+    });
+    document.getElementById(`${tabId}-tab`).classList.remove('hidden');
+}
+
+// Update your existing event listeners
+document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+        const tabId = link.getAttribute('data-tab');
+        setActiveTab(tabId);
+            
+        if (tabId === 'reports') {
+            loadReportsData();
+        }
+    });
+});
+
 function updateDashboardStats(performances) {
     const today = new Date().toISOString().split('T')[0];
     const upcomingPerformances = performances.filter(perf => perf.date >= today && perf.status === 'confirmed');

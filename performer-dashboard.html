@@ -10,79 +10,70 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-[#ffffff] min-h-screen">
-    <!-- Mobile Navigation Toggle -->
-    <div class="lg:hidden fixed top-4 left-4 z-50 flex items-center gap-3">
-        <button id="mobileMenuBtn" class="p-2 rounded-lg bg-black/20 backdrop-blur-lg border border-black/10">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-        </button>
-        <img src="/img/logo_v1.svg" alt="StageLink Logo" class="h-12 w-auto">
-    </div>
+    
+    <!-- Two-tier Navigation -->
+    <div class="relative z-30">
+        <!-- Top Tier - Logo and Settings -->
+        <div class="relative z-40 bg-[#0A0A18]/80 backdrop-blur-lg border-b border-black/10">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="flex justify-between items-center h-12">
+                    <!-- Logo -->
+                    <div class="flex-shrink-0">
+                        <img src="/img/logo_v1.svg" alt="StageLink Logo" class="h-10 w-auto">
+                    </div>
 
-    <!-- Sidebar -->
-    <aside id="sidebar" class="fixed top-0 left-0 z-40 w-72 h-screen transition-transform -translate-x-full lg:translate-x-0">
-        <div class="h-full flex flex-col bg-[#0A0A18]/95 backdrop-blur-lg border-r border-white/10">
-            <!-- Logo -->
-            <div class="hidden lg:flex items-center gap-3 p-4 border-b border-white/10">
-                <img src="/img/logo_v1.svg" alt="StageLink Logo" class="h-12 w-auto">
-            </div>
-            
-            <!-- Navigation Links -->
-            <nav class="flex-1 px-4 pt-6">
-                <ul class="space-y-2">
-                    <li>
-                        <button data-tab="dashboard" class="nav-link w-full flex items-center px-4 py-3 text-white/90 rounded-xl hover:bg-white/10">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                            </svg>
-                            <span class="font-medium text-base">Dashboard</span>
-                        </button>
-                    </li>
-                    <li>
-                        <button data-tab="performances" class="nav-link w-full flex items-center px-4 py-3 text-white/90 rounded-xl hover:bg-white/10">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                            </svg>
-                            <span class="font-medium text-base">Performances</span>
-                            <div id="pendingBadge" class="hidden ml-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">0</div>
-                        </button>
-                    </li>
-                    <li>
-                        <button data-tab="availability" class="nav-link w-full flex items-center px-4 py-3 text-white/90 rounded-xl hover:bg-white/10">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                            <span class="font-medium text-base">Availability</span>
-                        </button>
-                    </li>
-                    <li>
-                        <button data-tab="reports" class="nav-link w-full flex items-center px-4 py-3 text-white/90 rounded-xl hover:bg-white/10">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            <span class="font-medium text-base">Reports</span>
-                        </button>
-                    </li>
-                </ul>
-            </nav>
+                    <!-- Right Side - Settings -->
+                    <div class="flex items-center space-x-4">
+                        <!-- User Menu Dropdown -->
+                        <div class="relative">
+                            <button id="userMenuBtn" class="flex items-center text-white/70 hover:text-white">
+                                <span class="text-sm font-medium mr-2" id="performerName">Loading...</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
 
-            <!-- User Info & Logout -->
-            <div class="p-4 border-t border-white/10">
-                <div class="mb-3">
-                    <p class="text-sm text-white/60 mb-1">Logged in as</p>
-                    <h3 class="text-white font-medium" id="performerName">Loading...</h3>
+                            <!-- Dropdown Menu -->
+                            <div id="userDropdown" class="hidden absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                                <div class="py-1">
+                                    <button onclick="logout()" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                        </svg>
+                                        Logout
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <button onclick="logout()" 
-                    class="w-full px-4 py-2.5 rounded-xl bg-white/5 text-white/90 hover:bg-white/10 transition-colors flex items-center justify-center space-x-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
-                    <span>Logout</span>
-                </button>
             </div>
         </div>
-    </aside>
+
+        <!-- Bottom Tier - Main Navigation -->
+        <div class="relative z-30 bg-[#0A0A18]/95 backdrop-blur-lg border-b border-black/10">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="flex h-12">
+                    <!-- Navigation Links -->
+                    <div class="flex space-x-4 overflow-x-auto scrollbar-hide w-full">
+                        <button data-tab="dashboard" class="nav-link px-2 py-1 text-white/90 rounded-md hover:bg-white/10 my-2 whitespace-nowrap">
+                            <span class="font-medium text-sm">Dashboard</span>
+                        </button>
+                        <button data-tab="performances" class="nav-link px-2 py-1 text-white/90 rounded-md hover:bg-white/10 my-2 whitespace-nowrap flex items-center">
+                            <span class="font-medium text-sm">Performances</span>
+                            <div id="pendingBadge" class="hidden ml-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">0</div>
+                        </button>
+                        <button data-tab="availability" class="nav-link px-2 py-1 text-white/90 rounded-md hover:bg-white/10 my-2 whitespace-nowrap">
+                            <span class="font-medium text-sm">Availability</span>
+                        </button>
+                        <button data-tab="reports" class="nav-link px-2 py-1 text-white/90 rounded-md hover:bg-white/10 my-2 whitespace-nowrap">
+                            <span class="font-medium text-sm">Reports</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Main Content Area -->
     <div class="lg:ml-72 min-h-screen p-4">
