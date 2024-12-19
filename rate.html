@@ -20,34 +20,43 @@
     </style>
 </head>
 <body class="bg-gray-50">
-    <!-- Step 1: Performer Selection -->
-    <div id="performerList" class="max-w-lg mx-auto p-6">
-        <h2 class="text-xl font-bold mb-4">Performances at <span id="venueName">...</span></h2>
+    
+    <div class="max-w-lg mx-auto p-6">
+        <!-- Fixed header -->
+        <div class="mb-8 text-center">
+            <h2 class="text-2xl font-bold">Performances at <span id="venueName">...</span></h2>
+        </div>
+    
+        <!-- Dynamic content -->
+        <div id="performerList" class="max-w-lg mx-auto p-6">
+            <h2 class="text-xl font-bold mb-4">Performances at <span id="venueName">...</span></h2>
+            
+            <!-- Current Events (Ratable) -->
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold mb-4 text-green-600">Current Events</h3>
+                <div class="space-y-4" id="currentEventsList">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
         
-        <!-- Current Events (Ratable) -->
-        <div class="mb-8">
-            <h3 class="text-lg font-semibold mb-4 text-green-600">Current Events</h3>
-            <div class="space-y-4" id="currentEventsList">
-                <!-- Populated by JS -->
+            <!-- Upcoming Events -->
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold mb-4 text-blue-600">Upcoming Events</h3>
+                <div class="space-y-4" id="upcomingEventsList">
+                    <!-- Populated by JS -->
+                </div>
             </div>
-        </div>
-    
-        <!-- Upcoming Events -->
-        <div class="mb-8">
-            <h3 class="text-lg font-semibold mb-4 text-blue-600">Upcoming Events</h3>
-            <div class="space-y-4" id="upcomingEventsList">
-                <!-- Populated by JS -->
-            </div>
-        </div>
-    
-        <!-- Expired Events -->
-        <div class="mb-8">
-            <h3 class="text-lg font-semibold mb-4 text-gray-600">Expired Events</h3>
-            <div class="space-y-4" id="expiredEventsList">
-                <!-- Populated by JS -->
+        
+            <!-- Expired Events -->
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold mb-4 text-gray-600">Expired Events</h3>
+                <div class="space-y-4" id="expiredEventsList">
+                    <!-- Populated by JS -->
+                </div>
             </div>
         </div>
     </div>
+    <!-- Step 1: Performer Selection -->
 
     <!-- Step 2: Rating Form (initially hidden) -->
     <div id="ratingForm" class="max-w-lg mx-auto p-6 hidden">
