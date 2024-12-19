@@ -187,6 +187,57 @@ class RatingManager {
                 comment: document.getElementById('comments').value,
             });
         });
+
+        // Add star rating functionality
+        document.querySelectorAll('.star-rating').forEach(container => {
+            const stars = container.querySelectorAll('.star');
+            const category = container.dataset.category;
+
+            stars.forEach(star => {
+                star.addEventListener('click', (e) => {
+                    const value = parseInt(e.target.dataset.value);
+                    
+                    // Update visual state
+                    stars.forEach(s => {
+                        const starValue = parseInt(s.dataset.value);
+                        if (starValue <= value) {
+                            s.classList.add('text-yellow-400');
+                            s.classList.remove('text-gray-300');
+                        } else {
+                            s.classList.remove('text-yellow-400');
+                            s.classList.add('text-gray-300');
+                        }
+                    });
+
+                    // Store the rating value
+                    container.dataset.value = value;
+                });
+
+                // Optional: Add hover effects
+                star.addEventListener('mouseenter', (e) => {
+                    const value = parseInt(e.target.dataset.value);
+                    stars.forEach(s => {
+                        const starValue = parseInt(s.dataset.value);
+                        if (starValue <= value) {
+                            s.classList.add('hover:text-yellow-400');
+                        }
+                    });
+                });
+
+                star.addEventListener('mouseleave', (e) => {
+                    const selectedValue = parseInt(container.dataset.value) || 0;
+                    stars.forEach(s => {
+                        const starValue = parseInt(s.dataset.value);
+                        s.classList.remove('hover:text-yellow-400');
+                        if (starValue <= selectedValue) {
+                            s.classList.add('text-yellow-400');
+                        } else {
+                            s.classList.add('text-gray-300');
+                        }
+                    });
+                });
+            });
+        });
     }
 
     showRatingForm() {
@@ -195,8 +246,8 @@ class RatingManager {
     }
 
     getRatingValue(category) {
-        const element = document.querySelector(`.star-rating[data-category="${category}"]`);
-        return element ? element.getAttribute('data-value') : null;
+        const container = document.querySelector(`.star-rating[data-category="${category}"]`);
+        return parseInt(container.dataset.value) || 0;
     }
 
     async submitRating(data) {
