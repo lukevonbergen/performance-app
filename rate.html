@@ -22,9 +22,30 @@
 <body class="bg-gray-50">
     <!-- Step 1: Performer Selection -->
     <div id="performerSelect" class="max-w-lg mx-auto p-6">
-        <h2 class="text-xl font-bold mb-4">Tonight's Performers at <span id="venueName">...</span></h2>
-        <div class="space-y-4" id="performerList">
-            <!-- Performers will be listed here -->
+        <h2 class="text-xl font-bold mb-4">Performances at <span id="venueName">...</span></h2>
+        
+        <!-- Current Events (Ratable) -->
+        <div class="mb-8">
+            <h3 class="text-lg font-semibold mb-4 text-green-600">Current Events</h3>
+            <div class="space-y-4" id="currentEventsList">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    
+        <!-- Upcoming Events -->
+        <div class="mb-8">
+            <h3 class="text-lg font-semibold mb-4 text-blue-600">Upcoming Events</h3>
+            <div class="space-y-4" id="upcomingEventsList">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    
+        <!-- Expired Events -->
+        <div class="mb-8">
+            <h3 class="text-lg font-semibold mb-4 text-gray-600">Expired Events</h3>
+            <div class="space-y-4" id="expiredEventsList">
+                <!-- Populated by JS -->
+            </div>
         </div>
     </div>
 

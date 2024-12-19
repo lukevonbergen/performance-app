@@ -76,40 +76,86 @@ class RatingManager {
 
     renderPerformances(performances) {
         const container = document.getElementById('performerList');
+        container.innerHTML = ''; // Clear existing content
         const now = new Date();
     
+        // Create category sections
+        const categorySections = {
+            current: {
+                title: 'Current Events',
+                description: 'Events that are currently performing or recently finished',
+                performances: []
+            },
+            upcoming: {
+                title: 'Upcoming Events',
+                description: 'Confirmed future performances',
+                performances: []
+            },
+            expired: {
+                title: 'Expired Events',
+                description: 'Past events that can no longer be rated',
+                performances: []
+            }
+        };
+    
+        // Sort performances into categories
         performances.forEach(perf => {
             const status = this.getPerformanceStatus(perf, now);
-            const hasRated = this.checkIfRated(perf.id);
+            categorySections[status.category].performances.push({perf, status});
+        });
     
-            const performanceCard = document.createElement('div');
-            performanceCard.className = 'rounded-lg shadow-sm p-4 mb-4 bg-white';
-            performanceCard.innerHTML = `
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-900">${perf.performers.stage_name}</h3>
-                        <p class="text-sm text-gray-600">${this.formatTimeSlot(perf.start_time, perf.end_time)}</p>
-                        <span class="inline-block px-2 py-1 mt-2 text-xs font-medium rounded-full ${
-                            status.label === "Currently Playing" ? "bg-green-100 text-green-800" :
-                            status.label === "Upcoming" ? "bg-blue-100 text-blue-800" :
-                            "bg-gray-100 text-gray-800"
-                        }">
-                            ${status.label}
-                        </span>
-                    </div>
-                    <button 
-                        data-perf-id="${perf.id}" 
-                        class="rate-now-btn bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors ${
-                            hasRated ? 'opacity-50 cursor-not-allowed' : ''
-                        }"
-                        ${hasRated ? 'disabled' : ''}
-                    >
-                        ${hasRated ? 'Already Rated' : 'Rate Performance'}
-                    </button>
+        // Render each category
+        Object.entries(categorySections).forEach(([key, section]) => {
+            const sectionDiv = document.createElement('div');
+            sectionDiv.className = 'mb-8';
+            
+            // Add section header
+            sectionDiv.innerHTML = `
+                <h3 class="text-lg font-semibold mb-2 ${
+                    key === 'current' ? 'text-green-600' :
+                    key === 'upcoming' ? 'text-blue-600' :
+                    'text-gray-600'
+                }">${section.title}</h3>
+                <p class="text-sm text-gray-500 mb-4">${section.description}</p>
+                <div class="space-y-4" id="${key}List">
+                    ${section.performances.length === 0 ? 
+                        `<p class="text-center text-gray-500 py-4">No ${key} events</p>` :
+                        section.performances.map(({perf, status}) => {
+                            const hasRated = this.checkIfRated(perf.id);
+                            return `
+                                <div class="rounded-lg shadow-sm p-4 bg-white border border-gray-200">
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <h3 class="text-lg font-semibold text-gray-900">${perf.performers.stage_name}</h3>
+                                            <p class="text-sm text-gray-600">${this.formatTimeSlot(perf.start_time, perf.end_time)}</p>
+                                            <span class="inline-block px-2 py-1 mt-2 text-xs font-medium rounded-full ${
+                                                status.label === "Currently Playing" ? "bg-green-100 text-green-800" :
+                                                status.label === "Recently Finished" ? "bg-green-100 text-green-800" :
+                                                status.label === "Upcoming" ? "bg-blue-100 text-blue-800" :
+                                                "bg-gray-100 text-gray-800"
+                                            }">
+                                                ${status.label}
+                                            </span>
+                                        </div>
+                                        ${status.canRate && !hasRated ? `
+                                            <button 
+                                                data-perf-id="${perf.id}" 
+                                                class="rate-now-btn bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                                            >
+                                                Rate Performance
+                                            </button>
+                                        ` : hasRated ? `
+                                            <span class="text-sm text-gray-500">Already Rated</span>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')
+                    }
                 </div>
             `;
-    
-            container.appendChild(performanceCard);
+            
+            container.appendChild(sectionDiv);
         });
     }
 
@@ -142,13 +188,29 @@ class RatingManager {
         const end = new Date(performanceDate.setHours(
             ...perf.end_time.split(':').map(Number)
         ));
+        const sixHoursAfterEnd = new Date(end.getTime() + (6 * 60 * 60 * 1000));
     
         if (now < start) {
-            return { label: "Upcoming", class: "bg-blue-100", canRate: false };
-        } else if (now >= start && now <= end) {
-            return { label: "Currently Playing", class: "bg-green-100", canRate: true };
+            return { 
+                label: "Upcoming", 
+                class: "bg-blue-100", 
+                canRate: false,
+                category: 'upcoming'
+            };
+        } else if (now >= start && now <= sixHoursAfterEnd) {
+            return { 
+                label: now <= end ? "Currently Playing" : "Recently Finished", 
+                class: "bg-green-100", 
+                canRate: true,
+                category: 'current'
+            };
         } else {
-            return { label: "Finished", class: "bg-gray-100", canRate: true };
+            return { 
+                label: "Expired", 
+                class: "bg-gray-100", 
+                canRate: false,
+                category: 'expired'
+            };
         }
     }
 
