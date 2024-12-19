@@ -11,6 +11,26 @@ if (!window.user || window.user.type !== 'performer') {
     window.location.href = 'login';
 }
 
+// Initialize UI and Navigation
+if (!window.hasInitializedNavigation) {
+    // Dropdown toggle functionality
+    document.getElementById('userMenuBtn').addEventListener('click', function(e) {
+        e.stopPropagation();
+        document.getElementById('userDropdown').classList.toggle('hidden');
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        const dropdown = document.getElementById('userDropdown');
+        const button = document.getElementById('userMenuBtn');
+        if (!button.contains(event.target) && !dropdown.contains(event.target)) {
+            dropdown.classList.add('hidden');
+        }
+    });
+
+    window.hasInitializedNavigation = true;
+}
+
 // Initialize UI
 document.getElementById('performerName').textContent = window.user.stage_name || 'Performer Dashboard';
 
@@ -75,6 +95,33 @@ function showToast(message, type = 'success') {
     }, 3000);
 }
 
+// Navigation Functions
+function setActiveTab(tabId) {
+    // Remove active class from all tabs
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('bg-white/5', 'bg-white/10');
+    });
+    
+    // Add active class to current tab
+    const activeTab = document.querySelector(`[data-tab="${tabId}"]`);
+    if (activeTab) {
+        activeTab.classList.add('bg-white/5');
+    }
+
+    // Show/hide content
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.add('hidden');
+    });
+    document.getElementById(`${tabId}-tab`).classList.remove('hidden');
+}
+
+// Authentication Functions
+window.logout = function() {
+    sessionStorage.removeItem('user');
+    window.location.href = 'login';
+};
+
+// Dashboard Functions
 async function loadDashboardData() {
     try {
         const { data: performances, error } = await supabase
@@ -99,60 +146,13 @@ async function loadDashboardData() {
     }
 }
 
-// Dropdown toggle functionality
-document.getElementById('userMenuBtn').addEventListener('click', function(e) {
-    e.stopPropagation();
-    document.getElementById('userDropdown').classList.toggle('hidden');
-});
-
-// Close dropdown when clicking outside
-document.addEventListener('click', function(event) {
-    const dropdown = document.getElementById('userDropdown');
-    const button = document.getElementById('userMenuBtn');
-    if (!button.contains(event.target) && !dropdown.contains(event.target)) {
-        dropdown.classList.add('hidden');
-    }
-});
-
-// Modified setActiveTab function
-function setActiveTab(tabId) {
-    // Remove active class from all tabs
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.classList.remove('bg-white/5', 'bg-white/10');
-    });
-    
-    // Add active class to current tab
-    const activeTab = document.querySelector(`[data-tab="${tabId}"]`);
-    if (activeTab) {
-        activeTab.classList.add('bg-white/5');
-    }
-
-    // Show/hide content
-    document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.add('hidden');
-    });
-    document.getElementById(`${tabId}-tab`).classList.remove('hidden');
-}
-
-// Update your existing event listeners
-document.querySelectorAll('.nav-link').forEach(link => {
-    link.addEventListener('click', () => {
-        const tabId = link.getAttribute('data-tab');
-        setActiveTab(tabId);
-            
-        if (tabId === 'reports') {
-            loadReportsData();
-        }
-    });
-});
-
 function updateDashboardStats(performances) {
     const today = new Date().toISOString().split('T')[0];
     const upcomingPerformances = performances.filter(perf => perf.date >= today && perf.status === 'confirmed');
     
     // Update UI elements
     document.getElementById('upcomingGigs').textContent = upcomingPerformances.length;
-    document.getElementById('averageRating').textContent = '--'; // We can keep this for future use
+    document.getElementById('averageRating').textContent = '--';
 }
 
 function updateRecentActivity(performances) {
@@ -190,32 +190,6 @@ function updateRecentActivity(performances) {
         recentActivityList.innerHTML = '<p class="text-center text-gray-400">No recent activity</p>';
     }
 }
-
-// Navigation Functions
-function setActiveTab(tabId) {
-    // Remove active class from all tabs
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.classList.remove('bg-black/5');
-    });
-    
-    // Add active class to current tab
-    const activeTab = document.querySelector(`[data-tab="${tabId}"]`);
-    if (activeTab) {
-        activeTab.classList.add('bg-black/5');
-    }
-
-    // Show/hide content
-    document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.add('hidden');
-    });
-    document.getElementById(`${tabId}-tab`).classList.remove('hidden');
-}
-
-// Authentication Functions
-window.logout = function() {
-    sessionStorage.removeItem('user');
-    window.location.href = 'login';
-};
 
 // Performance Management Functions
 async function loadPerformances() {
@@ -298,43 +272,7 @@ function updatePerformancesUI(upcoming, pending, rejected) {
     // Update Pending Performances
     const pendingList = document.getElementById('pendingPerformancesList');
     if (pending.length > 0) {
-        pendingList.innerHTML = pending.map(perf => `
-            <div class="border-l-4 border-yellow-500 pl-4">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <h3 class="font-medium text-black">${perf.venues?.venue_name || 'Unknown Venue'}</h3>
-                        <p class="text-black">${formatDate(perf.date)}</p>
-                        <p class="text-black">${formatTime(perf.start_time)} - ${formatTime(perf.end_time)}</p>
-                        <div class="flex space-x-2 text-sm text-gray-400">
-                            <p>Rate: £${perf.booking_rate}/hr</p>
-                            <span>•</span>
-                            <p>Total: £${calculatePerformanceTotal(perf)}</p>
-                        </div>
-                        <a href="${createMapsUrl(perf.venues)}" 
-                           target="_blank" 
-                           rel="noopener noreferrer" 
-                           class="inline-flex items-center mt-2 text-indigo-500 hover:text-indigo-400 text-sm">
-                            Get directions
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-                            </svg>
-                        </a>
-                    </div>
-                    <div class="flex space-x-2">
-                        <button 
-                            onclick="handleBookingResponse('${perf.id}', 'confirmed')"
-                            class="px-4 py-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 text-sm transition-colors duration-200">
-                            Accept
-                        </button>
-                        <button 
-                            onclick="handleBookingResponse('${perf.id}', 'rejected')"
-                            class="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 text-sm transition-colors duration-200">
-                            Decline
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `).join('');
+        pendingList.innerHTML = pending.map(perf => performancePendingTemplate(perf)).join('');
     } else {
         pendingList.innerHTML = '<p class="text-center text-gray-400">No pending requests</p>';
     }
@@ -342,8 +280,16 @@ function updatePerformancesUI(upcoming, pending, rejected) {
     // Update Rejected Performances
     const rejectedList = document.getElementById('rejectedPerformancesList');
     if (rejected.length > 0) {
-        rejectedList.innerHTML = rejected.map(perf => `
-            <div class="border-l-4 border-red-500 pl-4">
+        rejectedList.innerHTML = rejected.map(perf => performanceRejectedTemplate(perf)).join('');
+    } else {
+        rejectedList.innerHTML = '<p class="text-center text-gray-400">No rejected performances</p>';
+    }
+}
+
+function performancePendingTemplate(perf) {
+    return `
+        <div class="border-l-4 border-yellow-500 pl-4">
+            <div class="flex justify-between items-start">
                 <div>
                     <h3 class="font-medium text-black">${perf.venues?.venue_name || 'Unknown Venue'}</h3>
                     <p class="text-black">${formatDate(perf.date)}</p>
@@ -363,11 +309,47 @@ function updatePerformancesUI(upcoming, pending, rejected) {
                         </svg>
                     </a>
                 </div>
+                <div class="flex space-x-2">
+                    <button 
+                        onclick="handleBookingResponse('${perf.id}', 'confirmed')"
+                        class="px-4 py-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 text-sm transition-colors duration-200">
+                        Accept
+                    </button>
+                    <button 
+                        onclick="handleBookingResponse('${perf.id}', 'rejected')"
+                        class="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 text-sm transition-colors duration-200">
+                        Decline
+                    </button>
+                </div>
             </div>
-        `).join('');
-    } else {
-        rejectedList.innerHTML = '<p class="text-center text-gray-400">No rejected performances</p>';
-    }
+        </div>
+    `;
+}
+
+function performanceRejectedTemplate(perf) {
+    return `
+        <div class="border-l-4 border-red-500 pl-4">
+            <div>
+                <h3 class="font-medium text-black">${perf.venues?.venue_name || 'Unknown Venue'}</h3>
+                <p class="text-black">${formatDate(perf.date)}</p>
+                <p class="text-black">${formatTime(perf.start_time)} - ${formatTime(perf.end_time)}</p>
+                <div class="flex space-x-2 text-sm text-gray-400">
+                    <p>Rate: £${perf.booking_rate}/hr</p>
+                    <span>•</span>
+                    <p>Total: £${calculatePerformanceTotal(perf)}</p>
+                </div>
+                <a href="${createMapsUrl(perf.venues)}" 
+                   target="_blank" 
+                   rel="noopener noreferrer" 
+                   class="inline-flex items-center mt-2 text-indigo-500 hover:text-indigo-400 text-sm">
+                    Get directions
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+    `;
 }
 
 function calculatePerformanceTotal(performance) {
@@ -461,12 +443,13 @@ function updateReportsSummary(stats) {
     document.getElementById('confirmationRate').textContent = `${stats.confirmationRate.toFixed(1)}%`;
 }
 
-let earningsChartInstance = null; // Declare a global variable to track the chart instance
+// Chart Management
+let earningsChartInstance = null;
+let timesChartInstance = null;
 
 function createEarningsChart(monthlyEarnings) {
     const ctx = document.getElementById('earningsChart');
 
-    // Check if an existing chart instance exists and destroy it
     if (earningsChartInstance) {
         earningsChartInstance.destroy();
     }
@@ -474,7 +457,6 @@ function createEarningsChart(monthlyEarnings) {
     const months = Object.keys(monthlyEarnings);
     const earnings = Object.values(monthlyEarnings);
 
-    // Create a new chart instance and assign it to the global variable
     earningsChartInstance = new Chart(ctx, {
         type: 'line',
         data: {
@@ -520,13 +502,9 @@ function createEarningsChart(monthlyEarnings) {
     });
 }
 
-
-let timesChartInstance = null; // Global variable to track the chart instance
-
 function createTimesChart(timeStats) {
     const ctx = document.getElementById('timesChart');
 
-    // Destroy existing chart instance, if it exists
     if (timesChartInstance) {
         timesChartInstance.destroy();
     }
@@ -534,7 +512,6 @@ function createTimesChart(timeStats) {
     const hours = Object.keys(timeStats).sort();
     const counts = hours.map(hour => timeStats[hour]);
 
-    // Create new chart and save the instance
     timesChartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -578,20 +555,38 @@ function createTimesChart(timeStats) {
     });
 }
 
+function updatePerformanceHistoryTable(performances) {
+    const tableBody = document.getElementById('performanceHistoryTable');
+    
+    const sortedPerformances = [...performances].sort((a, b) => 
+        new Date(b.date) - new Date(a.date)
+    );
 
-function updateVenuePerformanceTable(venueStats) {
-    const tableBody = document.getElementById('venuePerformanceTable');
-    const venues = Object.entries(venueStats)
-        .sort((a, b) => b[1].performances - a[1].performances);
+    tableBody.innerHTML = sortedPerformances.map(perf => {
+        const duration = calculateDuration(perf.start_time, perf.end_time);
+        const totalCost = duration * perf.booking_rate;
+        
+        const statusColors = {
+            confirmed: 'bg-green-500/20 text-green-400',
+            pending: 'bg-yellow-700/20 text-yellow-700',
+            rejected: 'bg-red-500/20 text-red-400'
+        };
 
-    tableBody.innerHTML = venues.map(([name, stats]) => `
-        <tr class="border-t border-black/10">
-            <td class="py-4">${name}</td>
-            <td class="py-4">${stats.performances}</td>
-            <td class="py-4">£${stats.earnings.toFixed(2)}</td>
-            <td class="py-4">£${(stats.totalRate / stats.performances).toFixed(2)}/hr</td>
-        </tr>
-    `).join('');
+        return `
+            <tr class="border-t border-black/10">
+                <td class="py-4">${formatDate(perf.date)}</td>
+                <td class="py-4">${perf.venues.venue_name}</td>
+                <td class="py-4">${formatTime(perf.start_time)} - ${formatTime(perf.end_time)}</td>
+                <td class="py-4">£${perf.booking_rate}/hr</td>
+                <td class="py-4">£${totalCost.toFixed(2)}</td>
+                <td class="py-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColors[perf.status]}">
+                        ${perf.status.charAt(0).toUpperCase() + perf.status.slice(1)}
+                    </span>
+                </td>
+            </tr>
+        `;
+    }).join('');
 }
 
 // Booking Response Functions
@@ -634,6 +629,18 @@ window.handleBookingResponse = async function(bookingId, status) {
     }
 };
 
+// Performance Notification Badge
+function updatePendingBadge(pendingCount) {
+    const badge = document.getElementById('pendingBadge');
+    if (pendingCount > 0) {
+        badge.textContent = pendingCount;
+        badge.classList.remove('hidden');
+    } else {
+        badge.classList.add('hidden');
+    }
+}
+
+// Performance Cancellation Functions
 window.cancelPerformance = function(performanceId) {
     performanceToCancel = performanceId;
     document.getElementById('cancelPerformanceModal').classList.remove('hidden');
@@ -651,287 +658,7 @@ async function refreshPerformanceData() {
     ]);
 }
 
-// Availability Management Functions
-async function loadAvailability() {
-    try {
-        const { data: availability, error } = await supabase
-            .from('performer_availability')
-            .select('*')
-            .eq('performer_id', window.user.id)
-            .gte('date', new Date().toISOString().split('T')[0])
-            .order('date');
-
-        if (error) throw error;
-
-        updateAvailabilityUI(availability);
-    } catch (error) {
-        console.error('Error loading availability:', error);
-        showToast('Error loading availability', 'error');
-    }
-}
-
-function updateAvailabilityUI(availability) {
-    const availabilityList = document.getElementById('availabilityList');
-    
-    if (availability && availability.length > 0) {
-        availabilityList.innerHTML = '';
-        availability.forEach(slot => {
-            availabilityList.appendChild(renderAvailabilityItem(slot));
-        });
-    } else {
-        availabilityList.innerHTML = '<p class="text-center text-gray-400">No availability set</p>';
-    }
-}
-
-function renderAvailabilityItem(slot) {
-    const duration = calculateDuration(slot.start_time, slot.end_time);
-    const totalCost = duration * slot.rate_per_hour;
-
-    const div = document.createElement('div');
-    div.className = 'border-l-4 border-blue-500 pl-4 flex justify-between items-center';
-    div.dataset.availabilityId = slot.id;
-
-    div.innerHTML = `
-        <div>
-            <p class="font-semibold text-black">${formatDate(slot.date)}</p>
-            <p class="text-black">${formatTime(slot.start_time)} - ${formatTime(slot.end_time)}</p>
-            <div class="flex space-x-2 text-sm text-gray-400">
-                <p>Rate: £${slot.rate_per_hour}/hr</p>
-                <span>•</span>
-                <p>Total: £${totalCost.toFixed(2)}</p>
-            </div>
-        </div>
-        <button 
-            class="text-red-400 hover:text-red-300 transition-colors duration-200"
-            onclick="deleteAvailability('${slot.id}')"
-        >
-            Delete
-        </button>
-    `;
-
-    return div;
-}
-
-// Modal Management Functions
-let availabilityToDelete = null;
-
-window.openAvailabilityModal = function() {
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('availabilityDate').min = today;
-    document.getElementById('availabilityModal').classList.remove('hidden');
-};
-
-window.closeAvailabilityModal = function() {
-    document.getElementById('availabilityModal').classList.add('hidden');
-    document.getElementById('availabilityForm').reset();
-};
-
-function openConfirmationModal(id) {
-    availabilityToDelete = id;
-    document.getElementById('confirmationModal').classList.remove('hidden');
-}
-
-function closeConfirmationModal() {
-    availabilityToDelete = null;
-    document.getElementById('confirmationModal').classList.add('hidden');
-}
-
-// Availability Delete Functions
-window.deleteAvailability = async function(id) {
-    openConfirmationModal(id);
-};
-
-// Form Handlers
-document.getElementById('availabilityForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    try {
-        const formData = {
-            performer_id: window.user.id,
-            date: document.getElementById('availabilityDate').value,
-            start_time: document.getElementById('startTime').value + ':00',
-            end_time: document.getElementById('endTime').value + ':00',
-            rate_per_hour: parseFloat(document.getElementById('ratePerHour').value)
-        };
-
-        const { error } = await supabase
-            .from('performer_availability')
-            .insert([formData]);
-
-        if (error) throw error;
-
-        closeAvailabilityModal();
-        await loadAvailability();
-        showToast('Availability added successfully');
-    } catch (error) {
-        console.error('Error adding availability:', error);
-        showToast('Error adding availability', 'error');
-    }
-});
-
-// Confirmation Modal Handler for Availability
-document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
-    if (!availabilityToDelete) return;
-    
-    try {
-        const { error } = await supabase
-            .from('performer_availability')
-            .delete()
-            .eq('id', availabilityToDelete);
-
-        if (error) throw error;
-
-        await loadAvailability();
-        closeConfirmationModal();
-        showToast('Availability deleted successfully');
-    } catch (error) {
-        console.error('Error deleting availability:', error);
-        showToast('Error deleting availability', 'error');
-    }
-});
-
-function updatePerformanceHistoryTable(performances) {
-    const tableBody = document.getElementById('performanceHistoryTable');
-    
-    const sortedPerformances = [...performances].sort((a, b) => 
-        new Date(b.date) - new Date(a.date)
-    );
-
-    tableBody.innerHTML = sortedPerformances.map(perf => {
-        const duration = calculateDuration(perf.start_time, perf.end_time);
-        const totalCost = duration * perf.booking_rate;
-        
-        const statusColors = {
-            confirmed: 'bg-green-500/20 text-green-400',
-            pending: 'bg-yellow-700/20 text-yellow-700',
-            rejected: 'bg-red-500/20 text-red-400'
-        };
-
-        return `
-            <tr class="border-t border-black/10">
-                <td class="py-4">${formatDate(perf.date)}</td>
-                <td class="py-4">${perf.venues.venue_name}</td>
-                <td class="py-4">${formatTime(perf.start_time)} - ${formatTime(perf.end_time)}</td>
-                <td class="py-4">£${perf.booking_rate}/hr</td>
-                <td class="py-4">£${totalCost.toFixed(2)}</td>
-                <td class="py-4">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColors[perf.status]}">
-                        ${perf.status.charAt(0).toUpperCase() + perf.status.slice(1)}
-                    </span>
-                </td>
-            </tr>
-        `;
-    }).join('');
-}
-
-// Performance Notification Badle
-function updatePendingBadge(pendingCount) {
-    const badge = document.getElementById('pendingBadge');
-    if (pendingCount > 0) {
-        badge.textContent = pendingCount;
-        badge.classList.remove('hidden');
-    } else {
-        badge.classList.add('hidden');
-    }
-}
-
-// Navigation Event Listeners
-document.addEventListener('DOMContentLoaded', function() {
-    // Set up navigation
-    const currentTab = window.location.hash.slice(1) || 'dashboard';
-    setActiveTab(currentTab);
-
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', () => {
-            const tabId = link.getAttribute('data-tab');
-            setActiveTab(tabId);
-
-            if (tabId === 'reports') {
-                loadReportsData();
-            }
-            
-            if (window.innerWidth < 1024) {
-                document.getElementById('sidebar').classList.add('-translate-x-full');
-            }
-        });
-    });
-
-    // Mobile menu handlers
-    document.getElementById('mobileMenuBtn').addEventListener('click', () => {
-        document.getElementById('sidebar').classList.toggle('-translate-x-full');
-    });
-
-    // Close sidebar when clicking outside on mobile
-    document.addEventListener('click', (e) => {
-        const sidebar = document.getElementById('sidebar');
-        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-        
-        if (window.innerWidth < 1024 && 
-            !sidebar.contains(e.target) && 
-            !mobileMenuBtn.contains(e.target) && 
-            !sidebar.classList.contains('-translate-x-full')) {
-            sidebar.classList.add('-translate-x-full');
-        }
-    });
-
-    // Performance cancellation handler
-    document.getElementById('confirmCancelBtn').addEventListener('click', async () => {
-        if (!performanceToCancel) return;
-        
-        try {
-            console.log('Querying for performance:', performanceToCancel);
-            
-            const { data: performances, error: fetchError } = await supabase
-                .from('performances')
-                .select('*')
-                .eq('id', performanceToCancel);
-
-            console.log('Query results:', { performances, fetchError });
-
-            if (fetchError) throw fetchError;
-            
-            if (!performances || performances.length === 0) {
-                throw new Error('Performance not found');
-            }
-
-            const performance = performances[0];
-            
-            console.log('Attempting to delete performance:', performance);
-
-            const { error: deleteError } = await supabase
-                .from('performances')
-                .delete()
-                .eq('id', performanceToCancel)
-                .eq('performer_id', window.user.id);
-
-            if (deleteError) throw deleteError;
-
-            const availabilityData = {
-                performer_id: window.user.id,
-                date: performance.date,
-                start_time: performance.start_time,
-                end_time: performance.end_time,
-                rate_per_hour: performance.booking_rate
-            };
-
-            const { error: availError } = await supabase
-                .from('performer_availability')
-                .insert([availabilityData]);
-
-            if (availError) throw availError;
-
-            await refreshPerformanceData();
-            showToast('Performance cancelled successfully');
-            closeCancelPerformanceModal();
-        } catch (error) {
-            console.error('Error cancelling performance:', error);
-            showToast('Error cancelling performance', 'error');
-            closeCancelPerformanceModal();
-        }
-    });
-});
-
-// Initialize Dashboard
+// Data Refresh Functions
 async function initializeDashboard() {
     try {
         await Promise.all([
@@ -945,8 +672,77 @@ async function initializeDashboard() {
     }
 }
 
-// Start the application
-initializeDashboard();
+// Performance cancellation handler
+document.getElementById('confirmCancelBtn').addEventListener('click', async () => {
+    if (!performanceToCancel) return;
+    
+    try {
+        const { data: performances, error: fetchError } = await supabase
+            .from('performances')
+            .select('*')
+            .eq('id', performanceToCancel);
 
-// Refresh data every minute
-setInterval(initializeDashboard, 60000);
+        if (fetchError) throw fetchError;
+        
+        if (!performances || performances.length === 0) {
+            throw new Error('Performance not found');
+        }
+
+        const performance = performances[0];
+
+        const { error: deleteError } = await supabase
+            .from('performances')
+            .delete()
+            .eq('id', performanceToCancel)
+            .eq('performer_id', window.user.id);
+
+        if (deleteError) throw deleteError;
+
+        const availabilityData = {
+            performer_id: window.user.id,
+            date: performance.date,
+            start_time: performance.start_time,
+            end_time: performance.end_time,
+            rate_per_hour: performance.booking_rate
+        };
+
+        const { error: availError } = await supabase
+            .from('performer_availability')
+            .insert([availabilityData]);
+
+        if (availError) throw availError;
+
+        await refreshPerformanceData();
+        showToast('Performance cancelled successfully');
+        closeCancelPerformanceModal();
+    } catch (error) {
+        console.error('Error cancelling performance:', error);
+        showToast('Error cancelling performance', 'error');
+        closeCancelPerformanceModal();
+    }
+});
+
+// Event Listeners
+document.addEventListener('DOMContentLoaded', function() {
+    // Set up navigation
+    const currentTab = window.location.hash.slice(1) || 'dashboard';
+    setActiveTab(currentTab);
+
+    // Navigation handlers
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', () => {
+            const tabId = link.getAttribute('data-tab');
+            setActiveTab(tabId);
+
+            if (tabId === 'reports') {
+                loadReportsData();
+            }
+        });
+    });
+
+    // Initialize dashboard
+    initializeDashboard();
+    
+    // Set up refresh interval
+    setInterval(initializeDashboard, 60000); // Refresh every minute
+});
