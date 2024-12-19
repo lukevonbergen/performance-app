@@ -1,5 +1,5 @@
 // Import and Global Setup
-import { supabase } from '/utils/supabase.js';
+import { supabase } from '/js/utils/supabase.js';
 
 class RatingManager {
     constructor() {
