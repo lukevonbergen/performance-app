@@ -243,19 +243,22 @@ class RatingManager {
     
 
     setupEventListeners() {
+    // Event delegation for rate buttons
         document.getElementById('performerList').addEventListener('click', (event) => {
-            if (event.target.classList.contains('rate-now-btn')) {
-                this.selectedPerformance = event.target.getAttribute('data-perf-id');
+            const rateButton = event.target.closest('.rate-now-btn');
+            if (rateButton) {
+                this.selectedPerformance = rateButton.dataset.perfId;
                 this.showRatingForm();
             }
         });
 
+        // Submit rating handler
         document.getElementById('submitRating').addEventListener('click', () => {
             this.submitRating({
                 overall: this.getRatingValue('overall'),
                 presence: this.getRatingValue('presence'),
                 songs: this.getRatingValue('songs'),
-                comment: document.getElementById('comments').value,
+                comment: document.getElementById('comments').value
             });
         });
 
@@ -314,6 +317,12 @@ class RatingManager {
     showRatingForm() {
         document.getElementById('performerSelect').classList.add('hidden');
         document.getElementById('ratingForm').classList.remove('hidden');
+    
+        // Add back button functionality
+        document.getElementById('backToList').addEventListener('click', () => {
+            document.getElementById('ratingForm').classList.add('hidden');
+            document.getElementById('performerSelect').classList.remove('hidden');
+        });
     }
 
     getRatingValue(category) {
