@@ -76,7 +76,7 @@ class RatingManager {
 
     renderPerformances(performances) {
         const container = document.getElementById('performerList');
-        container.innerHTML = ''; // Clear only the performance list content, not the header
+        container.innerHTML = ''; // Clear existing content
         const now = new Date();
     
         // Create category sections
