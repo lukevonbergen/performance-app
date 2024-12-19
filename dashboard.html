@@ -11,10 +11,10 @@
 </head>
 <body class="bg-[#ffffff] min-h-screen">
 
-            <!-- Two-tier Navigation -->
-    <div class="relative">
+    <!-- Two-tier Navigation -->
+    <div class="relative z-30">
         <!-- Top Tier - Logo and Settings -->
-        <div class="bg-[#0A0A18]/80 backdrop-blur-lg border-b border-black/10">
+        <div class="relative z-40 bg-[#0A0A18]/80 backdrop-blur-lg border-b border-black/10">
             <div class="max-w-7xl mx-auto px-4">
                 <div class="flex justify-between items-center h-12">
                     <!-- Logo -->
@@ -32,7 +32,7 @@
                         </button>
 
                         <!-- User Menu Dropdown -->
-                        <div class="relative">
+                        <div id="userDropdown" class="hidden absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
                             <button id="userMenuBtn" class="flex items-center text-white/70 hover:text-white">
                                 <span class="text-sm font-medium mr-2" id="venueName">Loading...</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -58,7 +58,7 @@
         </div>
 
         <!-- Bottom Tier - Main Navigation -->
-        <div class="bg-[#0A0A18]/95 backdrop-blur-lg border-b border-black/10">
+       <div class="relative z-30 bg-[#0A0A18]/95 backdrop-blur-lg border-b border-black/10">
             <div class="max-w-7xl mx-auto px-4">
                 <div class="flex h-12">
                     <!-- Navigation Links -->
