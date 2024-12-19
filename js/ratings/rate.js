@@ -78,38 +78,39 @@ class RatingManager {
         const container = document.getElementById('performerList');
         const now = new Date();
     
-        container.innerHTML = performances.map(perf => {
+        performances.forEach(perf => {
             const status = this.getPerformanceStatus(perf, now);
             const hasRated = this.checkIfRated(perf.id);
     
-            return `
-                <div class="rounded-lg shadow-sm p-4 ${status.class} transition-all duration-200">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-900">${perf.performers.stage_name}</h3>
-                            <p class="text-sm text-gray-600">${this.formatTimeSlot(perf.start_time, perf.end_time)}</p>
-                            <span class="inline-block px-2 py-1 mt-2 text-xs font-medium rounded-full ${
-                                status.label === "Currently Playing" ? "bg-green-100 text-green-800" :
-                                status.label === "Upcoming" ? "bg-blue-100 text-blue-800" :
-                                "bg-gray-100 text-gray-800"
-                            }">
-                                ${status.label}
-                            </span>
-                        </div>
-                        ${!hasRated && status.canRate ? `
-                            <button 
-                                data-perf-id="${perf.id}"
-                                class="rate-now-btn bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
-                            >
-                                Rate Now
-                            </button>
-                        ` : hasRated ? `
-                            <span class="text-sm text-gray-500">Already Rated</span>
-                        ` : ''}
+            const performanceCard = document.createElement('div');
+            performanceCard.className = 'rounded-lg shadow-sm p-4 mb-4 bg-white';
+            performanceCard.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">${perf.performers.stage_name}</h3>
+                        <p class="text-sm text-gray-600">${this.formatTimeSlot(perf.start_time, perf.end_time)}</p>
+                        <span class="inline-block px-2 py-1 mt-2 text-xs font-medium rounded-full ${
+                            status.label === "Currently Playing" ? "bg-green-100 text-green-800" :
+                            status.label === "Upcoming" ? "bg-blue-100 text-blue-800" :
+                            "bg-gray-100 text-gray-800"
+                        }">
+                            ${status.label}
+                        </span>
                     </div>
+                    <button 
+                        data-perf-id="${perf.id}" 
+                        class="rate-now-btn bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors ${
+                            hasRated ? 'opacity-50 cursor-not-allowed' : ''
+                        }"
+                        ${hasRated ? 'disabled' : ''}
+                    >
+                        ${hasRated ? 'Already Rated' : 'Rate Performance'}
+                    </button>
                 </div>
             `;
-        }).join('');
+    
+            container.appendChild(performanceCard);
+        });
     }
 
     setupStarRatings() {
@@ -157,15 +158,16 @@ class RatingManager {
     
 
     formatTimeSlot(startTime, endTime) {
-        const start = new Date(startTime);
-        const end = new Date(endTime);
+        // Convert time strings (e.g., "14:00:00") to readable format
+        const formatTime = (timeStr) => {
+            const [hours, minutes] = timeStr.split(':');
+            const hour = parseInt(hours);
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            const hour12 = hour % 12 || 12;
+            return `${hour12}:${minutes} ${ampm}`;
+        };
     
-        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-            return "Invalid Date";
-        }
-    
-        const options = { hour: '2-digit', minute: '2-digit' };
-        return `${start.toLocaleTimeString([], options)} - ${end.toLocaleTimeString([], options)}`;
+        return `${formatTime(startTime)} - ${formatTime(endTime)}`;
     }
     
 
