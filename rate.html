@@ -8,11 +8,11 @@
     <style>
         .star {
             cursor: pointer;
-            color: #D1D5DB; /* gray-300 */
+            color: #D1D5DB;
             transition: color 0.2s;
         }
         .star.text-yellow-400 {
-            color: #FBBF24; /* yellow-400 */
+            color: #FBBF24;
         }
         .star:hover {
             transform: scale(1.1);
@@ -20,57 +20,45 @@
     </style>
 </head>
 <body class="bg-gray-50">
-    
-    <div class="max-w-lg mx-auto p-6">
-        <!-- Fixed header -->
-        <div class="mb-8 text-center">
-            <h2 class="text-2xl font-bold">Performances at <span id="venueName">...</span></h2>
-        </div>
-    
-        <!-- Dynamic content -->
-        <div id="performerList" class="max-w-lg mx-auto p-6">
-            <h2 class="text-xl font-bold mb-4">Performances at <span id="venueName">...</span></h2>
-            
-            <!-- Current Events (Ratable) -->
-            <div class="mb-8">
-                <h3 class="text-lg font-semibold mb-4 text-green-600">Current Events</h3>
-                <div class="space-y-4" id="currentEventsList">
-                    <!-- Populated by JS -->
-                </div>
-            </div>
-        
-            <!-- Upcoming Events -->
-            <div class="mb-8">
-                <h3 class="text-lg font-semibold mb-4 text-blue-600">Upcoming Events</h3>
-                <div class="space-y-4" id="upcomingEventsList">
-                    <!-- Populated by JS -->
-                </div>
-            </div>
-        
-            <!-- Expired Events -->
-            <div class="mb-8">
-                <h3 class="text-lg font-semibold mb-4 text-gray-600">Expired Events</h3>
-                <div class="space-y-4" id="expiredEventsList">
-                    <!-- Populated by JS -->
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Step 1: Performer Selection -->
-
-    <!-- Step 2: Rating Form (initially hidden) -->
     <div class="max-w-lg mx-auto p-6">
         <!-- List View -->
         <div id="performerSelect">
+            
             <div class="mb-8 text-center">
                 <h2 class="text-2xl font-bold">Performances at <span id="venueName">...</span></h2>
             </div>
-            <div id="performerList" class="space-y-8">
-                <!-- Content will be inserted here -->
+
+            <!-- Dynamic content -->
+            <div id="performerList" class="max-w-lg mx-auto p-6">
+                <h2 class="text-xl font-bold mb-4">Performances at <span id="venueName">...</span></h2>
+                
+                <!-- Current Events (Ratable) -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold mb-4 text-green-600">Current Events</h3>
+                    <div class="space-y-4" id="currentEventsList">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            
+                <!-- Upcoming Events -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold mb-4 text-blue-600">Upcoming Events</h3>
+                    <div class="space-y-4" id="upcomingEventsList">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            
+                <!-- Expired Events -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-600">Expired Events</h3>
+                    <div class="space-y-4" id="expiredEventsList">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
             </div>
         </div>
-    
-        <!-- Rating Form (initially hidden) -->
+
+        <!-- Rating Form -->
         <div id="ratingForm" class="hidden">
             <div class="mb-8">
                 <button id="backToList" class="text-gray-600 hover:text-gray-800 flex items-center gap-2">
@@ -80,7 +68,7 @@
                     Back to Performances
                 </button>
             </div>
-    
+
             <div class="space-y-6">
                 <!-- Overall Rating -->
                 <div class="rating-section">
@@ -95,7 +83,7 @@
                         </div>
                     </div>
                 </div>
-    
+
                 <!-- Stage Presence -->
                 <div class="rating-section">
                     <h3 class="text-lg font-semibold mb-2">Stage Presence</h3>
@@ -109,7 +97,7 @@
                         </div>
                     </div>
                 </div>
-    
+
                 <!-- Song Selection -->
                 <div class="rating-section">
                     <h3 class="text-lg font-semibold mb-2">Song Selection</h3>
@@ -123,7 +111,7 @@
                         </div>
                     </div>
                 </div>
-    
+
                 <!-- Comments -->
                 <div>
                     <label class="block text-lg font-semibold mb-2">Additional Comments</label>
@@ -131,9 +119,10 @@
                         id="comments" 
                         class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         rows="4"
+                        placeholder="Share your thoughts about the performance..."
                     ></textarea>
                 </div>
-    
+
                 <!-- Venue Verification -->
                 <div class="flex items-center space-x-2">
                     <input 
@@ -145,7 +134,7 @@
                         I confirm I'm currently at <span id="venueNameConfirm">...</span>
                     </label>
                 </div>
-    
+
                 <button 
                     id="submitRating" 
                     class="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg hover:bg-indigo-700 transition-colors"
