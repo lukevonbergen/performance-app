@@ -58,33 +58,24 @@
         </div>
 
         <!-- Bottom Tier - Main Navigation -->
-       <div class="relative z-30 bg-[#0A0A18]/95 backdrop-blur-lg border-b border-black/10">
+        <div class="relative z-30 bg-[#0A0A18]/95 backdrop-blur-lg border-b border-black/10">
             <div class="max-w-7xl mx-auto px-4">
                 <div class="flex h-12">
-                    <!-- Navigation Links -->
-                    <div class="hidden sm:flex sm:space-x-4">
-                        <button data-tab="dashboard" class="nav-link px-2 py-1 text-white/90 rounded-md hover:bg-white/10 my-2">
+                    <!-- Navigation Links - changed to show on mobile and enable horizontal scroll -->
+                    <div class="flex space-x-4 overflow-x-auto scrollbar-hide w-full">
+                        <button data-tab="dashboard" class="nav-link px-2 py-1 text-white/90 rounded-md hover:bg-white/10 my-2 whitespace-nowrap">
                             <span class="font-medium text-sm">Dashboard</span>
                         </button>
-                        <button data-tab="book" class="nav-link px-2 py-1 text-white/90 rounded-md hover:bg-white/10 my-2">
+                        <button data-tab="book" class="nav-link px-2 py-1 text-white/90 rounded-md hover:bg-white/10 my-2 whitespace-nowrap">
                             <span class="font-medium text-sm">Book Performers</span>
                         </button>
-                        <button data-tab="reports" class="nav-link px-2 py-1 text-white/90 rounded-md hover:bg-white/10 my-2">
+                        <button data-tab="reports" class="nav-link px-2 py-1 text-white/90 rounded-md hover:bg-white/10 my-2 whitespace-nowrap">
                             <span class="font-medium text-sm">Reports</span>
                         </button>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Mobile menu button -->
-    <div class="sm:hidden absolute top-4 left-4">
-        <button id="mobileMenuBtn" class="p-2 rounded-lg bg-white/20 backdrop-blur-lg border border-white/10">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-        </button>
     </div>
 
     <!-- Main Content Area -->
