@@ -11,68 +11,74 @@
 </head>
 <body class="bg-[#ffffff] min-h-screen">
 
-    <aside id="sidebar" class="fixed top-0 left-0 z-40 w-72 h-screen transition-transform -translate-x-full lg:translate-x-0">
-        <div class="h-full flex flex-col bg-[#0A0A18]/95 backdrop-blur-lg border-r border-black/10">
-            <!-- Logo - Only show on desktop -->
-            <div class="hidden lg:flex items-center gap-3 p-4 border-b border-black/10">
-                <img src="/img/logo_v1.svg" alt="StageLink Logo" class="h-12 w-auto">
-            </div>
-            
-            <!-- Navigation Links -->
-            <nav class="flex-1 px-4 pt-6">
-                <ul class="space-y-2">
-                    <li>
-                        <button data-tab="dashboard" class="nav-link w-full flex items-center px-4 py-3 text-white/90 rounded-xl hover:bg-white/10">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                            </svg>
+        <nav class="bg-[#0A0A18]/95 backdrop-blur-lg border-b border-black/10">
+        <div class="max-w-full mx-auto px-4">
+            <div class="flex justify-between h-16">
+                <!-- Left side - Logo and Nav Links -->
+                <div class="flex items-center">
+                    <!-- Logo -->
+                    <div class="flex-shrink-0 flex items-center mr-6">
+                        <img src="/img/logo_v1.svg" alt="StageLink Logo" class="h-8 w-auto">
+                    </div>
+                    
+                    <!-- Navigation Links -->
+                    <div class="hidden sm:flex sm:space-x-4">
+                        <button data-tab="dashboard" class="nav-link px-4 py-2 text-white/90 rounded-xl hover:bg-white/10">
                             <span class="font-medium text-base">Dashboard</span>
                         </button>
-                    </li> 
-                    <li>
-                        <button data-tab="book" class="nav-link w-full flex items-center px-4 py-3 text-white/90 rounded-xl hover:bg-white/10">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
+                        <button data-tab="book" class="nav-link px-4 py-2 text-white/90 rounded-xl hover:bg-white/10">
                             <span class="font-medium text-base">Book Performers</span>
                         </button>
-                    </li>
-                    <li>
-                        <button data-tab="reports" class="nav-link w-full flex items-center px-4 py-3 text-white/90 rounded-xl hover:bg-white/10">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
+                        <button data-tab="reports" class="nav-link px-4 py-2 text-white/90 rounded-xl hover:bg-white/10">
                             <span class="font-medium text-base">Reports</span>
                         </button>
-                    </li>
-                    <li>
-                        <button data-tab="settings" class="nav-link w-full flex items-center px-4 py-3 text-white/90 rounded-xl hover:bg-white/10">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            <span class="font-medium text-base">Settings</span>
-                        </button>
-                    </li>
-                </ul>
-            </nav>
+                    </div>
+                </div>
 
-        <!-- User Info & Logout -->
-        <div class="p-4 border-t border-white/10">
-            <div class="mb-3">
-                <p class="text-sm text-white/60 mb-1">Logged in as</p>
-                <h3 class="text-white font-medium" id="venueName">Loading...</h3>
+                <!-- Right side - Settings and User Menu -->
+                <div class="flex items-center space-x-4">
+                    <!-- Settings Icon -->
+                    <button data-tab="settings" class="nav-link p-2 text-white/90 rounded-xl hover:bg-white/10">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </button>
+
+                    <!-- User Menu Dropdown -->
+                    <div class="relative">
+                        <button id="userMenuBtn" class="flex items-center text-white/90 hover:text-white">
+                            <span class="text-sm font-medium mr-2" id="venueName">Loading...</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+
+                        <!-- Dropdown Menu -->
+                        <div id="userDropdown" class="hidden absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                            <div class="py-1">
+                                <button onclick="logout()" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                    </svg>
+                                    Logout
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <button onclick="logout()" 
-                class="w-full px-4 py-2.5 rounded-xl bg-white/5 text-white/90 hover:bg-white/10 transition-colors flex items-center justify-center space-x-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        </div>
+
+        <!-- Mobile menu button -->
+        <div class="sm:hidden absolute top-4 left-4">
+            <button id="mobileMenuBtn" class="p-2 rounded-lg bg-white/20 backdrop-blur-lg border border-white/10">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
-                <span>Logout</span>
             </button>
         </div>
-    </div>
-</aside>
+    </nav>
 
     <!-- Mobile Navigation Toggle -->
     <div class="lg:hidden fixed top-4 left-4 z-50 flex items-center gap-3">
