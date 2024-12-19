@@ -1,3 +1,6 @@
+// Import and Global Setup
+import { supabase } from '/utils/supabase.js';
+
 class RatingManager {
     constructor() {
         this.venueId = this.getVenueIdFromUrl();
