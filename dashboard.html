@@ -387,6 +387,18 @@
                         </form>
                     </div>
                 </div>
+
+                <div class="glass-card rounded-xl border border-black/10">
+
+                    <div id="venue-qr-container">
+                        <img id="venueQR" alt="Venue QR Code" style="max-width: 300px; display: block; margin-bottom: 10px;" />
+                        <button id="downloadQR" style="padding: 10px 20px; background-color: #007bff; color: white; border: none; cursor: pointer;">
+                            Download QR Code
+                        </button>
+                    </div>
+
+                </div>
+                
             </div>
         </div>
     </div>
@@ -413,5 +425,6 @@
 
     <!-- Scripts -->
     <script type="module" src="./js/dashboard/venue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode"></script>
 </body>
 </html>

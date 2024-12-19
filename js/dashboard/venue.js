@@ -667,18 +667,31 @@ window.logout = function() {
     window.location.href = 'login';
 };
 
-// Ratings Feature
-function generateVenueQR(venueId) {
+async function generateVenueQR(venueId) {
     const ratingUrl = `${window.location.origin}/rate/venue/${venueId}`;
-    return QRCode.toDataURL(ratingUrl);
+    return QRCode.toDataURL(ratingUrl); // Generate QR code as a Data URL
 }
 
-// Add to venue settings page:
 async function displayVenueQR() {
-    const qrCode = await generateVenueQR(window.user.id);
-    document.getElementById('venueQR').src = qrCode;
-    // Also add download button for venue to save QR
+    const qrCode = await generateVenueQR(window.user.id); // Generate QR code using user ID
+    const qrImage = document.getElementById('venueQR');
+    const downloadButton = document.getElementById('downloadQR');
+
+    // Set the QR code image source
+    qrImage.src = qrCode;
+
+    // Set the download button functionality
+    downloadButton.addEventListener('click', () => {
+        const link = document.createElement('a');
+        link.href = qrCode; // Use the generated QR code data URL
+        link.download = 'venue-qr-code.png'; // File name for the download
+        link.click();
+    });
 }
+
+// Call the display function on page load or when the venue settings page is ready
+document.addEventListener('DOMContentLoaded', displayVenueQR);
+
 
 // Event Listeners
 document.addEventListener('DOMContentLoaded', function() {
