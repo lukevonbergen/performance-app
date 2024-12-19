@@ -669,7 +669,13 @@ window.logout = function() {
 
 async function generateVenueQR(venueId) {
     const ratingUrl = `${window.location.origin}/rate/venue/${venueId}`;
-    return QRCode.toDataURL(ratingUrl); // Generate QR code as a Data URL
+    try {
+        // Ensure QRCode is defined and generate the QR Code
+        return await QRCode.toDataURL(ratingUrl);
+    } catch (error) {
+        console.error('Error generating QR code:', error);
+        throw error;
+    }
 }
 
 async function displayVenueQR() {
