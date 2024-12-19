@@ -9,8 +9,25 @@ class RatingManager {
     }
 
     async initialize() {
+        await this.loadVenueInfo();
         await this.loadTodaysPerformances();
         this.setupEventListeners();
+    }
+    
+    async loadVenueInfo() {
+        const { data: venue, error } = await supabase
+            .from('venues')
+            .select('name')
+            .eq('id', this.venueId)
+            .single();
+    
+        if (error || !venue) {
+            document.getElementById('venueName').textContent = "Unknown Venue";
+            document.getElementById('venueNameConfirm').textContent = "Unknown Venue";
+        } else {
+            document.getElementById('venueName').textContent = venue.name;
+            document.getElementById('venueNameConfirm').textContent = venue.name;
+        }
     }
 
     getVenueIdFromUrl() {
@@ -66,23 +83,36 @@ class RatingManager {
         });
     }
 
-    getPerformanceStatus(performance, now) {
-        const start = new Date(performance.start_time);
-        const end = new Date(performance.end_time);
-
-        if (now < start) return { label: 'Upcoming', class: 'upcoming', canRate: false };
-        if (now >= start && now <= end) return { label: 'Currently Playing', class: 'playing', canRate: true };
-        return { label: 'Finished', class: 'finished', canRate: true };
+    getPerformanceStatus(perf, now) {
+        const start = new Date(perf.start_time);
+        const end = new Date(perf.end_time);
+    
+        if (now < start) {
+            return { label: "Upcoming", class: "bg-blue-200", canRate: false };
+        } else if (now >= start && now <= end) {
+            return { label: "Currently Playing", class: "bg-green-200", canRate: true };
+        } else {
+            return { label: "Finished", class: "bg-gray-200", canRate: true };
+        }
     }
 
     checkIfRated(performanceId) {
         return localStorage.getItem(`rated-${performanceId}`) !== null;
     }
+    
 
-    formatTimeSlot(start, end) {
+    formatTimeSlot(startTime, endTime) {
+        const start = new Date(startTime);
+        const end = new Date(endTime);
+    
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+            return "Invalid Date";
+        }
+    
         const options = { hour: '2-digit', minute: '2-digit' };
-        return `${new Date(start).toLocaleTimeString([], options)} - ${new Date(end).toLocaleTimeString([], options)}`;
+        return `${start.toLocaleTimeString([], options)} - ${end.toLocaleTimeString([], options)}`;
     }
+    
 
     setupEventListeners() {
         document.getElementById('performerList').addEventListener('click', (event) => {
