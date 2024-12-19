@@ -15,18 +15,25 @@ class RatingManager {
     }
     
     async loadVenueInfo() {
-        const { data: venue, error } = await supabase
-            .from('venues')
-            .select('venue_name')
-            .eq('id', this.venueId)
-            .single();
+        try {
+            const { data: venue, error } = await supabase
+                .from('venues')
+                .select('venue_name')
+                .eq('id', this.venueId)
+                .single();
     
-        if (error || !venue) {
-            document.getElementById('venueName').textContent = "Unknown Venue";
-            document.getElementById('venueNameConfirm').textContent = "Unknown Venue";
-        } else {
-            document.getElementById('venueName').textContent = venue.venue_name; // Changed from venue.name
-            document.getElementById('venueNameConfirm').textContent = venue.venue_name;
+            if (error) throw error;
+    
+            // Update all instances of venue name
+            const venueNameElements = document.querySelectorAll('#venueName');
+            venueNameElements.forEach(element => {
+                element.textContent = venue.venue_name;
+            });
+        } catch (error) {
+            console.error('Error loading venue info:', error);
+            document.querySelectorAll('#venueName').forEach(element => {
+                element.textContent = 'Unknown Venue';
+            });
         }
     }
     
@@ -76,7 +83,7 @@ class RatingManager {
 
     renderPerformances(performances) {
         const container = document.getElementById('performerList');
-        container.innerHTML = ''; // Clear existing content
+        container.innerHTML = ''; // Clear only the performance list content, not the header
         const now = new Date();
     
         // Create category sections
