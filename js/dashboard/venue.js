@@ -72,6 +72,20 @@ async function loadDashboardData() {
     }
 }
 
+// Dropdown toggle functionality
+document.getElementById('userMenuBtn').addEventListener('click', function() {
+    document.getElementById('userDropdown').classList.toggle('hidden');
+});
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('userDropdown');
+    const button = document.getElementById('userMenuBtn');
+    if (!button.contains(event.target) && !dropdown.contains(event.target)) {
+        dropdown.classList.add('hidden');
+    }
+});
+
 function updateDashboardUI(upcomingEvents, today) {
     // Update total cost
     const confirmedEvents = upcomingEvents?.filter(event => event.status === 'confirmed') || [];
