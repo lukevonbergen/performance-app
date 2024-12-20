@@ -163,7 +163,7 @@ function updateDashboardStats(performances, ratings) {
     let averageRating = '--';
     if (ratings && ratings.length > 0) {
         const totalRating = ratings.reduce((sum, rating) => sum + rating.overall_rating, 0);
-        averageRating = (totalRating / ratings.length).toFixed(1) + '⭐';
+        averageRating = (totalRating / ratings.length).toFixed(1);
     }
 
     // Update UI elements
