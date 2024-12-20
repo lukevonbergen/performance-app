@@ -973,9 +973,3 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, 60000); // Refresh every minute
 });
-
-// Make sure we're consistently using calculatePerformanceTotal
-function calculatePerformanceTotal(performance) {
-    const duration = calculateDuration(performance.start_time, performance.end_time);
-    return (duration * performance.booking_rate).toFixed(2);
-}
