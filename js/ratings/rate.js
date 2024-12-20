@@ -65,20 +65,34 @@ class RatingManager {
 
     async loadTodaysPerformances() {
         const sixHoursAgo = new Date(Date.now() - 6 * 60 * 60 * 1000);
-
-        const { data: performances, error } = await supabase
-            .from('performances')
-            .select(`*, performers (stage_name)`)
-            .eq('venue_id', this.venueId)
-            .gte('date', sixHoursAgo.toISOString())
-            .order('start_time');
-
-        if (error) {
+        
+        try {
+            const { data: performances, error } = await supabase
+                .from('performances')
+                .select(`
+                    *,
+                    performers (stage_name)
+                `)
+                .eq('venue_id', this.venueId)
+                .order('date', { ascending: true })
+                .order('start_time', { ascending: true });
+    
+            if (error) throw error;
+    
+            // Filter out performances older than 6 hours ago
+            const filteredPerformances = performances.filter(perf => {
+                const perfDate = new Date(perf.date);
+                const perfTime = perf.start_time.split(':');
+                perfDate.setHours(parseInt(perfTime[0]), parseInt(perfTime[1]), 0);
+                return perfDate >= sixHoursAgo;
+            });
+    
+            console.log('Filtered Performances:', filteredPerformances);
+            this.renderPerformances(filteredPerformances);
+        } catch (error) {
             console.error('Error fetching performances:', error);
             return;
         }
-
-        this.renderPerformances(performances);
     }
 
     renderPerformances(performances) {
@@ -191,14 +205,28 @@ class RatingManager {
     }
 
     getPerformanceStatus(perf, now) {
+        // Create date objects for start and end times
         const performanceDate = new Date(perf.date);
-        const start = new Date(performanceDate.setHours(
-            ...perf.start_time.split(':').map(Number)
-        ));
-        const end = new Date(performanceDate.setHours(
-            ...perf.end_time.split(':').map(Number)
-        ));
+        const [startHours, startMinutes] = perf.start_time.split(':');
+        const [endHours, endMinutes] = perf.end_time.split(':');
+    
+        const start = new Date(performanceDate);
+        start.setHours(parseInt(startHours), parseInt(startMinutes), 0);
+    
+        const end = new Date(performanceDate);
+        end.setHours(parseInt(endHours), parseInt(endMinutes), 0);
+    
         const sixHoursAfterEnd = new Date(end.getTime() + (6 * 60 * 60 * 1000));
+    
+        // Add console logs for debugging
+        console.log('Performance:', {
+            name: perf.performers.stage_name,
+            date: perf.date,
+            start: start.toISOString(),
+            end: end.toISOString(),
+            now: now.toISOString(),
+            sixHoursAfter: sixHoursAfterEnd.toISOString()
+        });
     
         if (now < start) {
             return { 
