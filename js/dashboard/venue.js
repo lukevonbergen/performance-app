@@ -160,7 +160,7 @@ function updateTodaySchedule(upcomingEvents, today) {
     if (todayEvents.length > 0) {
         scheduleList.innerHTML = todayEvents.map(event => `
             <div class="border-l-4 border-blue-500 pl-4">
-                <h3 class="font-medium text-white">${event.performers.stage_name}</h3>
+                <h3 class="font-medium text-black">${event.performers.stage_name}</h3>
                 <p class="text-black">${formatTime(event.start_time)} - ${formatTime(event.end_time)}</p>
                 <p class="text-sm text-gray-400">Status: ${event.status}</p>
             </div>
