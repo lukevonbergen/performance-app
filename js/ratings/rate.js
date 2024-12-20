@@ -131,9 +131,10 @@ class RatingManager {
                                 const hasRated = this.checkIfRated(perf.id);
                                 return `
                                     <div class="rounded-lg shadow-sm p-4 bg-white border border-gray-200">
-                                        <div class="flex justify-between items-center">
+                                        <div class="flex flex-col sm:flex-row justify-between">
                                             <div>
                                                 <h3 class="text-lg font-semibold text-gray-900">${perf.performers.stage_name}</h3>
+                                                <p class="text-sm text-gray-600 mb-1">${this.formatDate(perf.date)}</p>
                                                 <p class="text-sm text-gray-600">${this.formatTimeSlot(perf.start_time, perf.end_time)}</p>
                                                 <span class="inline-block px-2 py-1 mt-2 text-xs font-medium rounded-full ${
                                                     status.label === "Currently Playing" ? "bg-green-100 text-green-800" :
@@ -147,12 +148,12 @@ class RatingManager {
                                             ${status.canRate && !hasRated ? `
                                                 <button 
                                                     data-perf-id="${perf.id}" 
-                                                    class="rate-now-btn bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                                                    class="rate-now-btn bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors mt-4 sm:mt-0 whitespace-nowrap"
                                                 >
-                                                    Rate Performance
+                                                    Rate Now
                                                 </button>
                                             ` : hasRated ? `
-                                                <span class="text-sm text-gray-500">Already Rated</span>
+                                                <span class="text-sm text-gray-500 mt-4 sm:mt-0">Already Rated</span>
                                             ` : ''}
                                         </div>
                                     </div>
@@ -225,6 +226,35 @@ class RatingManager {
 
     checkIfRated(performanceId) {
         return localStorage.getItem(`rated-${performanceId}`) !== null;
+    }
+
+    formatDate(dateStr) {
+        const date = new Date(dateStr);
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+    
+        // Reset time part for comparison
+        const compareDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        const compareToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const compareTomorrow = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate());
+        const compareYesterday = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate());
+    
+        if (compareDate.getTime() === compareToday.getTime()) {
+            return 'Today';
+        } else if (compareDate.getTime() === compareTomorrow.getTime()) {
+            return 'Tomorrow';
+        } else if (compareDate.getTime() === compareYesterday.getTime()) {
+            return 'Yesterday';
+        } else {
+            return date.toLocaleDateString('en-GB', { 
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long'
+            });
+        }
     }
     
 
