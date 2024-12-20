@@ -114,7 +114,7 @@ class RatingManager {
                 performances: []
             },
             expired: {
-                title: 'Expired Events',
+                title: 'Past Events',
                 description: 'Past events that can no longer be rated',
                 performances: []
             }
