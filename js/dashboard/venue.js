@@ -661,9 +661,19 @@ function setActiveTab(tabId) {
     }
 }
 
+// Tab persistence functions
+function saveActiveTab(tabId) {
+    localStorage.setItem('activeTab', tabId);
+}
+
+function getActiveTab() {
+    return localStorage.getItem('activeTab') || 'dashboard'; // Default to dashboard if no tab is stored
+}
+
 // Authentication Functions
 window.logout = function() {
     sessionStorage.removeItem('user');
+    localStorage.removeItem('activeTab'); // Clear stored tab on logout
     window.location.href = 'login';
 };
 
@@ -699,19 +709,68 @@ async function displayVenueQR() {
 document.addEventListener('DOMContentLoaded', displayVenueQR);
 
 
-// Event Listeners
+// Update the DOMContentLoaded event listener
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize UI
+    // Get the stored tab or use dashboard as default
+    const storedTab = getActiveTab();
+    setActiveTab(storedTab);
+    
+    // Initialize UI elements
     document.getElementById('venueName').textContent = window.user.venue_name;
     document.getElementById('welcomeMessage').textContent = `Welcome back, ${window.user.first_name}`;
-    document.getElementById('searchDate').min = new Date().toISOString().split('T')[0];
+    if (document.getElementById('searchDate')) {
+        document.getElementById('searchDate').min = new Date().toISOString().split('T')[0];
+    }
 
-    // Navigation setup
-    const currentTab = window.location.hash.slice(1) || 'dashboard';
-    setActiveTab(currentTab);
+    // Show the stored tab content
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.add('hidden');
+    });
+    document.getElementById(`${storedTab}-tab`).classList.remove('hidden');
+
+    // Load data based on which tab is selected
+    switch(storedTab) {
+        case 'reports':
+            loadReportsData();
+            break;
+        case 'settings':
+            loadSettings();
+            break;
+        case 'dashboard':
+        default:
+            loadDashboardData();
+            break;
+    }
+
+    // Navigation handlers
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', () => {
+            const tabId = link.getAttribute('data-tab');
+            saveActiveTab(tabId);
+            setActiveTab(tabId);
+
+            // Load data based on which tab is selected
+            switch(tabId) {
+                case 'reports':
+                    loadReportsData();
+                    break;
+                case 'settings':
+                    loadSettings();
+                    break;
+                case 'dashboard':
+                    loadDashboardData();
+                    break;
+            }
+
+            // Handle mobile menu if needed
+            if (window.innerWidth < 1024) {
+                document.getElementById('sidebar')?.classList.add('-translate-x-full');
+            }
+        });
+    });
 
     // Form handlers
-    document.getElementById('searchForm').addEventListener('submit', async (e) => {
+    document.getElementById('searchForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const date = document.getElementById('searchDate').value;
         const startTime = document.getElementById('searchStartTime').value;
@@ -719,7 +778,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Settings form handler
-    document.getElementById('settingsForm').addEventListener('submit', async (e) => {
+    document.getElementById('settingsForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         
         const formData = {
@@ -737,54 +796,36 @@ document.addEventListener('DOMContentLoaded', function() {
         await updateSettings(formData);
     });
 
-    // Load settings when tab is clicked
-    document.querySelector('[data-tab="settings"]').addEventListener('click', loadSettings);
-
-    // Navigation handlers
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', () => {
-            const tabId = link.getAttribute('data-tab');
-            setActiveTab(tabId);
-            
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.add('hidden');
-            });
-            document.getElementById(`${tabId}-tab`).classList.remove('hidden');
-
-            if (tabId === 'reports') {
-                loadReportsData();
-            } else if (tabId === 'settings') {
-                loadSettings();
-            }
-
-            if (window.innerWidth < 1024) {
-                document.getElementById('sidebar').classList.add('-translate-x-full');
-            }
-        });
+    // Dropdown toggle functionality
+    document.getElementById('userMenuBtn')?.addEventListener('click', function() {
+        document.getElementById('userDropdown').classList.toggle('hidden');
     });
 
-    // Mobile menu toggle
-if (document.getElementById('mobileMenuBtn')) {
-    document.getElementById('mobileMenuBtn').addEventListener('click', () => {
-        const sidebar = document.getElementById('sidebar');
-        sidebar.classList.toggle('-translate-x-full');
-    });
-}
-    
-
-    document.addEventListener('click', (e) => {
-        const sidebar = document.getElementById('sidebar');
-        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-        
-        if (window.innerWidth < 1024 && 
-            !sidebar.contains(e.target) && 
-            !mobileMenuBtn.contains(e.target) && 
-            !sidebar.classList.contains('-translate-x-full')) {
-            sidebar.classList.add('-translate-x-full');
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        const dropdown = document.getElementById('userDropdown');
+        const button = document.getElementById('userMenuBtn');
+        if (dropdown && button && !button.contains(event.target) && !dropdown.contains(event.target)) {
+            dropdown.classList.add('hidden');
         }
     });
 
-    // Initialize data
+    // Set up auto-refresh interval for active data
+    setInterval(() => {
+        const activeTab = getActiveTab();
+        switch(activeTab) {
+            case 'dashboard':
+                loadDashboardData();
+                break;
+            case 'reports':
+                loadReportsData();
+                break;
+            case 'settings':
+                // Settings don't need regular refresh
+                break;
+        }
+    }, 60000); // Refresh every minute
+
+    // Initial data load
     loadDashboardData();
-    setInterval(loadDashboardData, 60000); // Refresh every minute
 });
