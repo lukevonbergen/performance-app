@@ -117,19 +117,29 @@ function setActiveTab(tabId) {
     document.querySelectorAll('.nav-link').forEach(link => {
         link.classList.remove('bg-white/5', 'bg-white/10');
     });
-    
-    // Add active class to current tab
+
+    // Add active class to the selected tab
     const activeTab = document.querySelector(`[data-tab="${tabId}"]`);
     if (activeTab) {
         activeTab.classList.add('bg-white/5');
+    } else {
+        console.warn(`Active tab not found for tabId: ${tabId}`);
     }
 
-    // Show/hide content
+    // Hide all tab contents
     document.querySelectorAll('.tab-content').forEach(content => {
         content.classList.add('hidden');
     });
-    document.getElementById(`${tabId}-tab`).classList.remove('hidden');
+
+    // Show the selected tab content
+    const tabContent = document.getElementById(`${tabId}-tab`);
+    if (tabContent) {
+        tabContent.classList.remove('hidden');
+    } else {
+        console.warn(`Tab content not found for tabId: ${tabId}`);
+    }
 }
+
 
 // Authentication Functions
 window.logout = function() {
