@@ -380,7 +380,7 @@ function performancePendingTemplate(perf) {
                         </svg>
                     </a>
                 </div>
-                <div class="flex space-x-2">
+                <div class="flex flex-col space-y-2">
                     <button 
                         onclick="handleBookingResponse('${perf.id}', 'confirmed')"
                         class="px-4 py-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 text-sm transition-colors duration-200">
