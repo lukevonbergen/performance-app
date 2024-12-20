@@ -194,6 +194,9 @@ function updateRecentActivity(performances) {
 // Performance Management Functions
 async function loadPerformances() {
     try {
+        const today = new Date().toISOString().split('T')[0];
+        
+        // Get all performances for this performer
         const { data: performances, error } = await supabase
             .from('performances')
             .select(`
@@ -209,20 +212,21 @@ async function loadPerformances() {
                 )
             `)
             .eq('performer_id', window.user.id)
-            .gte('date', new Date().toISOString().split('T')[0])
             .order('date');
 
         if (error) throw error;
 
-        // Filter performances by status
-        const upcoming = performances?.filter(p => p.status === 'confirmed') || [];
-        const pending = performances?.filter(p => p.status === 'pending') || [];
-        const rejected = performances?.filter(p => p.status === 'rejected') || [];
+        // Split performances into categories
+        const upcoming = performances?.filter(p => p.date >= today && p.status === 'confirmed') || [];
+        const pending = performances?.filter(p => p.date >= today && p.status === 'pending') || [];
+        const rejected = performances?.filter(p => p.date >= today && p.status === 'rejected') || [];
+        const past = performances?.filter(p => p.date < today) || [];
 
         // Update the badge with pending count
         updatePendingBadge(pending.length);
 
-        updatePerformancesUI(upcoming, pending, rejected);
+        // Update all performance sections
+        updatePerformancesUI(upcoming, pending, rejected, past);
 
     } catch (error) {
         console.error('Error loading performances:', error);
@@ -230,7 +234,7 @@ async function loadPerformances() {
     }
 }
 
-function updatePerformancesUI(upcoming, pending, rejected) {
+function updatePerformancesUI(upcoming, pending, rejected, past) {
     // Update Upcoming Performances
     const upcomingList = document.getElementById('upcomingPerformancesList');
     if (upcoming.length > 0) {
@@ -283,6 +287,41 @@ function updatePerformancesUI(upcoming, pending, rejected) {
         rejectedList.innerHTML = rejected.map(perf => performanceRejectedTemplate(perf)).join('');
     } else {
         rejectedList.innerHTML = '<p class="text-center text-gray-400">No rejected performances</p>';
+    }
+
+    // Update Past Performances
+    const pastList = document.getElementById('pastPerformancesList');
+    if (past.length > 0) {
+        pastList.innerHTML = past
+            .sort((a, b) => new Date(b.date) - new Date(a.date)) // Sort by date, most recent first
+            .map(perf => `
+                <div class="border-l-4 border-gray-500 pl-4">
+                    <div>
+                        <h3 class="font-medium text-black">${perf.venues?.venue_name || 'Unknown Venue'}</h3>
+                        <p class="text-black">${formatDate(perf.date)}</p>
+                        <p class="text-black">${formatTime(perf.start_time)} - ${formatTime(perf.end_time)}</p>
+                        <div class="flex space-x-2 text-sm text-gray-400">
+                            <p>Rate: £${perf.booking_rate}/hr</p>
+                            <span>•</span>
+                            <p>Total: £${calculatePerformanceTotal(perf)}</p>
+                            <span>•</span>
+                            <p>Status: ${perf.status.charAt(0).toUpperCase() + perf.status.slice(1)}</p>
+                        </div>
+                        <a href="${createMapsUrl(perf.venues)}" 
+                           target="_blank" 
+                           rel="noopener noreferrer" 
+                           class="inline-flex items-center mt-2 text-indigo-500 hover:text-indigo-400 text-sm">
+                            Get directions
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            `)
+            .join('');
+    } else {
+        pastList.innerHTML = '<p class="text-center text-gray-400">No past performances</p>';
     }
 }
 
