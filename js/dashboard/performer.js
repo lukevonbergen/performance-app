@@ -398,6 +398,7 @@ function calculatePerformanceTotal(performance) {
 
 // Availability Management Functions
 async function loadAvailability() {
+    console.log('Loading availability...');
     try {
         const { data: availability, error } = await supabase
             .from('performer_availability')
@@ -406,8 +407,12 @@ async function loadAvailability() {
             .gte('date', new Date().toISOString().split('T')[0])
             .order('date');
 
-        if (error) throw error;
+        if (error) {
+            console.error('Availability error:', error);
+            throw error;
+        }
 
+        console.log('Availability data:', availability);
         updateAvailabilityUI(availability);
     } catch (error) {
         console.error('Error loading availability:', error);
@@ -537,6 +542,7 @@ document.getElementById('confirmDeleteBtn')?.addEventListener('click', async () 
 
 // Reports Functions
 async function loadReportsData() {
+    console.log('Loading reports...');
     try {
         const { data: performances, error } = await supabase
             .from('performances')
@@ -549,8 +555,12 @@ async function loadReportsData() {
             `)
             .eq('performer_id', window.user.id);
 
-        if (error) throw error;
+        if (error) {
+            console.error('Reports error:', error);
+            throw error;
+        }
 
+        console.log('Reports data:', performances);
         const stats = processReportsData(performances);
         updateReportsSummary(stats);
         createEarningsChart(stats.monthlyEarnings);
@@ -928,28 +938,33 @@ document.addEventListener('DOMContentLoaded', function() {
     setActiveTab('dashboard');
 
     // Navigation handlers
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', () => {
-            const tabId = link.getAttribute('data-tab');
-            setActiveTab(tabId);
+document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+        const tabId = link.getAttribute('data-tab');
+        console.log('Tab clicked:', tabId);
+        setActiveTab(tabId);
 
-            // Load data based on which tab is selected
-            switch(tabId) {
-                case 'reports':
-                    loadReportsData();
-                    break;
-                case 'availability':
-                    loadAvailability();
-                    break;
-                case 'performances':
-                    loadPerformances();
-                    break;
-                case 'dashboard':
-                    loadDashboardData();
-                    break;
-            }
-        });
+        // Load data based on which tab is selected
+        switch(tabId) {
+            case 'reports':
+                console.log('Loading reports tab...');
+                loadReportsData();
+                break;
+            case 'availability':
+                console.log('Loading availability tab...');
+                loadAvailability();
+                break;
+            case 'performances':
+                console.log('Loading performances tab...');
+                loadPerformances();
+                break;
+            case 'dashboard':
+                console.log('Loading dashboard tab...');
+                loadDashboardData();
+                break;
+        }
     });
+});
 
     // Initialize dashboard
     initializeDashboard();
