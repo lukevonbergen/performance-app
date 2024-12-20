@@ -749,6 +749,12 @@ document.addEventListener('DOMContentLoaded', function() {
             saveActiveTab(tabId);
             setActiveTab(tabId);
 
+            // Show/hide tab content immediately
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            document.getElementById(`${tabId}-tab`).classList.remove('hidden');
+
             // Load data based on which tab is selected
             switch(tabId) {
                 case 'reports':
@@ -756,6 +762,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     break;
                 case 'settings':
                     loadSettings();
+                    break;
+                case 'book':
+                    // Book tab doesn't need initial data load
                     break;
                 case 'dashboard':
                     loadDashboardData();
