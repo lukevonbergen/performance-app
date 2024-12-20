@@ -922,11 +922,10 @@ document.getElementById('confirmCancelBtn').addEventListener('click', async () =
     }
 });
 
-// Event Listeners
+// Update the navigation handlers in the DOMContentLoaded event listener
 document.addEventListener('DOMContentLoaded', function() {
-    // Set up navigation
-    const currentTab = window.location.hash.slice(1) || 'dashboard';
-    setActiveTab(currentTab);
+    // Set dashboard as default active tab
+    setActiveTab('dashboard');
 
     // Navigation handlers
     document.querySelectorAll('.nav-link').forEach(link => {
@@ -934,8 +933,20 @@ document.addEventListener('DOMContentLoaded', function() {
             const tabId = link.getAttribute('data-tab');
             setActiveTab(tabId);
 
-            if (tabId === 'reports') {
-                loadReportsData();
+            // Load data based on which tab is selected
+            switch(tabId) {
+                case 'reports':
+                    loadReportsData();
+                    break;
+                case 'availability':
+                    loadAvailability();
+                    break;
+                case 'performances':
+                    loadPerformances();
+                    break;
+                case 'dashboard':
+                    loadDashboardData();
+                    break;
             }
         });
     });
@@ -943,6 +954,28 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize dashboard
     initializeDashboard();
     
-    // Set up refresh interval
-    setInterval(initializeDashboard, 60000); // Refresh every minute
+    // Set up refresh interval for active data
+    setInterval(() => {
+        const activeTab = document.querySelector('.nav-link.bg-white/5')?.getAttribute('data-tab');
+        switch(activeTab) {
+            case 'dashboard':
+                loadDashboardData();
+                break;
+            case 'performances':
+                loadPerformances();
+                break;
+            case 'availability':
+                loadAvailability();
+                break;
+            case 'reports':
+                loadReportsData();
+                break;
+        }
+    }, 60000); // Refresh every minute
 });
+
+// Make sure we're consistently using calculatePerformanceTotal
+function calculatePerformanceTotal(performance) {
+    const duration = calculateDuration(performance.start_time, performance.end_time);
+    return (duration * performance.booking_rate).toFixed(2);
+}
