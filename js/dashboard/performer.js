@@ -11,6 +11,22 @@ if (!window.user || window.user.type !== 'performer') {
     window.location.href = 'login';
 }
 
+// Tab persistence functions
+function saveActiveTab(tabId) {
+    localStorage.setItem('activeTab', tabId);
+}
+
+function getActiveTab() {
+    return localStorage.getItem('activeTab') || 'dashboard'; // Default to dashboard if no tab is stored
+}
+
+// Authentication Functions
+window.logout = function() {
+    sessionStorage.removeItem('user');
+    localStorage.removeItem('activeTab'); // Clear stored tab on logout
+    window.location.href = 'login';
+};
+
 // Initialize UI and Navigation
 if (!window.hasInitializedNavigation) {
     // Dropdown toggle functionality
@@ -950,44 +966,64 @@ document.getElementById('confirmCancelBtn').addEventListener('click', async () =
 
 // Update the navigation handlers in the DOMContentLoaded event listener
 document.addEventListener('DOMContentLoaded', function() {
-    // Set dashboard as default active tab
-    setActiveTab('dashboard');
+    // Get the stored tab or use dashboard as default
+    const storedTab = getActiveTab();
+    setActiveTab(storedTab);
+
+    // Initialize UI
+    document.getElementById('performerName').textContent = window.user.stage_name || 'Performer Dashboard';
+
+    // Show the stored tab content
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.add('hidden');
+    });
+    document.getElementById(`${storedTab}-tab`).classList.remove('hidden');
+
+    // Load data based on which tab is selected
+    switch(storedTab) {
+        case 'reports':
+            loadReportsData();
+            break;
+        case 'availability':
+            loadAvailability();
+            break;
+        case 'performances':
+            loadPerformances();
+            break;
+        case 'dashboard':
+        default:
+            loadDashboardData();
+            break;
+    }
 
     // Navigation handlers
-document.querySelectorAll('.nav-link').forEach(link => {
-    link.addEventListener('click', () => {
-        const tabId = link.getAttribute('data-tab');
-        console.log('Tab clicked:', tabId);
-        setActiveTab(tabId);
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', () => {
+            const tabId = link.getAttribute('data-tab');
+            saveActiveTab(tabId);
+            setActiveTab(tabId);
 
-        // Load data based on which tab is selected
-        switch(tabId) {
-            case 'reports':
-                console.log('Loading reports tab...');
-                loadReportsData();
-                break;
-            case 'availability':
-                console.log('Loading availability tab...');
-                loadAvailability();
-                break;
-            case 'performances':
-                console.log('Loading performances tab...');
-                loadPerformances();
-                break;
-            case 'dashboard':
-                console.log('Loading dashboard tab...');
-                loadDashboardData();
-                break;
-        }
+            // Load data based on which tab is selected
+            switch(tabId) {
+                case 'reports':
+                    loadReportsData();
+                    break;
+                case 'availability':
+                    loadAvailability();
+                    break;
+                case 'performances':
+                    loadPerformances();
+                    break;
+                case 'dashboard':
+                    loadDashboardData();
+                    break;
+            }
+        });
     });
-});
 
-    // Initialize dashboard
-    initializeDashboard();
-    
-    // Set up refresh interval for active data
+    // Set up auto-refresh interval for active data
     setInterval(() => {
-        const activeTab = document.querySelector('.nav-link.bg-white/5')?.getAttribute('data-tab');
+        const activeTab = getActiveTab();
         switch(activeTab) {
             case 'dashboard':
                 loadDashboardData();
@@ -1003,4 +1039,7 @@ document.querySelectorAll('.nav-link').forEach(link => {
                 break;
         }
     }, 60000); // Refresh every minute
+
+    // Initialize dashboard
+    initializeDashboard();
 });
