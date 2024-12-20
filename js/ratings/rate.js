@@ -206,12 +206,11 @@ class RatingManager {
     }
 
     getPerformanceStatus(perf, now) {
-
         // If the performance is rejected, it shouldn't show up in any category
         if (perf.status === 'rejected') {
-            return null; // or we could add a 'rejected' category if you want to show them separately
+            return null;
         }
-
+    
         // Create date objects for start and end times
         const performanceDate = new Date(perf.date);
         const [startHours, startMinutes] = perf.start_time.split(':');
@@ -225,17 +224,21 @@ class RatingManager {
     
         const sixHoursAfterEnd = new Date(end.getTime() + (6 * 60 * 60 * 1000));
     
-        // Add console logs for debugging
-        console.log('Performance:', {
-            name: perf.performers.stage_name,
-            date: perf.date,
-            start: start.toISOString(),
-            end: end.toISOString(),
-            now: now.toISOString(),
-            sixHoursAfter: sixHoursAfterEnd.toISOString()
-        });
+        // Check if the performance date is before today (excluding time)
+        const today = new Date(now);
+        today.setHours(0, 0, 0, 0);
+        const perfDay = new Date(perf.date);
+        perfDay.setHours(0, 0, 0, 0);
     
-        if (now < start) {
+        // If it's a past date or it's more than 6 hours after end time
+        if (perfDay < today || now > sixHoursAfterEnd) {
+            return { 
+                label: "Expired", 
+                class: "bg-gray-100", 
+                canRate: false,
+                category: 'expired'
+            };
+        } else if (now < start) {
             return { 
                 label: "Upcoming", 
                 class: "bg-blue-100", 
@@ -248,13 +251,6 @@ class RatingManager {
                 class: "bg-green-100", 
                 canRate: true,
                 category: 'current'
-            };
-        } else {
-            return { 
-                label: "Expired", 
-                class: "bg-gray-100", 
-                canRate: false,
-                category: 'expired'
             };
         }
     }
