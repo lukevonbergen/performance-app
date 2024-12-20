@@ -623,7 +623,6 @@ async function updateSettings(formData) {
 // Cancellation Functions
 window.cancelBooking = async function(bookingId) {
     try {
-        // First get the booking details
         const { data: booking, error: fetchError } = await supabase
             .from('performances')
             .select('*')
@@ -632,7 +631,6 @@ window.cancelBooking = async function(bookingId) {
 
         if (fetchError) throw fetchError;
 
-        // Delete the performance
         const { error: deleteError } = await supabase
             .from('performances')
             .delete()
@@ -640,22 +638,6 @@ window.cancelBooking = async function(bookingId) {
             .eq('venue_id', window.user.id);
 
         if (deleteError) throw deleteError;
-
-        // Create new availability for the performer
-        const availabilityData = {
-            performer_id: booking.performer_id,
-            date: booking.date,
-            start_time: booking.start_time,
-            end_time: booking.end_time,
-            rate_per_hour: booking.booking_rate
-        };
-
-        // Re-insert the availability
-        const { error: availError } = await supabase
-            .from('performer_availability')
-            .insert([availabilityData]);
-
-        if (availError) throw availError;
 
         loadDashboardData();
         showSuccessMessage('Booking cancelled successfully');
