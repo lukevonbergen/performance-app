@@ -123,7 +123,8 @@ class RatingManager {
         // Sort performances into categories
         performances.forEach(perf => {
             const status = this.getPerformanceStatus(perf, now);
-            if (categorySections[status.category]) {
+            // Only add the performance if it has a status (not rejected)
+            if (status && categorySections[status.category]) {
                 categorySections[status.category].performances.push({perf, status});
             }
         });
@@ -205,6 +206,12 @@ class RatingManager {
     }
 
     getPerformanceStatus(perf, now) {
+
+        // If the performance is rejected, it shouldn't show up in any category
+        if (perf.status === 'rejected') {
+            return null; // or we could add a 'rejected' category if you want to show them separately
+        }
+
         // Create date objects for start and end times
         const performanceDate = new Date(perf.date);
         const [startHours, startMinutes] = perf.start_time.split(':');
