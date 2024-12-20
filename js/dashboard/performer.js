@@ -976,21 +976,67 @@ document.getElementById('confirmCancelBtn').addEventListener('click', async () =
 
 // Update the navigation handlers in the DOMContentLoaded event listener
 document.addEventListener('DOMContentLoaded', function() {
-    // Get the stored tab or use dashboard as default
-    const storedTab = getActiveTab();
-    setActiveTab(storedTab);
+    try {
+        // Get the stored tab or use 'dashboard' as the default
+        const storedTab = getActiveTab();
+        setActiveTab(storedTab);
 
-    // Initialize UI
-    document.getElementById('performerName').textContent = window.user.stage_name || 'Performer Dashboard';
+        // Set performer name in the UI
+        const performerNameElement = document.getElementById('performerName');
+        if (performerNameElement) {
+            performerNameElement.textContent = window.user?.stage_name || 'Performer Dashboard';
+        } else {
+            console.warn('Performer name element not found');
+        }
 
-    // Show the stored tab content
-    document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.add('hidden');
-    });
-    document.getElementById(`${storedTab}-tab`).classList.remove('hidden');
+        // Hide all tab contents and show the stored tab content
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.add('hidden');
+        });
+        const storedTabContent = document.getElementById(`${storedTab}-tab`);
+        if (storedTabContent) {
+            storedTabContent.classList.remove('hidden');
+        } else {
+            console.warn(`Stored tab content for ID "${storedTab}-tab" not found`);
+        }
 
-    // Load data based on which tab is selected
-    switch(storedTab) {
+        // Load data for the selected tab
+        loadTabData(storedTab);
+
+        // Add click event listeners to all navigation links
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                const tabId = link.getAttribute('data-tab');
+                if (tabId) {
+                    saveActiveTab(tabId);
+                    setActiveTab(tabId);
+                    loadTabData(tabId);
+                } else {
+                    console.warn('Navigation link is missing a "data-tab" attribute');
+                }
+            });
+        });
+
+        // Set up auto-refresh for active tab data every minute
+        setInterval(() => {
+            const activeTab = getActiveTab();
+            loadTabData(activeTab);
+        }, 60000); // Refresh every 60 seconds
+
+        // Initialize dashboard
+        initializeDashboard();
+    } catch (error) {
+        console.error('Error initializing DOMContentLoaded:', error);
+        showToast('Error initializing page. Please try reloading.', 'error');
+    }
+});
+
+/**
+ * Loads data for the given tab ID.
+ * @param {string} tabId - The ID of the tab to load data for.
+ */
+function loadTabData(tabId) {
+    switch (tabId) {
         case 'reports':
             loadReportsData();
             break;
@@ -1005,51 +1051,4 @@ document.addEventListener('DOMContentLoaded', function() {
             loadDashboardData();
             break;
     }
-
-    // Navigation handlers
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', () => {
-            const tabId = link.getAttribute('data-tab');
-            saveActiveTab(tabId);
-            setActiveTab(tabId);
-
-            // Load data based on which tab is selected
-            switch(tabId) {
-                case 'reports':
-                    loadReportsData();
-                    break;
-                case 'availability':
-                    loadAvailability();
-                    break;
-                case 'performances':
-                    loadPerformances();
-                    break;
-                case 'dashboard':
-                    loadDashboardData();
-                    break;
-            }
-        });
-    });
-
-    // Set up auto-refresh interval for active data
-    setInterval(() => {
-        const activeTab = getActiveTab();
-        switch(activeTab) {
-            case 'dashboard':
-                loadDashboardData();
-                break;
-            case 'performances':
-                loadPerformances();
-                break;
-            case 'availability':
-                loadAvailability();
-                break;
-            case 'reports':
-                loadReportsData();
-                break;
-        }
-    }, 60000); // Refresh every minute
-
-    // Initialize dashboard
-    initializeDashboard();
-});
+}
