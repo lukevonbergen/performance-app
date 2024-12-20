@@ -124,7 +124,8 @@ window.logout = function() {
 // Dashboard Functions
 async function loadDashboardData() {
     try {
-        const { data: performances, error } = await supabase
+        // Get all performances for this performer
+        const { data: performances, error: perfError } = await supabase
             .from('performances')
             .select(`
                 *,
@@ -135,9 +136,17 @@ async function loadDashboardData() {
             `)
             .eq('performer_id', window.user.id);
 
-        if (error) throw error;
+        if (perfError) throw perfError;
 
-        updateDashboardStats(performances);
+        // Get all ratings for all performances by this performer
+        const { data: ratings, error: ratingsError } = await supabase
+            .from('ratings')
+            .select('overall_rating')
+            .in('performance_id', performances.map(p => p.id));
+
+        if (ratingsError) throw ratingsError;
+
+        updateDashboardStats(performances, ratings);
         updateRecentActivity(performances);
 
     } catch (error) {
@@ -146,13 +155,20 @@ async function loadDashboardData() {
     }
 }
 
-function updateDashboardStats(performances) {
+function updateDashboardStats(performances, ratings) {
     const today = new Date().toISOString().split('T')[0];
     const upcomingPerformances = performances.filter(perf => perf.date >= today && perf.status === 'confirmed');
     
+    // Calculate average rating
+    let averageRating = '--';
+    if (ratings && ratings.length > 0) {
+        const totalRating = ratings.reduce((sum, rating) => sum + rating.overall_rating, 0);
+        averageRating = (totalRating / ratings.length).toFixed(1) + '⭐';
+    }
+
     // Update UI elements
     document.getElementById('upcomingGigs').textContent = upcomingPerformances.length;
-    document.getElementById('averageRating').textContent = '--';
+    document.getElementById('averageRating').textContent = averageRating;
 }
 
 function updateRecentActivity(performances) {
