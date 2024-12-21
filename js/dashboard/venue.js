@@ -662,18 +662,44 @@ window.cancelBooking = async function(bookingId) {
     }
 };
 
-// Navigation Functions
+// Function to safely show a tab
+function showTab(tabId) {
+    // Hide all tab content first
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.add('hidden');
+    });
+
+    // Get the target tab element
+    const tabElement = document.getElementById(`${tabId}-tab`);
+    if (tabElement) {
+        tabElement.classList.remove('hidden');
+        return true;
+    }
+
+    // If tab not found, show dashboard as fallback
+    const dashboardTab = document.getElementById('dashboard-tab');
+    if (dashboardTab) {
+        dashboardTab.classList.remove('hidden');
+        saveActiveTab('dashboard');
+        return false;
+    }
+}
+
+// Update the setActiveTab function
 function setActiveTab(tabId) {
     // Remove active class from all tabs
     document.querySelectorAll('.nav-link').forEach(link => {
         link.classList.remove('bg-white/5', 'bg-white/10');
     });
     
-    // Add active class to current tab
+    // Add active class to current tab button if it exists
     const activeTab = document.querySelector(`[data-tab="${tabId}"]`);
     if (activeTab) {
         activeTab.classList.add('bg-white/5');
     }
+
+    // Show the correct tab content
+    showTab(tabId);
 }
 
 // Tab persistence functions
@@ -727,13 +753,35 @@ document.addEventListener('DOMContentLoaded', displayVenueQR);
 document.addEventListener('DOMContentLoaded', function() {
     // Get the stored tab or use dashboard as default
     const storedTab = getActiveTab();
-    setActiveTab(storedTab);
+    // setActiveTab(storedTab);
     
     // Initialize UI elements
     document.getElementById('venueName').textContent = window.user.venue_name;
     document.getElementById('welcomeMessage').textContent = `Welcome back, ${window.user.first_name}`;
     if (document.getElementById('searchDate')) {
         document.getElementById('searchDate').min = new Date().toISOString().split('T')[0];
+    }
+
+    // Show initial tab and load its data
+    const tabLoaded = showTab(storedTab);
+    if (tabLoaded) {
+        switch(storedTab) {
+            case 'reports':
+                loadReportsData();
+                break;
+            case 'settings':
+                loadSettings();
+                break;
+            case 'book':
+                // Book tab doesn't need initial data load
+                break;
+            case 'dashboard':
+            default:
+                loadDashboardData();
+                break;
+        }
+    } else {
+        loadDashboardData(); // Fallback to dashboard
     }
 
     // Show the stored tab content
