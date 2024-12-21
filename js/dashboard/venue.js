@@ -94,28 +94,38 @@ document.addEventListener('click', function(event) {
 });
 
 function updateDashboardUI(upcomingEvents, today) {
-    // Get all required elements first
-    const totalCostElement = document.getElementById('totalCost');
-    const upcomingEventsList = document.getElementById('upcomingEventsList');
-    const scheduleList = document.getElementById('scheduleList');
-    const actsCount = document.getElementById('actsCount');
+    // Retry mechanism for getting elements
+    let retryCount = 0;
+    const maxRetries = 5;
 
-    if (!totalCostElement || !upcomingEventsList || !scheduleList || !actsCount) {
-        console.error('Required elements not found:', {
-            totalCostElement: !!totalCostElement,
-            upcomingEventsList: !!upcomingEventsList,
-            scheduleList: !!scheduleList,
-            actsCount: !!actsCount
-        });
-        return;
-    }
+    const getElements = () => {
+        const totalCostElement = document.querySelector('p[id="totalCost"]');
+        const upcomingEventsList = document.getElementById('upcomingEventsList');
+        const scheduleList = document.getElementById('scheduleList');
+        const actsCount = document.getElementById('actsCount');
 
-    // Update total cost
-    const confirmedEvents = upcomingEvents?.filter(event => event.status === 'confirmed') || [];
-    const totalCost = confirmedEvents.reduce((sum, event) => {
-        return sum + parseFloat(calculateTotalCost(event.start_time, event.end_time, event.booking_rate));
-    }, 0);
-    totalCostElement.textContent = `£${totalCost.toFixed(2)}`;
+        if (!totalCostElement || !upcomingEventsList || !scheduleList || !actsCount) {
+            retryCount++;
+            if (retryCount < maxRetries) {
+                console.log(`Retry ${retryCount} getting elements...`);
+                setTimeout(getElements, 100);
+                return;
+            }
+            console.error('Required elements not found after retries:', {
+                totalCostElement: !!totalCostElement,
+                upcomingEventsList: !!upcomingEventsList,
+                scheduleList: !!scheduleList,
+                actsCount: !!actsCount
+            });
+            return;
+        }
+
+        // Continue with your existing update logic
+        const confirmedEvents = upcomingEvents?.filter(event => event.status === 'confirmed') || [];
+        const totalCost = confirmedEvents.reduce((sum, event) => {
+            return sum + parseFloat(calculateTotalCost(event.start_time, event.end_time, event.booking_rate));
+        }, 0);
+        totalCostElement.textContent = `£${totalCost.toFixed(2)}`;
 
     // Filter out rejected events for upcoming events list
     const activeEvents = upcomingEvents?.filter(event => event.status !== 'rejected') || [];
