@@ -100,25 +100,6 @@ function updateDashboardUI(upcomingEvents, today) {
     // Update today's schedule
     updateTodaySchedule(upcomingEvents, today);
 
-    // Update stats
-    const todayEvents = upcomingEvents?.filter(event => event.date === today) || [];
-    document.getElementById('actsCount').textContent = todayEvents.length;
-}
-
-function updateDashboardUI(upcomingEvents, today) {
-    // Update total cost
-    const confirmedEvents = upcomingEvents?.filter(event => event.status === 'confirmed') || [];
-    const totalCost = confirmedEvents.reduce((sum, event) => {
-        return sum + parseFloat(calculateTotalCost(event.start_time, event.end_time, event.booking_rate));
-    }, 0);
-    document.getElementById('totalCost').textContent = `£${totalCost.toFixed(2)}`;
-
-    // Update upcoming events list
-    updateUpcomingEventsList(upcomingEvents);
-
-    // Update today's schedule
-    updateTodaySchedule(upcomingEvents, today);
-
     // Update next event instead of acts count
     const nextEvent = upcomingEvents?.filter(event => 
         event.status === 'confirmed' && 
