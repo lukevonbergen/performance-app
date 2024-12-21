@@ -99,16 +99,33 @@ function updateDashboardUI(upcomingEvents, today) {
     const maxRetries = 5;
 
     const getElements = () => {
-        const totalCostElement = document.querySelector('p[id="totalCost"]');
+        // Try different methods to get totalCostElement
+        const totalCostElement = document.querySelector('#totalCost') || 
+                               document.querySelector('p[id="totalCost"]') ||
+                               document.getElementsByClassName('text-3xl font-bold text-black mt-1')[0];
+                               
         const upcomingEventsList = document.getElementById('upcomingEventsList');
         const scheduleList = document.getElementById('scheduleList');
         const actsCount = document.getElementById('actsCount');
-
+    
+        // Debug logging
+        console.log('Element check details:', {
+            totalCostElement: {
+                byId: document.getElementById('totalCost'),
+                byQuerySelector: document.querySelector('#totalCost'),
+                byClass: document.getElementsByClassName('text-3xl font-bold text-black mt-1')[0]
+            },
+            actsCount: {
+                element: actsCount,
+                parent: actsCount?.parentElement
+            }
+        });
+    
         if (!totalCostElement || !upcomingEventsList || !scheduleList || !actsCount) {
             retryCount++;
             if (retryCount < maxRetries) {
                 console.log(`Retry ${retryCount} getting elements...`);
-                setTimeout(getElements, 100);
+                setTimeout(getElements, 200); // Increased timeout to 200ms
                 return;
             }
             console.error('Required elements not found after retries:', {
