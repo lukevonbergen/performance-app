@@ -92,7 +92,6 @@ document.addEventListener('click', function(event) {
 function updateDashboardUI(upcomingEvents, today) {
     // Update total cost
     const totalCostElement = document.getElementById('totalCost');
-    const upcomingEventsList = document.getElementById('upcomingEventsList');
     const scheduleList = document.getElementById('scheduleList');
     const actsCount = document.getElementById('actsCount');
 
