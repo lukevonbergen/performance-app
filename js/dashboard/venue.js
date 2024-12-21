@@ -65,8 +65,6 @@ async function loadDashboardData() {
             .order('date', { ascending: true });
 
         if (error) throw error;
-
-        updateDashboardUI(upcomingEvents, today);
     } catch (error) {
         console.error('Error loading dashboard data:', error);
     }
@@ -312,16 +310,82 @@ window.openBookingModal = async function(performerId, performerName, rate, start
 
 function updateBookingModal(performerName, startTime, slot) {
     document.getElementById('bookingDetails').innerHTML = `
-        <div class="space-y-2">
-            <p><span class="font-medium">Performer:</span> ${performerName}</p>
-            <p><span class="font-medium">Date:</span> ${new Date(startTime).toLocaleDateString()}</p>
-            <p><span class="font-medium">Time:</span> ${formatTime(slot.start_time)} - ${formatTime(slot.end_time)}</p>
-            <p><span class="font-medium">Rate:</span> £${slot.rate_per_hour}/hr</p>
-            <p><span class="font-medium">Total Cost:</span> £${calculateTotalCost(slot.start_time, slot.end_time, slot.rate_per_hour)}</p>
+        <div class="grid gap-4">
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2 bg-indigo-100 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Performer</p>
+                        <p class="font-medium text-gray-900">${performerName}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <div class="flex items-center space-x-3">
+                        <div class="p-2 bg-indigo-100 rounded-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Date</p>
+                            <p class="font-medium text-gray-900">${new Date(startTime).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <div class="flex items-center space-x-3">
+                        <div class="p-2 bg-indigo-100 rounded-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Time</p>
+                            <p class="font-medium text-gray-900">${formatTime(slot.start_time)} - ${formatTime(slot.end_time)}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <div class="flex items-center space-x-3">
+                        <div class="p-2 bg-indigo-100 rounded-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Rate</p>
+                            <p class="font-medium text-gray-900">£${slot.rate_per_hour}/hr</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <div class="flex items-center space-x-3">
+                        <div class="p-2 bg-indigo-100 rounded-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4M20 12a2 2 0 002-2V6a2 2 0 00-2-2H4a2 2 0 00-2 2v4a2 2 0 002 2M20 12v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Total Cost</p>
+                            <p class="font-medium text-gray-900">£${calculateTotalCost(slot.start_time, slot.end_time, slot.rate_per_hour)}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     `;
-
-    document.getElementById('bookingModal').classList.remove('hidden');
 }
 
 window.closeBookingModal = function() {
