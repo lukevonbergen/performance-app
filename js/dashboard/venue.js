@@ -170,14 +170,16 @@ function updateDashboardUI(upcomingEvents, today) {
     `;
     } else {
         document.getElementById('actsCount').parentElement.innerHTML = `
-            <div class="p-3 rounded-full bg-indigo-500/10 border border-indigo-500/20">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-            </div>
-            <div class="ml-5">
-                <p class="text-sm font-medium text-black">Next Event</p>
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center w-12 h-12">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <div class="ml-5">
+                    <p class="text-sm font-medium text-black">Next Event</p>
                 <p class="text-lg text-gray-500 mt-1">No upcoming events</p>
+                </div>
             </div>
         `;
     }
