@@ -398,13 +398,6 @@ function updateBookingModal(performerName, startTime, slot) {
     `;
 }
 
-function updateBookingModal(performerName, startTime, slot) {
-    document.getElementById('bookingDetails').innerHTML = `
-        // ... your existing HTML ...
-    `;
-    console.log('Modal updated with details');
-}
-
 window.closeBookingModal = function() {
     document.getElementById('bookingModal').classList.add('hidden');
     window.selectedPerformer = null;
