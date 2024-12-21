@@ -90,8 +90,9 @@ document.addEventListener('click', function(event) {
 });
 
 function updateDashboardUI(upcomingEvents, today) {
-    // Update total cost
+    // Get all required elements first
     const totalCostElement = document.getElementById('totalCost');
+    const upcomingEventsList = document.getElementById('upcomingEventsList');
     const scheduleList = document.getElementById('scheduleList');
     const actsCount = document.getElementById('actsCount');
 
@@ -105,6 +106,7 @@ function updateDashboardUI(upcomingEvents, today) {
         return;
     }
 
+    // Update total cost
     const confirmedEvents = upcomingEvents?.filter(event => event.status === 'confirmed') || [];
     const totalCost = confirmedEvents.reduce((sum, event) => {
         return sum + parseFloat(calculateTotalCost(event.start_time, event.end_time, event.booking_rate));
@@ -113,7 +115,6 @@ function updateDashboardUI(upcomingEvents, today) {
 
     // Filter out rejected events for upcoming events list
     const activeEvents = upcomingEvents?.filter(event => event.status !== 'rejected') || [];
-    const upcomingEventsList = document.getElementById('upcomingEventsList');
     
     if (activeEvents.length > 0) {
         upcomingEventsList.innerHTML = activeEvents.map(event => `
@@ -170,7 +171,7 @@ function updateDashboardUI(upcomingEvents, today) {
 
     // Update UI
     if (nextEvent) {
-        document.getElementById('actsCount').parentElement.innerHTML = `
+        actsCount.parentElement.innerHTML = `
         <div class="flex items-center">
             <div class="p-3 rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center w-12 h-12">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -186,7 +187,7 @@ function updateDashboardUI(upcomingEvents, today) {
         </div>
     `;
     } else {
-        document.getElementById('actsCount').parentElement.innerHTML = `
+        actsCount.parentElement.innerHTML = `
             <div class="flex items-center">
                 <div class="p-3 rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center w-12 h-12">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -195,7 +196,7 @@ function updateDashboardUI(upcomingEvents, today) {
                 </div>
                 <div class="ml-5">
                     <p class="text-sm font-medium text-black">Next Event</p>
-                <p class="text-lg text-gray-500 mt-1">No upcoming events</p>
+                    <p class="text-lg text-gray-500 mt-1">No upcoming events</p>
                 </div>
             </div>
         `;
