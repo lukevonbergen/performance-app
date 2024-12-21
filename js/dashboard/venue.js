@@ -154,7 +154,10 @@ function updateUpcomingEventsList(upcomingEvents) {
 }
 
 function updateTodaySchedule(upcomingEvents, today) {
-    const todayEvents = upcomingEvents?.filter(event => event.date === today) || [];
+    // Filter out rejected performances and only show for today
+    const todayEvents = upcomingEvents?.filter(event => 
+        event.date === today && event.status !== 'rejected'
+    ) || [];
     const scheduleList = document.getElementById('scheduleList');
     
     if (todayEvents.length > 0) {
@@ -623,27 +626,56 @@ async function updateSettings(formData) {
 // Cancellation Functions
 window.cancelBooking = async function(bookingId) {
     try {
+        // First get the booking details
         const { data: booking, error: fetchError } = await supabase
             .from('performances')
             .select('*')
             .eq('id', bookingId)
             .single();
 
-        if (fetchError) throw fetchError;
+        if (fetchError) {
+            console.error('Fetch error:', fetchError);
+            throw fetchError;
+        }
 
+        // Delete the performance
         const { error: deleteError } = await supabase
             .from('performances')
             .delete()
             .eq('id', bookingId)
             .eq('venue_id', window.user.id);
 
-        if (deleteError) throw deleteError;
+        if (deleteError) {
+            console.error('Delete error:', deleteError);
+            throw deleteError;
+        }
 
-        loadDashboardData();
+        // Create new availability for the performer
+        const availabilityData = {
+            performer_id: booking.performer_id,
+            date: booking.date,
+            start_time: booking.start_time,
+            end_time: booking.end_time,
+            rate_per_hour: booking.booking_rate
+        };
+
+        console.log('Creating new availability:', availabilityData);
+
+        // Re-insert the availability
+        const { error: availError } = await supabase
+            .from('performer_availability')
+            .insert([availabilityData]);
+
+        if (availError) {
+            console.error('Availability error:', availError);
+            throw availError;
+        }
+
+        await loadDashboardData();
         showSuccessMessage('Booking cancelled successfully');
     } catch (error) {
         console.error('Error cancelling booking:', error);
-        showErrorMessage('Error cancelling booking');
+        showErrorMessage('Error cancelling booking: ' + error.message);
     }
 };
 
