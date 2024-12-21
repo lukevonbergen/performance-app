@@ -91,11 +91,26 @@ document.addEventListener('click', function(event) {
 
 function updateDashboardUI(upcomingEvents, today) {
     // Update total cost
+    const totalCostElement = document.getElementById('totalCost');
+    const upcomingEventsList = document.getElementById('upcomingEventsList');
+    const scheduleList = document.getElementById('scheduleList');
+    const actsCount = document.getElementById('actsCount');
+
+    if (!totalCostElement || !upcomingEventsList || !scheduleList || !actsCount) {
+        console.error('Required elements not found:', {
+            totalCostElement: !!totalCostElement,
+            upcomingEventsList: !!upcomingEventsList,
+            scheduleList: !!scheduleList,
+            actsCount: !!actsCount
+        });
+        return;
+    }
+
     const confirmedEvents = upcomingEvents?.filter(event => event.status === 'confirmed') || [];
     const totalCost = confirmedEvents.reduce((sum, event) => {
         return sum + parseFloat(calculateTotalCost(event.start_time, event.end_time, event.booking_rate));
     }, 0);
-    document.getElementById('totalCost').textContent = `£${totalCost.toFixed(2)}`;
+    totalCostElement.textContent = `£${totalCost.toFixed(2)}`;
 
     // Filter out rejected events for upcoming events list
     const activeEvents = upcomingEvents?.filter(event => event.status !== 'rejected') || [];
