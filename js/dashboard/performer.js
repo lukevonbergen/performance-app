@@ -518,15 +518,16 @@ window.closeAvailabilityModal = function() {
     document.getElementById('availabilityForm').reset();
 };
 
-function openConfirmationModal(id) {
+// Add these two functions to the window object
+window.openConfirmationModal = function(id) {
     availabilityToDelete = id;
     document.getElementById('confirmationModal').classList.remove('hidden');
-}
+};
 
-function closeConfirmationModal() {
+window.closeConfirmationModal = function() {
     availabilityToDelete = null;
     document.getElementById('confirmationModal').classList.add('hidden');
-}
+};
 
 // Availability Delete Functions
 window.deleteAvailability = async function(id) {
