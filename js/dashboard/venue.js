@@ -289,10 +289,14 @@ function updateSearchResults(availability, bookedPerformerIds, startTime, search
 
 // Modal Functions
 window.openBookingModal = async function(performerId, performerName, rate, startTime) {
+    console.log('Opening modal with:', { performerId, performerName, rate, startTime });
+    
     window.selectedPerformer = { id: performerId, name: performerName, rate: rate };
     window.selectedTime = startTime;
 
     const date = new Date(startTime).toISOString().split('T')[0];
+    console.log('Fetching availability for date:', date);
+
     const { data: slot, error } = await supabase
         .from('performer_availability')
         .select('start_time, end_time, rate_per_hour')
@@ -304,6 +308,12 @@ window.openBookingModal = async function(performerId, performerName, rate, start
         console.error('Error fetching availability:', error);
         return;
     }
+
+    console.log('Retrieved slot:', slot);
+    
+    // Show the modal
+    const modal = document.getElementById('bookingModal');
+    modal.classList.remove('hidden');
 
     updateBookingModal(performerName, startTime, slot);
 };
@@ -386,6 +396,13 @@ function updateBookingModal(performerName, startTime, slot) {
             </div>
         </div>
     `;
+}
+
+function updateBookingModal(performerName, startTime, slot) {
+    document.getElementById('bookingDetails').innerHTML = `
+        // ... your existing HTML ...
+    `;
+    console.log('Modal updated with details');
 }
 
 window.closeBookingModal = function() {
