@@ -741,7 +741,6 @@ async function displayVenueQR() {
 document.addEventListener('DOMContentLoaded', displayVenueQR);
 
 
-// Update the DOMContentLoaded event listener
 document.addEventListener('DOMContentLoaded', function() {
     // Get the stored tab or use dashboard as default
     const storedTab = getActiveTab();
@@ -768,8 +767,10 @@ document.addEventListener('DOMContentLoaded', function() {
         case 'settings':
             loadSettings();
             break;
+        case 'book':
+            // Book tab doesn't need initial data load
+            break;
         case 'dashboard':
-        default:
             loadDashboardData();
             break;
     }
@@ -802,11 +803,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     loadDashboardData();
                     break;
             }
-
-            // Handle mobile menu if needed
-            if (window.innerWidth < 1024) {
-                document.getElementById('sidebar')?.classList.add('-translate-x-full');
-            }
         });
     });
 
@@ -835,20 +831,6 @@ document.addEventListener('DOMContentLoaded', function() {
         };
 
         await updateSettings(formData);
-    });
-
-    // Dropdown toggle functionality
-    document.getElementById('userMenuBtn')?.addEventListener('click', function() {
-        document.getElementById('userDropdown').classList.toggle('hidden');
-    });
-
-    // Close dropdown when clicking outside
-    document.addEventListener('click', function(event) {
-        const dropdown = document.getElementById('userDropdown');
-        const button = document.getElementById('userMenuBtn');
-        if (dropdown && button && !button.contains(event.target) && !dropdown.contains(event.target)) {
-            dropdown.classList.add('hidden');
-        }
     });
 
     // Set up auto-refresh interval for active data
