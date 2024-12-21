@@ -231,7 +231,7 @@ function updateSearchResults(availability, bookedPerformerIds, startTime, search
         resultsDiv.innerHTML = availablePerformers.map(slot => `
             <div class="border rounded-lg p-4 flex justify-between items-center bg-black/20 backdrop-blur-lg">
                 <div>
-                    <h3 class="font-medium text-white">${slot.performers.stage_name}</h3>
+                    <h3 class="font-medium text-black">${slot.performers.stage_name}</h3>
                     <p class="text-sm text-black">Available ${formatTime(slot.start_time)} - ${formatTime(slot.end_time)}</p>
                     <div class="flex space-x-2 text-sm text-black">
                         <p>Rate: £${slot.rate_per_hour}/hr</p>
