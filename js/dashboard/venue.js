@@ -120,88 +120,72 @@ function updateDashboardUI(upcomingEvents, today) {
             return;
         }
 
-        // Continue with your existing update logic
+        // Update total cost
         const confirmedEvents = upcomingEvents?.filter(event => event.status === 'confirmed') || [];
         const totalCost = confirmedEvents.reduce((sum, event) => {
             return sum + parseFloat(calculateTotalCost(event.start_time, event.end_time, event.booking_rate));
         }, 0);
         totalCostElement.textContent = `£${totalCost.toFixed(2)}`;
 
-    // Filter out rejected events for upcoming events list
-    const activeEvents = upcomingEvents?.filter(event => event.status !== 'rejected') || [];
-    
-    if (activeEvents.length > 0) {
-        upcomingEventsList.innerHTML = activeEvents.map(event => `
-            <div class="border-l-4 ${
-                event.status === 'confirmed' ? 'border-green-500' :
-                event.status === 'pending' ? 'border-yellow-500' :
-                'border-gray-500'
-            } pl-4 py-3">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <h3 class="font-medium text-black">${event.performers.stage_name}</h3>
-                        <p class="text-sm text-black">${formatDate(event.date)}</p>
-                        <p class="text-sm text-black">${formatTime(event.start_time)} - ${formatTime(event.end_time)}</p>
-                        <div class="flex space-x-2 text-sm text-black">
-                            <p>Rate: £${event.booking_rate}/hr</p>
-                            <span>•</span>
-                            <p>Total: £${calculateTotalCost(event.start_time, event.end_time, event.booking_rate)}</p>
+        // Filter out rejected events for upcoming events list
+        const activeEvents = upcomingEvents?.filter(event => event.status !== 'rejected') || [];
+        
+        if (activeEvents.length > 0) {
+            upcomingEventsList.innerHTML = activeEvents.map(event => `
+                <div class="border-l-4 ${
+                    event.status === 'confirmed' ? 'border-green-500' :
+                    event.status === 'pending' ? 'border-yellow-500' :
+                    'border-gray-500'
+                } pl-4 py-3">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-medium text-black">${event.performers.stage_name}</h3>
+                            <p class="text-sm text-black">${formatDate(event.date)}</p>
+                            <p class="text-sm text-black">${formatTime(event.start_time)} - ${formatTime(event.end_time)}</p>
+                            <div class="flex space-x-2 text-sm text-black">
+                                <p>Rate: £${event.booking_rate}/hr</p>
+                                <span>•</span>
+                                <p>Total: £${calculateTotalCost(event.start_time, event.end_time, event.booking_rate)}</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-end">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                event.status === 'confirmed' ? 'bg-green-500/20 text-green-400' :
+                                event.status === 'pending' ? 'bg-yellow-500/20 text-yellow-700' :
+                                'bg-gray-500/20 text-gray-400'
+                            }">
+                                ${event.status.charAt(0).toUpperCase() + event.status.slice(1)}
+                            </span>
+                            <button 
+                                onclick="cancelBooking('${event.id}')"
+                                class="mt-2 text-sm text-red-400 hover:text-red-300"
+                            >
+                                Cancel Booking
+                            </button>
                         </div>
                     </div>
-                    <div class="flex flex-col items-end">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            event.status === 'confirmed' ? 'bg-green-500/20 text-green-400' :
-                            event.status === 'pending' ? 'bg-yellow-500/20 text-yellow-700' :
-                            'bg-gray-500/20 text-gray-400'
-                        }">
-                            ${event.status.charAt(0).toUpperCase() + event.status.slice(1)}
-                        </span>
-                        <button 
-                            onclick="cancelBooking('${event.id}')"
-                            class="mt-2 text-sm text-red-400 hover:text-red-300"
-                        >
-                            Cancel Booking
-                        </button>
-                    </div>
                 </div>
-            </div>
-        `).join('');
-    } else {
-        upcomingEventsList.innerHTML = `
-            <div class="text-center text-gray-500">
-                No upcoming events scheduled
-            </div>
-        `;
-    }
+            `).join('');
+        } else {
+            upcomingEventsList.innerHTML = `
+                <div class="text-center text-gray-500">
+                    No upcoming events scheduled
+                </div>
+            `;
+        }
 
-    // Update today's schedule
-    updateTodaySchedule(upcomingEvents, today);
+        // Update today's schedule
+        updateTodaySchedule(upcomingEvents, today);
 
-    // Update next event instead of acts count
-    const nextEvent = upcomingEvents?.filter(event => 
-        event.status === 'confirmed' && 
-        event.date >= today
-    ).sort((a, b) => new Date(a.date) - new Date(b.date))[0];
+        // Update next event instead of acts count
+        const nextEvent = upcomingEvents?.filter(event => 
+            event.status === 'confirmed' && 
+            event.date >= today
+        ).sort((a, b) => new Date(a.date) - new Date(b.date))[0];
 
-    // Update UI
-    if (nextEvent) {
-        actsCount.parentElement.innerHTML = `
-        <div class="flex items-center">
-            <div class="p-3 rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center w-12 h-12">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-            </div>
-            <div class="ml-5">
-                <p class="text-sm font-medium text-black">Next Event</p>
-                <h3 class="text-lg font-semibold text-black mt-1">${nextEvent.performers.stage_name}</h3>
-                <p class="text-sm text-gray-500">${formatDate(nextEvent.date)}</p>
-                <p class="text-sm text-gray-500">${formatTime(nextEvent.start_time)} - ${formatTime(nextEvent.end_time)}</p>
-            </div>
-        </div>
-    `;
-    } else {
-        actsCount.parentElement.innerHTML = `
+        // Update UI
+        if (nextEvent) {
+            actsCount.parentElement.innerHTML = `
             <div class="flex items-center">
                 <div class="p-3 rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center w-12 h-12">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -210,11 +194,31 @@ function updateDashboardUI(upcomingEvents, today) {
                 </div>
                 <div class="ml-5">
                     <p class="text-sm font-medium text-black">Next Event</p>
-                    <p class="text-lg text-gray-500 mt-1">No upcoming events</p>
+                    <h3 class="text-lg font-semibold text-black mt-1">${nextEvent.performers.stage_name}</h3>
+                    <p class="text-sm text-gray-500">${formatDate(nextEvent.date)}</p>
+                    <p class="text-sm text-gray-500">${formatTime(nextEvent.start_time)} - ${formatTime(nextEvent.end_time)}</p>
                 </div>
             </div>
         `;
-    }
+        } else {
+            actsCount.parentElement.innerHTML = `
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center w-12 h-12">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <div class="ml-5">
+                        <p class="text-sm font-medium text-black">Next Event</p>
+                        <p class="text-lg text-gray-500 mt-1">No upcoming events</p>
+                    </div>
+                </div>
+            `;
+        }
+    };
+
+    // Start the process
+    getElements();
 }
 
 function updateTodaySchedule(upcomingEvents, today) {
