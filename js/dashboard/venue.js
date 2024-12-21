@@ -51,6 +51,13 @@ function formatDate(dateString) {
 // Dashboard Functions
 async function loadDashboardData() {
     try {
+        console.log('Elements check:', {
+            totalCost: document.getElementById('totalCost'),
+            actsCount: document.getElementById('actsCount'),
+            scheduleList: document.getElementById('scheduleList'),
+            upcomingEventsList: document.getElementById('upcomingEventsList')
+        });
+
         const today = new Date().toISOString().split('T')[0];
         const { data: upcomingEvents, error } = await supabase
             .from('performances')
@@ -65,10 +72,7 @@ async function loadDashboardData() {
             .order('date', { ascending: true });
 
         if (error) throw error;
-
-        // Add this line to update the UI with the fetched data
         updateDashboardUI(upcomingEvents, today);
-
     } catch (error) {
         console.error('Error loading dashboard data:', error);
         showErrorMessage('Error loading dashboard data');
