@@ -94,8 +94,53 @@ function updateDashboardUI(upcomingEvents, today) {
     }, 0);
     document.getElementById('totalCost').textContent = `£${totalCost.toFixed(2)}`;
 
-    // Update upcoming events list
-    updateUpcomingEventsList(upcomingEvents);
+    // Filter out rejected events for upcoming events list
+    const activeEvents = upcomingEvents?.filter(event => event.status !== 'rejected') || [];
+    const upcomingEventsList = document.getElementById('upcomingEventsList');
+    
+    if (activeEvents.length > 0) {
+        upcomingEventsList.innerHTML = activeEvents.map(event => `
+            <div class="border-l-4 ${
+                event.status === 'confirmed' ? 'border-green-500' :
+                event.status === 'pending' ? 'border-yellow-500' :
+                'border-gray-500'
+            } pl-4 py-3">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="font-medium text-black">${event.performers.stage_name}</h3>
+                        <p class="text-sm text-black">${formatDate(event.date)}</p>
+                        <p class="text-sm text-black">${formatTime(event.start_time)} - ${formatTime(event.end_time)}</p>
+                        <div class="flex space-x-2 text-sm text-black">
+                            <p>Rate: £${event.booking_rate}/hr</p>
+                            <span>•</span>
+                            <p>Total: £${calculateTotalCost(event.start_time, event.end_time, event.booking_rate)}</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-end">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            event.status === 'confirmed' ? 'bg-green-500/20 text-green-400' :
+                            event.status === 'pending' ? 'bg-yellow-500/20 text-yellow-700' :
+                            'bg-gray-500/20 text-gray-400'
+                        }">
+                            ${event.status.charAt(0).toUpperCase() + event.status.slice(1)}
+                        </span>
+                        <button 
+                            onclick="cancelBooking('${event.id}')"
+                            class="mt-2 text-sm text-red-400 hover:text-red-300"
+                        >
+                            Cancel Booking
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    } else {
+        upcomingEventsList.innerHTML = `
+            <div class="text-center text-gray-500">
+                No upcoming events scheduled
+            </div>
+        `;
+    }
 
     // Update today's schedule
     updateTodaySchedule(upcomingEvents, today);
