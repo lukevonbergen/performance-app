@@ -929,6 +929,11 @@ document.addEventListener('DOMContentLoaded', displayVenueQR);
 
 
 document.addEventListener('DOMContentLoaded', function() {
+
+    setTimeout(() => {
+        loadDashboardData();
+    }, 100);
+    
     // Get the stored tab or use dashboard as default
     const storedTab = getActiveTab();
     // setActiveTab(storedTab);
