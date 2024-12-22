@@ -925,97 +925,72 @@ async function displayVenueQR() {
 }
 
 // Call the display function on page load or when the venue settings page is ready
-document.addEventListener('DOMContentLoaded', displayVenueQR);
+document.addEventListener('DOMContentLoaded', async function() {
+    // Wait for page to be fully loaded
+    await new Promise(resolve => setTimeout(resolve, 500));
 
-
-document.addEventListener('DOMContentLoaded', function() {
-
-    setTimeout(() => {
-        loadDashboardData();
-    }, 100);
-    
-    // Get the stored tab or use dashboard as default
-    const storedTab = getActiveTab();
-    // setActiveTab(storedTab);
-    
-    // Initialize UI elements
+    // Initialize UI elements first
     document.getElementById('venueName').textContent = window.user.venue_name;
     document.getElementById('welcomeMessage').textContent = `Welcome back, ${window.user.first_name}`;
     if (document.getElementById('searchDate')) {
         document.getElementById('searchDate').min = new Date().toISOString().split('T')[0];
     }
 
-    // Show initial tab and load its data
-    const tabLoaded = showTab(storedTab);
-    if (tabLoaded) {
-        switch(storedTab) {
-            case 'reports':
-                loadReportsData();
-                break;
-            case 'settings':
-                loadSettings();
-                break;
-            case 'book':
-                // Book tab doesn't need initial data load
-                break;
-            case 'dashboard':
-            default:
-                loadDashboardData();
-                break;
-        }
-    } else {
-        loadDashboardData(); // Fallback to dashboard
-    }
-
-    // Show the stored tab content
-    document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.add('hidden');
-    });
+    // Get and set the active tab
+    const storedTab = getActiveTab();
+    setActiveTab(storedTab);
+    
+    // Show initial tab content
     document.getElementById(`${storedTab}-tab`).classList.remove('hidden');
 
-    // Load data based on which tab is selected
-    switch(storedTab) {
-        case 'reports':
-            loadReportsData();
-            break;
-        case 'settings':
-            loadSettings();
-            break;
-        case 'book':
-            // Book tab doesn't need initial data load
-            break;
-        case 'dashboard':
-            loadDashboardData();
-            break;
+    // Load initial data
+    try {
+        await loadDashboardData();
+        
+        // Load data based on active tab
+        switch(storedTab) {
+            case 'reports':
+                await loadReportsData();
+                break;
+            case 'settings':
+                await loadSettings();
+                break;
+            case 'dashboard':
+                // Already loaded
+                break;
+        }
+    } catch (error) {
+        console.error('Error loading initial data:', error);
     }
 
-    // Navigation handlers
+    // Set up navigation handlers
     document.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', () => {
+        link.addEventListener('click', async () => {
             const tabId = link.getAttribute('data-tab');
             saveActiveTab(tabId);
             setActiveTab(tabId);
 
-            // Show/hide tab content immediately
+            // Hide all tabs and show selected
             document.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.add('hidden');
             });
             document.getElementById(`${tabId}-tab`).classList.remove('hidden');
 
-            // Load data based on which tab is selected
-            switch(tabId) {
-                case 'reports':
-                    loadReportsData();
-                    break;
-                case 'settings':
-                    loadSettings();
-                    break;
-                case 'book':
-                    // Book tab doesn't need initial data load
-                    break;
-                case 'dashboard':
-                    loadDashboardData();
-                    break;
+            // Load tab data
+            try {
+                switch(tabId) {
+                    case 'reports':
+                        await loadReportsData();
+                        break;
+                    case 'settings':
+                        await loadSettings();
+                        break;
+                    case 'dashboard':
+                        await loadDashboardData();
+                        break;
+                }
+            } catch (error) {
+                console.error('Error loading tab data:', error);
             }
         });
     });
@@ -1031,7 +1006,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Settings form handler
     document.getElementById('settingsForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
         const formData = {
             firstName: document.getElementById('settingsFirstName').value,
             lastName: document.getElementById('settingsLastName').value,
@@ -1043,26 +1017,23 @@ document.addEventListener('DOMContentLoaded', function() {
             county: document.getElementById('settingsCounty').value,
             postcode: document.getElementById('settingsPostcode').value
         };
-
         await updateSettings(formData);
     });
 
-    // Set up auto-refresh interval for active data
-    setInterval(() => {
+    // Auto-refresh setup
+    setInterval(async () => {
         const activeTab = getActiveTab();
-        switch(activeTab) {
-            case 'dashboard':
-                loadDashboardData();
-                break;
-            case 'reports':
-                loadReportsData();
-                break;
-            case 'settings':
-                // Settings don't need regular refresh
-                break;
+        try {
+            switch(activeTab) {
+                case 'dashboard':
+                    await loadDashboardData();
+                    break;
+                case 'reports':
+                    await loadReportsData();
+                    break;
+            }
+        } catch (error) {
+            console.error('Error in auto-refresh:', error);
         }
-    }, 60000); // Refresh every minute
-
-    // Initial data load
-    loadDashboardData();
+    }, 60000);
 });
