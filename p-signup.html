@@ -53,6 +53,27 @@
                 </div>
 
                 <div>
+                    <label class="block text-sm font-medium text-gray-300">Performance Type</label>
+                    <select id="performanceType" required
+                        class="auth-input mt-1 block w-full px-3 py-2 rounded-lg">
+                        <option value="" disabled selected>Select your performance type</option>
+                        <option value="acoustic">Acoustic</option>
+                        <option value="band">Band</option>
+                        <option value="blues">Blues</option>
+                        <option value="classical">Classical</option>
+                        <option value="coverband">Cover Band</option>
+                        <option value="dj">DJ</option>
+                        <option value="electronic">Electronic</option>
+                        <option value="folk">Folk</option>
+                        <option value="jazz">Jazz</option>
+                        <option value="pop">Pop</option>
+                        <option value="rock">Rock</option>
+                        <option value="tribute">Tribute</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div>
                     <label class="block text-sm font-medium text-gray-300">Email</label>
                     <input type="email" id="email" required
                         class="auth-input mt-1 block w-full px-3 py-2 rounded-lg">
@@ -107,6 +128,7 @@
                 first_name: document.getElementById('firstName').value,
                 last_name: document.getElementById('lastName').value,
                 stage_name: document.getElementById('stageName').value,
+                performance_type: document.getElementById('performanceType').value,
                 email: document.getElementById('email').value,
                 password: document.getElementById('password').value,
                 created_at: new Date().toISOString()

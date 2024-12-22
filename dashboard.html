@@ -168,7 +168,7 @@
                         <h2 class="text-xl font-semibold text-black">Book a Performer</h2>
                     </div>
                     <div class="p-6">
-                        <form id="searchForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <form id="searchForm" class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div>
                                 <label class="block text-sm font-medium text-black0 mb-2">Date</label>
                                 <input type="date" id="searchDate" required min="" 
@@ -179,7 +179,27 @@
                                 <input type="time" id="searchStartTime" step="900" required
                                     class="w-full px-4 py-3 bg-black/5 border border-black/10 rounded-lg text-black placeholder-gray-400 focus:border-black/20 focus:ring-black/20">
                             </div>
-                            <div class="md:col-span-2">
+                            <div>
+                                <label class="block text-sm font-medium text-black0 mb-2">Performance Type</label>
+                                <select id="performanceType" 
+                                    class="w-full px-4 py-3 bg-black/5 border border-black/10 rounded-lg text-black placeholder-gray-400 focus:border-black/20 focus:ring-black/20">
+                                    <option value="">All Types</option>
+                                    <option value="acoustic">Acoustic</option>
+                                    <option value="band">Band</option>
+                                    <option value="blues">Blues</option>
+                                    <option value="classical">Classical</option>
+                                    <option value="coverband">Cover Band</option>
+                                    <option value="dj">DJ</option>
+                                    <option value="electronic">Electronic</option>
+                                    <option value="folk">Folk</option>
+                                    <option value="jazz">Jazz</option>
+                                    <option value="pop">Pop</option>
+                                    <option value="rock">Rock</option>
+                                    <option value="tribute">Tribute</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-3">
                                 <button type="submit"
                                     class="w-full bg-gradient-to-r from-indigo-500 to-purple-500 text-black px-6 py-3 rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-all duration-200">
                                     Search Available Performers

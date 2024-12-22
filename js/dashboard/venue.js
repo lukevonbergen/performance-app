@@ -262,6 +262,7 @@ function updateTodaySchedule(upcomingEvents, today) {
 async function searchPerformers(date, startTime) {
     try {
         const searchDateTime = new Date(`${date}T${startTime}`);
+        const performanceType = document.getElementById('performanceType').value;
         
         // Get existing bookings
         const { data: existingBookings, error: bookingsError } = await supabase
@@ -274,17 +275,25 @@ async function searchPerformers(date, startTime) {
 
         const bookedPerformerIds = existingBookings?.map(booking => booking.performer_id) || [];
         
-        // Get available performers
-        const { data: availability, error } = await supabase
+        // Build query for available performers
+        let query = supabase
             .from('performer_availability')
             .select(`
                 *,
                 performers (
                     id,
-                    stage_name
+                    stage_name,
+                    performance_type
                 )
             `)
             .eq('date', date);
+
+        // Add performance type filter if selected
+        if (performanceType) {
+            query = query.eq('performers.performance_type', performanceType);
+        }
+
+        const { data: availability, error } = await query;
 
         if (error) throw error;
 
@@ -312,7 +321,12 @@ function updateSearchResults(availability, bookedPerformerIds, startTime, search
         resultsDiv.innerHTML = availablePerformers.map(slot => `
             <div class="border rounded-lg p-4 flex justify-between items-center bg-black/20 backdrop-blur-lg">
                 <div>
-                    <h3 class="font-medium text-black">${slot.performers.stage_name}</h3>
+                    <div class="flex items-center gap-2 mb-1">
+                        <h3 class="font-medium text-black">${slot.performers.stage_name}</h3>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-500/20 text-indigo-400">
+                            ${slot.performers.performance_type}
+                        </span>
+                    </div>
                     <p class="text-sm text-black">Available ${formatTime(slot.start_time)} - ${formatTime(slot.end_time)}</p>
                     <div class="flex space-x-2 text-sm text-black">
                         <p>Rate: £${slot.rate_per_hour}/hr</p>
@@ -321,12 +335,11 @@ function updateSearchResults(availability, bookedPerformerIds, startTime, search
                     </div>
                 </div>
                 <button 
-                    onclick="openBookingModal('${slot.performer_id}', '${slot.performers.stage_name.replace(/'/g, "\\'")}', ${slot.rate_per_hour}, '${searchDateTime.toISOString()}')"
+                    onclick="openBookingModal('${slot.performer_id}', '${slot.performers.stage_name.replace(/'/g, "\\'")}', ${slot.rate_per_hour}, '${searchDateTime.toISOString()}', '${slot.performers.performance_type}')"
                     class="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-all duration-200"
                 >
                     Book Now
                 </button>
-
             </div>
         `).join('');
     } else {
@@ -369,7 +382,7 @@ window.openBookingModal = async function(performerId, performerName, rate, start
     updateBookingModal(performerName, startTime, slot);
 };
 
-function updateBookingModal(performerName, startTime, slot) {
+function updateBookingModal(performerName, startTime, slot, performanceType) {
     document.getElementById('bookingDetails').innerHTML = `
         <div class="grid gap-4">
             <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
@@ -382,6 +395,9 @@ function updateBookingModal(performerName, startTime, slot) {
                     <div>
                         <p class="text-sm text-gray-500">Performer</p>
                         <p class="font-medium text-gray-900">${performerName}</p>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-500/20 text-indigo-400 mt-1">
+                            ${performanceType}
+                        </span>
                     </div>
                 </div>
             </div>
