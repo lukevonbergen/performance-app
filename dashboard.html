@@ -399,17 +399,23 @@
                     </div>
                 </div>
 
-                <div class="glass-card rounded-xl border border-black/10">
-
-                    <div id="venue-qr-container">
-                        <img id="venueQR" alt="Venue QR Code" style="max-width: 300px; display: block; margin-bottom: 10px;" />
-                        <button id="downloadQR" class="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-all duration-200">
-                            Download QR Code
+                <div class="glass-card rounded-xl border border-black/10 p-6">
+                    <div class="px-6 py-4 border-b border-black/10 mb-6">
+                        <h2 class="text-xl font-semibold text-black">Venue QR Code</h2>
+                        <p class="text-sm text-gray-500 mt-1">Display this QR code in your venue for customer ratings</p>
+                    </div>
+                    <div id="venue-qr-container" class="flex flex-col items-center space-y-4">
+                        <div class="bg-white p-4 rounded-xl shadow-lg">
+                            <img id="venueQR" alt="Venue QR Code" class="w-64 h-64 object-contain" />
+                        </div>
+                        <button id="downloadQR" class="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-all duration-200 flex items-center space-x-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            <span>Download QR Code</span>
                         </button>
                     </div>
-
                 </div>
-                
             </div>
         </div>
     </div>

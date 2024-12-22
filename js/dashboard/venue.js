@@ -911,8 +911,21 @@ window.logout = function() {
 async function generateVenueQR(venueId) {
     const ratingUrl = `${window.location.origin}/rate/venue/${venueId}`;
     try {
-        // Ensure QRCode is defined and generate the QR Code
-        return await QRCode.toDataURL(ratingUrl);
+        const qr = await new Promise((resolve, reject) => {
+            QRCode.toDataURL(ratingUrl, {
+                width: 512,
+                height: 512,
+                margin: 2,
+                color: {
+                    dark: '#000000',
+                    light: '#FFFFFF'
+                }
+            }, (err, url) => {
+                if (err) reject(err);
+                resolve(url);
+            });
+        });
+        return qr;
     } catch (error) {
         console.error('Error generating QR code:', error);
         throw error;
@@ -973,6 +986,17 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     } catch (error) {
         console.error('Error loading initial data:', error);
+    }
+
+    // Generate and display QR code
+    try {
+        if (document.getElementById('venueQR')) {
+            const qrCode = await generateVenueQR(window.user.id);
+            const qrImage = document.getElementById('venueQR');
+            qrImage.src = qrCode;
+        }
+    } catch (error) {
+        console.error('Error generating QR code:', error);
     }
 
     // Set up navigation handlers
