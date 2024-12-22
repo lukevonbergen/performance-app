@@ -24,6 +24,14 @@
 
                     <!-- Right Side - Settings -->
                     <div class="flex items-center space-x-4">
+
+                        <button data-tab="settings" class="nav-link p-1.5 text-white/70 hover:text-white rounded-lg hover:bg-white/10 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </button>
+
                         <!-- User Menu Dropdown -->
                         <div class="relative">
                             <button id="userMenuBtn" class="flex items-center text-white/70 hover:text-white">
@@ -327,6 +335,71 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Settings Tab -->
+            <div id="settings-tab" class="tab-content hidden space-y-8">
+                <div class="glass-card rounded-xl border border-black/10">
+                    <div class="px-6 py-4 border-b border-black/10">
+                        <h2 class="text-lg font-semibold text-black">Account Settings</h2>
+                    </div>
+                    <div class="p-6">
+                        <form id="settingsForm" class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Personal Information -->
+                                <div class="space-y-4">
+                                    <h3 class="text-lg font-medium text-black">Personal Information</h3>
+                                    <div>
+                                        <label class="block text-sm font-medium text-black0 mb-2">First Name</label>
+                                        <input type="text" id="settingsFirstName" required
+                                            class="w-full px-4 py-3 bg-black/5 border border-black/10 rounded-lg text-black placeholder-gray-400 focus:border-black/20 focus:ring-black/20">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-black0 mb-2">Last Name</label>
+                                        <input type="text" id="settingsLastName" required
+                                            class="w-full px-4 py-3 bg-black/5 border border-black/10 rounded-lg text-black placeholder-gray-400 focus:border-black/20 focus:ring-black/20">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-black0 mb-2">Stage Name</label>
+                                        <input type="text" id="settingsStageName" required
+                                            class="w-full px-4 py-3 bg-black/5 border border-black/10 rounded-lg text-black placeholder-gray-400 focus:border-black/20 focus:ring-black/20">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-black0 mb-2">Email</label>
+                                        <input type="email" id="settingsEmail" required
+                                            class="w-full px-4 py-3 bg-black/5 border border-black/10 rounded-lg text-black placeholder-gray-400 focus:border-black/20 focus:ring-black/20">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-black0 mb-2">Performance Type</label>
+                                        <select id="settingsPerformanceType" required
+                                            class="w-full px-4 py-3 bg-black/5 border border-black/10 rounded-lg text-black placeholder-gray-400 focus:border-black/20 focus:ring-black/20">
+                                            <option value="acoustic">Acoustic</option>
+                                            <option value="band">Band</option>
+                                            <option value="blues">Blues</option>
+                                            <option value="classical">Classical</option>
+                                            <option value="coverband">Cover Band</option>
+                                            <option value="dj">DJ</option>
+                                            <option value="electronic">Electronic</option>
+                                            <option value="folk">Folk</option>
+                                            <option value="jazz">Jazz</option>
+                                            <option value="pop">Pop</option>
+                                            <option value="rock">Rock</option>
+                                            <option value="tribute">Tribute</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-end space-x-4">
+                                <button type="submit"
+                                    class="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-all duration-200">
+                                    Save Changes
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -448,6 +521,7 @@
             </div>
         </div>
     </div>
+
 
     <script type="module" src="./js/dashboard/performer.js"></script>
 </body>

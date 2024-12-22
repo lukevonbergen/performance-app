@@ -504,6 +504,76 @@ function renderAvailabilityItem(slot) {
     return div;
 }
 
+// Settings Functions
+async function loadSettings() {
+    try {
+        const { data: performer, error } = await supabase
+            .from('performers')
+            .select('*')
+            .eq('id', window.user.id)
+            .single();
+
+        if (error) throw error;
+
+        // Populate form fields
+        document.getElementById('settingsFirstName').value = performer.first_name;
+        document.getElementById('settingsLastName').value = performer.last_name;
+        document.getElementById('settingsStageName').value = performer.stage_name;
+        document.getElementById('settingsEmail').value = performer.email;
+        document.getElementById('settingsPerformanceType').value = performer.performance_type;
+
+    } catch (error) {
+        console.error('Error loading settings:', error);
+        showToast('Error loading settings. Please try again.', 'error');
+    }
+}
+
+async function updateSettings(formData) {
+    try {
+        const { error } = await supabase
+            .from('performers')
+            .update({
+                first_name: formData.firstName,
+                last_name: formData.lastName,
+                stage_name: formData.stageName,
+                email: formData.email,
+                performance_type: formData.performanceType
+            })
+            .eq('id', window.user.id);
+
+        if (error) throw error;
+
+        // Update session storage with new data
+        const user = JSON.parse(sessionStorage.getItem('user'));
+        user.first_name = formData.firstName;
+        user.stage_name = formData.stageName;
+        sessionStorage.setItem('user', JSON.stringify(user));
+
+        // Update UI elements
+        document.getElementById('performerName').textContent = formData.stageName;
+
+        showToast('Settings updated successfully');
+    } catch (error) {
+        console.error('Error updating settings:', error);
+        showToast('Error updating settings. Please try again.', 'error');
+    }
+}
+
+// Add settings form handler to your DOMContentLoaded event listener
+document.getElementById('settingsForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = {
+        firstName: document.getElementById('settingsFirstName').value,
+        lastName: document.getElementById('settingsLastName').value,
+        stageName: document.getElementById('settingsStageName').value,
+        email: document.getElementById('settingsEmail').value,
+        performanceType: document.getElementById('settingsPerformanceType').value
+    };
+
+    await updateSettings(formData);
+});
+
 // Modal Management Functions
 let availabilityToDelete = null;
 
@@ -1046,6 +1116,9 @@ function loadTabData(tabId) {
             break;
         case 'performances':
             loadPerformances();
+            break;
+        case 'settings':
+            loadSettings();
             break;
         case 'dashboard':
         default:
