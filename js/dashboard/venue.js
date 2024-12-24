@@ -631,7 +631,8 @@ function createCostChart(monthlyCosts) {
             datasets: [{
                 label: 'Cost',
                 data: costs,
-                borderColor: '#8B5CF6',
+                borderColor: '#4F46E5', // Changed to a darker indigo
+                backgroundColor: 'rgba(79, 70, 229, 0.1)', // Light indigo background
                 tension: 0.1
             }]
         },
@@ -642,25 +643,25 @@ function createCostChart(monthlyCosts) {
                 y: {
                     beginAtZero: true,
                     grid: {
-                        color: 'rgba(255, 255, 255, 0.1)'
+                        color: 'rgba(0, 0, 0, 0.1)' // Darker grid lines
                     },
                     ticks: {
-                        color: 'rgba(255, 255, 255, 0.7)'
+                        color: 'rgba(0, 0, 0, 0.7)' // Darker text
                     }
                 },
                 x: {
                     grid: {
-                        color: 'rgba(255, 255, 255, 0.1)'
+                        color: 'rgba(0, 0, 0, 0.1)' // Darker grid lines
                     },
                     ticks: {
-                        color: 'rgba(255, 255, 255, 0.7)'
+                        color: 'rgba(0, 0, 0, 0.7)' // Darker text
                     }
                 }
             },
             plugins: {
                 legend: {
                     labels: {
-                        color: 'rgba(255, 255, 255, 0.7)'
+                        color: 'rgba(0, 0, 0, 0.7)' // Darker legend text
                     }
                 }
             }
@@ -680,7 +681,8 @@ function createTimesChart(timeStats) {
             datasets: [{
                 label: 'Bookings',
                 data: counts,
-                backgroundColor: '#10B981'
+                backgroundColor: '#0EA5E9', // Changed to sky blue
+                hoverBackgroundColor: '#0284C7' // Darker sky blue on hover
             }]
         },
         options: {
@@ -690,25 +692,25 @@ function createTimesChart(timeStats) {
                 y: {
                     beginAtZero: true,
                     grid: {
-                        color: 'rgba(255, 255, 255, 0.1)'
+                        color: 'rgba(0, 0, 0, 0.1)' // Darker grid lines
                     },
                     ticks: {
-                        color: 'rgba(255, 255, 255, 0.7)'
+                        color: 'rgba(0, 0, 0, 0.7)' // Darker text
                     }
                 },
                 x: {
                     grid: {
-                        color: 'rgba(255, 255, 255, 0.1)'
+                        color: 'rgba(0, 0, 0, 0.1)' // Darker grid lines
                     },
                     ticks: {
-                        color: 'rgba(255, 255, 255, 0.7)'
+                        color: 'rgba(0, 0, 0, 0.7)' // Darker text
                     }
                 }
             },
             plugins: {
                 legend: {
                     labels: {
-                        color: 'rgba(255, 255, 255, 0.7)'
+                        color: 'rgba(0, 0, 0, 0.7)' // Darker legend text
                     }
                 }
             }
