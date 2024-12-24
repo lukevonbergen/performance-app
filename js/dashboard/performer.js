@@ -870,20 +870,6 @@ function processPeriodData(performances, periodDays) {
     return data;
 }
 
-function updateReportsSummary(stats) {
-    // Update summary cards
-    document.getElementById('periodEarnings').textContent = `£${stats.currentMetrics.totalEarnings.toFixed(2)}`;
-    document.getElementById('periodPerformances').textContent = stats.currentMetrics.performances;
-    document.getElementById('averageRate').textContent = `£${stats.currentMetrics.averageRate.toFixed(2)}`;
-    document.getElementById('averageDuration').textContent = `${stats.currentMetrics.averageDuration.toFixed(1)}`;
-
-    // Update change indicators
-    updateChangeIndicator('earningsChange', stats.changes.earnings);
-    updateChangeIndicator('performancesChange', stats.changes.performances);
-    updateChangeIndicator('rateChange', stats.changes.rate);
-    updateChangeIndicator('durationChange', stats.changes.duration);
-}
-
 function updateChangeIndicator(elementId, change) {
     const element = document.getElementById(elementId);
     const formattedChange = Math.abs(change).toFixed(1);
