@@ -55,6 +55,7 @@ if (!window.hasInitializedNavigation) {
 // Initialize UI
 document.getElementById('performerName').textContent = window.user.stage_name || 'Performer Dashboard';
 
+// Fix the destroyCharts function near the top of the file
 function destroyCharts() {
     if (earningsChartInstance) {
         earningsChartInstance.destroy();
@@ -72,6 +73,7 @@ function destroyCharts() {
         performanceTrendChartInstance.destroy();
         performanceTrendChartInstance = null;
     }
+} // Add this closing brace
 
 // Utility Functions
 function formatTime(timeString) {
@@ -1094,10 +1096,6 @@ function processReportsData(performances, periodDays) {
         periodData: processPeriodData(currentPeriodPerfs, periodDays)
     };
 }
-
-// Chart Management
-let earningsChartInstance = null;
-let timesChartInstance = null;
 
 function createTimesChart(timeStats) {
     const ctx = document.getElementById('timesChart');
