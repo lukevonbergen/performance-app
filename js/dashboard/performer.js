@@ -1069,61 +1069,6 @@ function processReportsData(performances, periodDays) {
 let earningsChartInstance = null;
 let timesChartInstance = null;
 
-function createEarningsChart(monthlyEarnings) {
-    const ctx = document.getElementById('earningsChart');
-
-    if (earningsChartInstance) {
-        earningsChartInstance.destroy();
-    }
-
-    const months = Object.keys(monthlyEarnings);
-    const earnings = Object.values(monthlyEarnings);
-
-    earningsChartInstance = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: months,
-            datasets: [{
-                label: 'Earnings',
-                data: earnings,
-                borderColor: '#8B5CF6',
-                tension: 0.1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        color: 'rgba(255, 255, 255, 0.1)'
-                    },
-                    ticks: {
-                        color: 'rgba(255, 255, 255, 0.7)',
-                        callback: value => `£${value}`
-                    }
-                },
-                x: {
-                    grid: {
-                        color: 'rgba(255, 255, 255, 0.1)'
-                    },
-                    ticks: {
-                        color: 'rgba(255, 255, 255, 0.7)'
-                    }
-                }
-            },
-            plugins: {
-                legend: {
-                    labels: {
-                        color: 'rgba(255, 255, 255, 0.7)'
-                    }
-                }
-            }
-        }
-    });
-}
-
 function createTimesChart(timeStats) {
     const ctx = document.getElementById('timesChart');
 
