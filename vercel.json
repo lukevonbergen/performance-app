@@ -1,14 +1,14 @@
 {
   "redirects": [
     {
-      "source": "/dashboard",
-      "destination": "https://venue.gostagelink.com",
-      "statusCode": 301
+      "source": "https://performer.gostagelink.com",
+      "destination": "https://gostagelink.com",
+      "statusCode": 307
     },
     {
-      "source": "/performer-dashboard",
-      "destination": "https://performer.gostagelink.com",
-      "statusCode": 301
+      "source": "https://venue.gostagelink.com",
+      "destination": "https://gostagelink.com",
+      "statusCode": 307
     }
   ],
   "rewrites": [
