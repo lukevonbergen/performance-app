@@ -751,8 +751,8 @@ document.getElementById('confirmDeleteBtn')?.addEventListener('click', async () 
 
 // Reports Functions
 async function loadReportsData() {
-    console.log('Loading reports...');
     try {
+        const period = document.getElementById('reportPeriod').value;
         const { data: performances, error } = await supabase
             .from('performances')
             .select(`
@@ -764,17 +764,14 @@ async function loadReportsData() {
             `)
             .eq('performer_id', window.user.id);
 
-        if (error) {
-            console.error('Reports error:', error);
-            throw error;
-        }
+        if (error) throw error;
 
-        console.log('Reports data:', performances);
-        const stats = processReportsData(performances);
+        const stats = processReportsData(performances, period);
         updateReportsSummary(stats);
-        createEarningsChart(stats.monthlyEarnings);
+        createEarningsChart(stats.periodData);
         createTimesChart(stats.timeStats);
-        updatePerformanceHistoryTable(performances);
+        createVenueAnalysis(stats.venueStats);
+        updatePerformanceHistoryTable(performances, period);
 
     } catch (error) {
         console.error('Error loading reports data:', error);
@@ -782,54 +779,289 @@ async function loadReportsData() {
     }
 }
 
-function processReportsData(performances) {
-    let totalEarnings = 0;
-    let confirmedCount = 0;
-    const monthlyEarnings = {};
-    const venueStats = {};
-    const timeStats = {};
+function calculatePeriodMetrics(performances) {
+    if (!performances.length) return {
+        totalEarnings: 0,
+        averageRate: 0,
+        averageDuration: 0
+    };
 
-    performances.forEach(perf => {
-        if (perf.status === 'confirmed') {
-            // Calculate earnings
-            const duration = calculateDuration(perf.start_time, perf.end_time);
-            const earnings = duration * perf.booking_rate;
-            totalEarnings += earnings;
-            confirmedCount++;
+    const totalEarnings = performances.reduce((sum, perf) => {
+        const duration = calculateDuration(perf.start_time, perf.end_time);
+        return sum + (duration * perf.booking_rate);
+    }, 0);
 
-            // Monthly earnings
-            const month = new Date(perf.date).toLocaleString('default', { month: 'short' });
-            monthlyEarnings[month] = (monthlyEarnings[month] || 0) + earnings;
+    const totalDuration = performances.reduce((sum, perf) => {
+        return sum + calculateDuration(perf.start_time, perf.end_time);
+    }, 0);
 
-            // Venue stats
-            const venueName = perf.venues?.venue_name || 'Unknown Venue';
-            if (!venueStats[venueName]) {
-                venueStats[venueName] = { 
-                    performances: 0, 
-                    earnings: 0, 
-                    totalRate: 0 
-                };
-            }
-            venueStats[venueName].performances++;
-            venueStats[venueName].earnings += earnings;
-            venueStats[venueName].totalRate += perf.booking_rate;
-
-            // Time stats
-            const hour = perf.start_time.split(':')[0];
-            timeStats[hour] = (timeStats[hour] || 0) + 1;
-        }
-    });
+    const averageRate = performances.reduce((sum, perf) => sum + perf.booking_rate, 0) / performances.length;
 
     return {
         totalEarnings,
-        totalPerformances: performances.length,
-        confirmedPerformances: confirmedCount,
-        confirmationRate: ((confirmedCount / performances.length) * 100) || 0,
-        monthlyEarnings,
+        averageRate,
+        averageDuration: totalDuration / performances.length
+    };
+}
+
+function calculatePercentageChange(previous, current) {
+    if (previous === 0) return current === 0 ? 0 : 100;
+    return ((current - previous) / previous) * 100;
+}
+
+function processTimeStats(performances) {
+    return performances.reduce((acc, perf) => {
+        const hour = parseInt(perf.start_time.split(':')[0]);
+        acc[hour] = (acc[hour] || 0) + 1;
+        return acc;
+    }, {});
+}
+
+function processPeriodData(performances, periodDays) {
+    const data = [];
+    const now = new Date();
+    let currentDate = new Date(now.getTime() - (periodDays * 24 * 60 * 60 * 1000));
+
+    while (currentDate <= now) {
+        const dateStr = currentDate.toISOString().split('T')[0];
+        const dayPerformances = performances.filter(perf => perf.date === dateStr);
+        
+        const dailyEarnings = dayPerformances.reduce((sum, perf) => {
+            const duration = calculateDuration(perf.start_time, perf.end_time);
+            return sum + (duration * perf.booking_rate);
+        }, 0);
+
+        data.push({
+            date: dateStr,
+            earnings: dailyEarnings,
+            performances: dayPerformances.length
+        });
+
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    return data;
+}
+
+function updateReportsSummary(stats) {
+    // Update summary cards
+    document.getElementById('periodEarnings').textContent = `£${stats.currentMetrics.totalEarnings.toFixed(2)}`;
+    document.getElementById('periodPerformances').textContent = stats.currentMetrics.performances;
+    document.getElementById('averageRate').textContent = `£${stats.currentMetrics.averageRate.toFixed(2)}`;
+    document.getElementById('averageDuration').textContent = `${stats.currentMetrics.averageDuration.toFixed(1)}`;
+
+    // Update change indicators
+    updateChangeIndicator('earningsChange', stats.changes.earnings);
+    updateChangeIndicator('performancesChange', stats.changes.performances);
+    updateChangeIndicator('rateChange', stats.changes.rate);
+    updateChangeIndicator('durationChange', stats.changes.duration);
+}
+
+function updateChangeIndicator(elementId, change) {
+    const element = document.getElementById(elementId);
+    const formattedChange = Math.abs(change).toFixed(1);
+    const arrow = change > 0 ? '↑' : change < 0 ? '↓' : '→';
+    const color = change > 0 ? 'text-green-500' : change < 0 ? 'text-red-500' : 'text-gray-500';
+    
+    element.className = `${color} font-medium`;
+    element.textContent = `${arrow} ${formattedChange}%`;
+}
+
+function createEarningsChart(data) {
+    const ctx = document.getElementById('earningsChart');
+    
+    if (earningsChartInstance) {
+        earningsChartInstance.destroy();
+    }
+
+    earningsChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.map(d => formatDate(d.date)),
+            datasets: [{
+                label: 'Daily Earnings',
+                data: data.map(d => d.earnings),
+                borderColor: '#10B981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: value => `£${value}`
+                    }
+                }
+            }
+        }
+    });
+}
+
+function createVenueAnalysis(venueStats) {
+    const venueStatsContainer = document.getElementById('venueStats');
+    const sortedVenues = Object.entries(venueStats)
+        .sort(([,a], [,b]) => b.earnings - a.earnings);
+
+    // Create venue statistics HTML
+    venueStatsContainer.innerHTML = sortedVenues.map(([venue, stats]) => `
+        <div class="flex justify-between items-center p-4 border-b border-black/10">
+            <div>
+                <h3 class="font-medium text-black">${venue}</h3>
+                <p class="text-sm text-gray-500">${stats.performances} performances</p>
+            </div>
+            <div class="text-right">
+                <p class="font-medium text-black">£${stats.earnings.toFixed(2)}</p>
+                <p class="text-sm text-gray-500">£${stats.averageRate.toFixed(2)}/hr avg</p>
+            </div>
+        </div>
+    `).join('');
+
+    // Create venue chart
+    const ctx = document.getElementById('venueChart');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: sortedVenues.map(([venue]) => venue),
+            datasets: [{
+                data: sortedVenues.map(([,stats]) => stats.earnings),
+                backgroundColor: [
+                    '#10B981', '#8B5CF6', '#F59E0B', '#EF4444',
+                    '#6366F1', '#EC4899', '#14B8A6', '#F97316'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+}
+
+// Event Listeners
+document.getElementById('reportPeriod').addEventListener('change', loadReportsData);
+
+document.getElementById('exportHistory').addEventListener('click', async () => {
+    try {
+        const { data: performances } = await supabase
+            .from('performances')
+            .select('*')
+            .eq('performer_id', window.user.id);
+
+        const csvContent = generateCSV(performances);
+        downloadCSV(csvContent, 'performance_history.csv');
+    } catch (error) {
+        console.error('Error exporting data:', error);
+        showToast('Error exporting data', 'error');
+    }
+});
+
+function generateCSV(performances) {
+    const headers = ['Date', 'Venue', 'Start Time', 'End Time', 'Rate', 'Duration', 'Total', 'Status'];
+    const rows = performances.map(perf => {
+        const duration = calculateDuration(perf.start_time, perf.end_time);
+        const total = duration * perf.booking_rate;
+        return [
+            perf.date,
+            perf.venues?.venue_name || 'Unknown',
+            perf.start_time,
+            perf.end_time,
+            `£${perf.booking_rate}`,
+            `${duration} hours`,
+            `£${total.toFixed(2)}`,
+            perf.status
+        ];
+    });
+
+    return [headers, ...rows]
+        .map(row => row.join(','))
+        .join('\n');
+}
+
+function downloadCSV(content, filename) {
+    const blob = new Blob([content], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    window.URL.revokeObjectURL(url);
+}
+
+function processReportsData(performances, periodDays) {
+    const now = new Date();
+    const periodStart = new Date(now.getTime() - (periodDays * 24 * 60 * 60 * 1000));
+    const previousPeriodStart = new Date(periodStart.getTime() - (periodDays * 24 * 60 * 60 * 1000));
+
+    // Filter performances for current and previous periods
+    const currentPeriodPerfs = performances.filter(perf => {
+        const perfDate = new Date(perf.date);
+        return perfDate >= periodStart && perfDate <= now && perf.status === 'confirmed';
+    });
+
+    const previousPeriodPerfs = performances.filter(perf => {
+        const perfDate = new Date(perf.date);
+        return perfDate >= previousPeriodStart && perfDate < periodStart && perf.status === 'confirmed';
+    });
+
+    // Calculate metrics for current period
+    const currentMetrics = calculatePeriodMetrics(currentPeriodPerfs);
+    const previousMetrics = calculatePeriodMetrics(previousPeriodPerfs);
+
+    // Calculate changes
+    const changes = {
+        earnings: calculatePercentageChange(previousMetrics.totalEarnings, currentMetrics.totalEarnings),
+        performances: calculatePercentageChange(previousPeriodPerfs.length, currentPeriodPerfs.length),
+        rate: calculatePercentageChange(previousMetrics.averageRate, currentMetrics.averageRate),
+        duration: calculatePercentageChange(previousMetrics.averageDuration, currentMetrics.averageDuration)
+    };
+
+    // Process venue statistics
+    const venueStats = performances.reduce((acc, perf) => {
+        if (perf.status !== 'confirmed') return acc;
+        
+        const venueName = perf.venues?.venue_name || 'Unknown';
+        if (!acc[venueName]) {
+            acc[venueName] = {
+                performances: 0,
+                earnings: 0,
+                averageRate: 0,
+                totalDuration: 0
+            };
+        }
+
+        const duration = calculateDuration(perf.start_time, perf.end_time);
+        const earnings = duration * perf.booking_rate;
+
+        acc[venueName].performances++;
+        acc[venueName].earnings += earnings;
+        acc[venueName].totalDuration += duration;
+        acc[venueName].averageRate = acc[venueName].earnings / acc[venueName].totalDuration;
+
+        return acc;
+    }, {});
+
+    return {
+        currentMetrics,
+        previousMetrics,
+        changes,
         venueStats,
-        timeStats,
-        topVenue: Object.entries(venueStats)
-            .sort((a, b) => b[1].performances - a[1].performances)[0]?.[0] || '--'
+        timeStats: processTimeStats(currentPeriodPerfs),
+        periodData: processPeriodData(currentPeriodPerfs, periodDays)
     };
 }
 
