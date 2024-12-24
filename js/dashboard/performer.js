@@ -836,11 +836,6 @@ function calculatePeriodMetrics(performances) {
     };
 }
 
-function calculatePercentageChange(previous, current) {
-    if (previous === 0) return current === 0 ? 0 : 100;
-    return ((current - previous) / previous) * 100;
-}
-
 function processTimeStats(performances) {
     return performances.reduce((acc, perf) => {
         const hour = parseInt(perf.start_time.split(':')[0]);
