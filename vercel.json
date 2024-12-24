@@ -1,4 +1,16 @@
 {
+  "redirects": [
+    {
+      "source": "/dashboard",
+      "destination": "https://venue.gostagelink.com",
+      "statusCode": 301
+    },
+    {
+      "source": "/performer-dashboard",
+      "destination": "https://performer.gostagelink.com",
+      "statusCode": 301
+    }
+  ],
   "rewrites": [
     {
       "source": "/:path",
@@ -7,6 +19,12 @@
     {
       "source": "/rate/venue/:venueId",
       "destination": "/rate.html"
+    }
+  ],
+  "routes": [
+    {
+      "src": "^/.*$",
+      "dest": "/index.html"
     }
   ]
 }
