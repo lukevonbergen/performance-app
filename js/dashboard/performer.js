@@ -403,6 +403,7 @@ function updateRecentActivity(performances) {
 async function loadPerformances() {
     try {
         const today = new Date().toISOString().split('T')[0];
+        console.log('Loading performances for date:', today);
         
         // Get all performances for this performer
         const { data: performances, error } = await supabase
@@ -424,11 +425,15 @@ async function loadPerformances() {
 
         if (error) throw error;
 
+        console.log('Fetched performances:', performances);
+
         // Split performances into categories
         const upcoming = performances?.filter(p => p.date >= today && p.status === 'confirmed') || [];
         const pending = performances?.filter(p => p.date >= today && p.status === 'pending') || [];
         const rejected = performances?.filter(p => p.date >= today && p.status === 'rejected') || [];
         const past = performances?.filter(p => p.date < today) || [];
+
+        console.log('Categorized performances:', { upcoming, pending, rejected, past });
 
         // Update the badge with pending count
         updatePendingBadge(pending.length);
@@ -443,40 +448,56 @@ async function loadPerformances() {
 }
 
 function updatePerformancesUI(upcoming, pending, rejected, past) {
+    console.log('Updating performances UI with:', { upcoming, pending, rejected, past });
+    
     // Update Upcoming Performances
     const upcomingList = document.getElementById('upcomingPerformancesList');
+    if (!upcomingList) {
+        console.warn('Upcoming performances list element not found');
+        return;
+    }
+
     if (upcoming.length > 0) {
-        upcomingList.innerHTML = upcoming.map(perf => `
-            <div class="border-l-4 border-green-500 pl-4">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <h3 class="font-medium text-black">${perf.venues?.venue_name || 'Unknown Venue'}</h3>
-                        <p class="text-black">${formatDate(perf.date)}</p>
-                        <p class="text-black">${formatTime(perf.start_time)} - ${formatTime(perf.end_time)}</p>
-                        <div class="flex space-x-2 text-sm text-gray-400">
-                            <p>Rate: £${perf.booking_rate}/hr</p>
-                            <span>•</span>
-                            <p>Total: £${calculatePerformanceTotal(perf)}</p>
+        console.log('Rendering upcoming performances:', upcoming);
+        upcomingList.innerHTML = upcoming.map(perf => {
+            // Add null check for venues
+            if (!perf.venues) {
+                console.warn('No venue data for performance:', perf);
+                return '';
+            }
+            
+            return `
+                <div class="border-l-4 border-green-500 pl-4">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-medium text-black">${perf.venues?.venue_name || 'Unknown Venue'}</h3>
+                            <p class="text-black">${formatDate(perf.date)}</p>
+                            <p class="text-black">${formatTime(perf.start_time)} - ${formatTime(perf.end_time)}</p>
+                            <div class="flex space-x-2 text-sm text-gray-400">
+                                <p>Rate: £${perf.booking_rate}/hr</p>
+                                <span>•</span>
+                                <p>Total: £${calculatePerformanceTotal(perf)}</p>
+                            </div>
+                            <a href="${createMapsUrl(perf.venues)}" 
+                               target="_blank" 
+                               rel="noopener noreferrer" 
+                               class="inline-flex items-center mt-2 text-indigo-500 hover:text-indigo-400 text-sm">
+                                Get directions
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                </svg>
+                            </a>
                         </div>
-                        <a href="${createMapsUrl(perf.venues)}" 
-                           target="_blank" 
-                           rel="noopener noreferrer" 
-                           class="inline-flex items-center mt-2 text-indigo-500 hover:text-indigo-400 text-sm">
-                            Get directions
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-                            </svg>
-                        </a>
+                        <button 
+                            onclick="cancelPerformance('${perf.id}')"
+                            class="text-red-400 hover:text-red-300 transition-colors duration-200"
+                        >
+                            Cancel Performance
+                        </button>
                     </div>
-                    <button 
-                        onclick="cancelPerformance('${perf.id}')"
-                        class="text-red-400 hover:text-red-300 transition-colors duration-200"
-                    >
-                        Cancel Performance
-                    </button>
                 </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     } else {
         upcomingList.innerHTML = '<p class="text-center text-gray-400">No upcoming performances</p>';
     }
