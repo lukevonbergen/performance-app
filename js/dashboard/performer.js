@@ -215,27 +215,8 @@ async function loadDashboardData() {
 }
 
 // Update the dashboard stats function to calculate total earnings from completed performances
-function updateDashboardStats(performances, ratings) {
-    // Add null checks for all elements first
-    const elements = {
-        upcomingGigs: document.getElementById('upcomingGigs'),
-        averageRating: document.getElementById('averageRating'),
-        totalEarnings: document.getElementById('totalEarnings'),
-        monthlyEarnings: document.getElementById('monthlyEarnings'),
-        completedGigs: document.getElementById('completedGigs'),
-        topVenue: document.getElementById('topVenue'),
-        monthlyGigs: document.getElementById('monthlyGigs')
-    };
-
-    // Check if any required elements are missing
-    const missingElements = Object.entries(elements)
-        .filter(([key, element]) => !element)
-        .map(([key]) => key);
-
-    if (missingElements.length > 0) {
-        console.warn('Missing dashboard elements:', missingElements);
-        return; // Exit early if elements are missing
-    }
+async function updateDashboardStats(performances, ratings) {
+    console.log('Updating dashboard with:', { performances, ratings });
 
     const now = new Date();
     const today = now.toISOString().split('T')[0];
@@ -287,14 +268,38 @@ function updateDashboardStats(performances, ratings) {
     const topVenue = Object.entries(venueFrequency)
         .sort(([,a], [,b]) => b - a)[0]?.[0] || '--';
 
-    // Update UI elements with null checks
-    elements.upcomingGigs.textContent = upcomingPerformances.length;
-    elements.averageRating.textContent = averageRating;
-    elements.totalEarnings.textContent = `£${totalEarnings.toFixed(2)}`;
-    elements.monthlyEarnings.textContent = `£${thisMonthEarnings.toFixed(2)}`;
-    elements.completedGigs.textContent = completedPerformances.length;
-    elements.topVenue.textContent = topVenue;
-    elements.monthlyGigs.textContent = thisMonthPerformances.length;
+    console.log('Calculated stats:', {
+        upcomingPerformances: upcomingPerformances.length,
+        averageRating,
+        totalEarnings,
+        thisMonthEarnings,
+        completedPerformances: completedPerformances.length,
+        topVenue,
+        thisMonthPerformances: thisMonthPerformances.length
+    });
+
+    // Try to update each element individually with try-catch blocks
+    const updateElement = (id, value) => {
+        try {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = value;
+            } else {
+                console.warn(`Element not found: ${id}`);
+            }
+        } catch (error) {
+            console.error(`Error updating element ${id}:`, error);
+        }
+    };
+
+    // Update UI elements
+    updateElement('upcomingGigs', upcomingPerformances.length);
+    updateElement('averageRating', averageRating);
+    updateElement('totalEarnings', `£${totalEarnings.toFixed(2)}`);
+    updateElement('monthlyEarnings', `£${thisMonthEarnings.toFixed(2)}`);
+    updateElement('completedGigs', completedPerformances.length);
+    updateElement('topVenue', topVenue);
+    updateElement('monthlyGigs', thisMonthPerformances.length);
 }
 
 function updatePerformanceTrend(performances) {
