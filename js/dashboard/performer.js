@@ -173,6 +173,7 @@ async function loadDashboardData() {
         if (ratingsError) throw ratingsError;
 
         updateDashboardStats(performances, ratings);
+        updatePerformanceTrend(performances);
         updateRecentActivity(performances);
 
     } catch (error) {
@@ -181,9 +182,26 @@ async function loadDashboardData() {
     }
 }
 
-function updateDashboardStats(performances, ratings) {
-    const today = new Date().toISOString().split('T')[0];
-    const upcomingPerformances = performances.filter(perf => perf.date >= today && perf.status === 'confirmed');
+// Update the dashboard stats function to calculate total earnings from completed performances
+async function updateDashboardStats(performances, ratings) {
+    const now = new Date();
+    const today = now.toISOString().split('T')[0];
+    
+    // Calculate upcoming performances
+    const upcomingPerformances = performances.filter(perf => 
+        perf.date >= today && perf.status === 'confirmed'
+    );
+    
+    // Calculate completed performances and their earnings
+    const completedPerformances = performances.filter(perf => {
+        const perfDateTime = new Date(`${perf.date} ${perf.end_time}`);
+        return perfDateTime < now && perf.status === 'confirmed';
+    });
+    
+    const totalEarnings = completedPerformances.reduce((sum, perf) => {
+        const duration = calculateDuration(perf.start_time, perf.end_time);
+        return sum + (duration * perf.booking_rate);
+    }, 0);
     
     // Calculate average rating
     let averageRating = '--';
@@ -192,9 +210,87 @@ function updateDashboardStats(performances, ratings) {
         averageRating = (totalRating / ratings.length).toFixed(1);
     }
 
+    // Calculate performance stats for this month
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    const thisMonthPerformances = completedPerformances.filter(perf => {
+        const perfDate = new Date(perf.date);
+        return perfDate.getMonth() === currentMonth && 
+               perfDate.getFullYear() === currentYear;
+    });
+
+    const thisMonthEarnings = thisMonthPerformances.reduce((sum, perf) => {
+        const duration = calculateDuration(perf.start_time, perf.end_time);
+        return sum + (duration * perf.booking_rate);
+    }, 0);
+
+    // Get most frequent venue
+    const venueFrequency = completedPerformances.reduce((acc, perf) => {
+        const venueName = perf.venues?.venue_name || 'Unknown';
+        acc[venueName] = (acc[venueName] || 0) + 1;
+        return acc;
+    }, {});
+
+    const topVenue = Object.entries(venueFrequency)
+        .sort(([,a], [,b]) => b - a)[0]?.[0] || '--';
+
     // Update UI elements
     document.getElementById('upcomingGigs').textContent = upcomingPerformances.length;
     document.getElementById('averageRating').textContent = averageRating;
+    document.getElementById('totalEarnings').textContent = `£${totalEarnings.toFixed(2)}`;
+    document.getElementById('monthlyEarnings').textContent = `£${thisMonthEarnings.toFixed(2)}`;
+    document.getElementById('completedGigs').textContent = completedPerformances.length;
+    document.getElementById('topVenue').textContent = topVenue;
+    document.getElementById('monthlyGigs').textContent = thisMonthPerformances.length;
+}
+
+function updatePerformanceTrend(performances) {
+    const ctx = document.getElementById('performanceTrendChart');
+    const now = new Date();
+    const last6Months = Array.from({length: 6}, (_, i) => {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        return d.toLocaleString('default', { month: 'short' });
+    }).reverse();
+
+    const performanceCounts = last6Months.map(month => {
+        return performances.filter(perf => {
+            const perfDate = new Date(perf.date);
+            return perfDate.toLocaleString('default', { month: 'short' }) === month &&
+                   perf.status === 'confirmed';
+        }).length;
+    });
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: last6Months,
+            datasets: [{
+                label: 'Performances',
+                data: performanceCounts,
+                borderColor: '#8B5CF6',
+                tension: 0.1,
+                fill: true,
+                backgroundColor: 'rgba(139, 92, 246, 0.1)'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
 }
 
 function updateRecentActivity(performances) {
