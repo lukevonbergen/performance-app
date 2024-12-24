@@ -870,16 +870,6 @@ function processPeriodData(performances, periodDays) {
     return data;
 }
 
-function updateChangeIndicator(elementId, change) {
-    const element = document.getElementById(elementId);
-    const formattedChange = Math.abs(change).toFixed(1);
-    const arrow = change > 0 ? '↑' : change < 0 ? '↓' : '→';
-    const color = change > 0 ? 'text-green-500' : change < 0 ? 'text-red-500' : 'text-gray-500';
-    
-    element.className = `${color} font-medium`;
-    element.textContent = `${arrow} ${formattedChange}%`;
-}
-
 function createEarningsChart(data) {
     const ctx = document.getElementById('earningsChart');
     
