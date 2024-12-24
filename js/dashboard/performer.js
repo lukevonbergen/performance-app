@@ -1,6 +1,11 @@
 // Import and Global Setup
 import { supabase } from '../utils/supabase.js';
 let performanceToCancel = null;
+let earningsChartInstance = null;
+let timesChartInstance = null;
+let venueChartInstance = null;
+let performanceTrendChartInstance = null;
+
 
 // Make supabase and user globally available
 window.supabase = supabase;
@@ -49,6 +54,24 @@ if (!window.hasInitializedNavigation) {
 
 // Initialize UI
 document.getElementById('performerName').textContent = window.user.stage_name || 'Performer Dashboard';
+
+function destroyCharts() {
+    if (earningsChartInstance) {
+        earningsChartInstance.destroy();
+        earningsChartInstance = null;
+    }
+    if (timesChartInstance) {
+        timesChartInstance.destroy();
+        timesChartInstance = null;
+    }
+    if (venueChartInstance) {
+        venueChartInstance.destroy();
+        venueChartInstance = null;
+    }
+    if (performanceTrendChartInstance) {
+        performanceTrendChartInstance.destroy();
+        performanceTrendChartInstance = null;
+    }
 
 // Utility Functions
 function formatTime(timeString) {
@@ -137,6 +160,10 @@ function setActiveTab(tabId) {
         tabContent.classList.remove('hidden');
     } else {
         console.warn(`Tab content not found for tabId: ${tabId}`);
+    }
+    if (tabId === 'reports') {
+        destroyCharts();
+        loadReportsData();
     }
 }
 
@@ -752,7 +779,10 @@ document.getElementById('confirmDeleteBtn')?.addEventListener('click', async () 
 // Reports Functions
 async function loadReportsData() {
     try {
-        const period = document.getElementById('reportPeriod').value;
+        // Destroy existing charts first
+        destroyCharts();
+
+        const period = document.getElementById('reportPeriod')?.value || '30';
         const { data: performances, error } = await supabase
             .from('performances')
             .select(`
@@ -766,12 +796,12 @@ async function loadReportsData() {
 
         if (error) throw error;
 
-        const stats = processReportsData(performances, period);
+        const stats = processReportsData(performances, parseInt(period));
         updateReportsSummary(stats);
         createEarningsChart(stats.periodData);
         createTimesChart(stats.timeStats);
         createVenueAnalysis(stats.venueStats);
-        updatePerformanceHistoryTable(performances, period);
+        updatePerformanceHistoryTable(performances, parseInt(period));
 
     } catch (error) {
         console.error('Error loading reports data:', error);
@@ -1340,6 +1370,19 @@ document.addEventListener('DOMContentLoaded', function() {
         // Load data for the selected tab
         loadTabData(storedTab);
 
+        const reportsTab = document.querySelector('[data-tab="reports"]');
+        if (reportsTab) {
+            reportsTab.addEventListener('click', function() {
+                setTimeout(() => {
+                    destroyCharts();
+                    loadReportsData();
+                }, 100);
+            });
+        }
+    
+    // Also add this period change listener
+    document.getElementById('reportPeriod')?.addEventListener('change', loadReportsData);
+
         // Add click event listeners to all navigation links
         document.querySelectorAll('.nav-link').forEach(link => {
             link.addEventListener('click', () => {
@@ -1368,10 +1411,98 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+function processReportsData(performances, periodDays) {
+    const now = new Date();
+    const periodStart = new Date(now.getTime() - (periodDays * 24 * 60 * 60 * 1000));
+    const previousPeriodStart = new Date(periodStart.getTime() - (periodDays * 24 * 60 * 60 * 1000));
+
+    const currentPeriodPerfs = performances.filter(perf => {
+        const perfDate = new Date(perf.date);
+        return perfDate >= periodStart && perfDate <= now && perf.status === 'confirmed';
+    });
+
+    const previousPeriodPerfs = performances.filter(perf => {
+        const perfDate = new Date(perf.date);
+        return perfDate >= previousPeriodStart && perfDate < periodStart && perf.status === 'confirmed';
+    });
+
+    const currentMetrics = calculatePeriodMetrics(currentPeriodPerfs);
+    const previousMetrics = calculatePeriodMetrics(previousPeriodPerfs);
+
+    const changes = {
+        earnings: calculatePercentageChange(previousMetrics.totalEarnings, currentMetrics.totalEarnings),
+        performances: calculatePercentageChange(previousPeriodPerfs.length, currentPeriodPerfs.length),
+        rate: calculatePercentageChange(previousMetrics.averageRate, currentMetrics.averageRate),
+        duration: calculatePercentageChange(previousMetrics.averageDuration, currentMetrics.averageDuration)
+    };
+
+    const venueStats = performances.reduce((acc, perf) => {
+        if (perf.status !== 'confirmed') return acc;
+        
+        const venueName = perf.venues?.venue_name || 'Unknown';
+        if (!acc[venueName]) {
+            acc[venueName] = {
+                performances: 0,
+                earnings: 0,
+                averageRate: 0,
+                totalDuration: 0
+            };
+        }
+
+        const duration = calculateDuration(perf.start_time, perf.end_time);
+        const earnings = duration * perf.booking_rate;
+
+        acc[venueName].performances++;
+        acc[venueName].earnings += earnings;
+        acc[venueName].totalDuration += duration;
+        acc[venueName].averageRate = acc[venueName].earnings / acc[venueName].totalDuration;
+
+        return acc;
+    }, {});
+
+    return {
+        currentMetrics,
+        previousMetrics,
+        changes,
+        venueStats,
+        timeStats: processTimeStats(currentPeriodPerfs),
+        periodData: processPeriodData(currentPeriodPerfs, periodDays)
+    };
+}
+
+// Add these additional helper functions:
+function calculatePercentageChange(previous, current) {
+    if (previous === 0) return current === 0 ? 0 : 100;
+    return ((current - previous) / previous) * 100;
+}
+
+function updateReportsSummary(stats) {
+    document.getElementById('periodEarnings').textContent = `£${stats.currentMetrics.totalEarnings.toFixed(2)}`;
+    document.getElementById('periodPerformances').textContent = stats.currentMetrics.performances;
+    document.getElementById('averageRate').textContent = `£${stats.currentMetrics.averageRate.toFixed(2)}`;
+    document.getElementById('averageDuration').textContent = `${stats.currentMetrics.averageDuration.toFixed(1)}`;
+
+    updateChangeIndicator('earningsChange', stats.changes.earnings);
+    updateChangeIndicator('performancesChange', stats.changes.performances);
+    updateChangeIndicator('rateChange', stats.changes.rate);
+    updateChangeIndicator('durationChange', stats.changes.duration);
+}
+
+function updateChangeIndicator(elementId, change) {
+    const element = document.getElementById(elementId);
+    const formattedChange = Math.abs(change).toFixed(1);
+    const arrow = change > 0 ? '↑' : change < 0 ? '↓' : '→';
+    const color = change > 0 ? 'text-green-500' : change < 0 ? 'text-red-500' : 'text-gray-500';
+    
+    element.className = `${color} font-medium`;
+    element.textContent = `${arrow} ${formattedChange}%`;
+}
+
 /**
  * Loads data for the given tab ID.
  * @param {string} tabId - The ID of the tab to load data for.
  */
+
 function loadTabData(tabId) {
     switch (tabId) {
         case 'reports':
