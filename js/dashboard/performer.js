@@ -1065,13 +1065,6 @@ function processReportsData(performances, periodDays) {
     };
 }
 
-function updateReportsSummary(stats) {
-    document.getElementById('totalEarnings').textContent = `£${stats.totalEarnings.toFixed(2)}`;
-    document.getElementById('totalPerformances').textContent = stats.totalPerformances;
-    document.getElementById('topVenue').textContent = stats.topVenue;
-    document.getElementById('confirmationRate').textContent = `${stats.confirmationRate.toFixed(1)}%`;
-}
-
 // Chart Management
 let earningsChartInstance = null;
 let timesChartInstance = null;
