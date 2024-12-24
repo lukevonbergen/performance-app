@@ -1409,65 +1409,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-function processReportsData(performances, periodDays) {
-    const now = new Date();
-    const periodStart = new Date(now.getTime() - (periodDays * 24 * 60 * 60 * 1000));
-    const previousPeriodStart = new Date(periodStart.getTime() - (periodDays * 24 * 60 * 60 * 1000));
-
-    const currentPeriodPerfs = performances.filter(perf => {
-        const perfDate = new Date(perf.date);
-        return perfDate >= periodStart && perfDate <= now && perf.status === 'confirmed';
-    });
-
-    const previousPeriodPerfs = performances.filter(perf => {
-        const perfDate = new Date(perf.date);
-        return perfDate >= previousPeriodStart && perfDate < periodStart && perf.status === 'confirmed';
-    });
-
-    const currentMetrics = calculatePeriodMetrics(currentPeriodPerfs);
-    const previousMetrics = calculatePeriodMetrics(previousPeriodPerfs);
-
-    const changes = {
-        earnings: calculatePercentageChange(previousMetrics.totalEarnings, currentMetrics.totalEarnings),
-        performances: calculatePercentageChange(previousPeriodPerfs.length, currentPeriodPerfs.length),
-        rate: calculatePercentageChange(previousMetrics.averageRate, currentMetrics.averageRate),
-        duration: calculatePercentageChange(previousMetrics.averageDuration, currentMetrics.averageDuration)
-    };
-
-    const venueStats = performances.reduce((acc, perf) => {
-        if (perf.status !== 'confirmed') return acc;
-        
-        const venueName = perf.venues?.venue_name || 'Unknown';
-        if (!acc[venueName]) {
-            acc[venueName] = {
-                performances: 0,
-                earnings: 0,
-                averageRate: 0,
-                totalDuration: 0
-            };
-        }
-
-        const duration = calculateDuration(perf.start_time, perf.end_time);
-        const earnings = duration * perf.booking_rate;
-
-        acc[venueName].performances++;
-        acc[venueName].earnings += earnings;
-        acc[venueName].totalDuration += duration;
-        acc[venueName].averageRate = acc[venueName].earnings / acc[venueName].totalDuration;
-
-        return acc;
-    }, {});
-
-    return {
-        currentMetrics,
-        previousMetrics,
-        changes,
-        venueStats,
-        timeStats: processTimeStats(currentPeriodPerfs),
-        periodData: processPeriodData(currentPeriodPerfs, periodDays)
-    };
-}
-
 // Add these additional helper functions:
 function calculatePercentageChange(previous, current) {
     if (previous === 0) return current === 0 ? 0 : 100;
