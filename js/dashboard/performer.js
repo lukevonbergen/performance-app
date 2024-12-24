@@ -73,7 +73,7 @@ function destroyCharts() {
         performanceTrendChartInstance.destroy();
         performanceTrendChartInstance = null;
     }
-} // Add this closing brace
+}
 
 // Utility Functions
 function formatTime(timeString) {
@@ -163,8 +163,11 @@ function setActiveTab(tabId) {
     } else {
         console.warn(`Tab content not found for tabId: ${tabId}`);
     }
+
+    // Destroy charts before loading new tab
+    destroyCharts();
+
     if (tabId === 'reports') {
-        destroyCharts();
         loadReportsData();
     }
 }
@@ -296,6 +299,17 @@ function updateDashboardStats(performances, ratings) {
 
 function updatePerformanceTrend(performances) {
     const ctx = document.getElementById('performanceTrendChart');
+    if (!ctx) {
+        console.warn('Performance trend chart canvas not found');
+        return;
+    }
+
+    // Destroy existing chart instance if it exists
+    if (performanceTrendChartInstance) {
+        performanceTrendChartInstance.destroy();
+        performanceTrendChartInstance = null;
+    }
+
     const now = new Date();
     const last6Months = Array.from({length: 6}, (_, i) => {
         const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
@@ -310,7 +324,8 @@ function updatePerformanceTrend(performances) {
         }).length;
     });
 
-    new Chart(ctx, {
+    // Create new chart instance and store it
+    performanceTrendChartInstance = new Chart(ctx, {
         type: 'line',
         data: {
             labels: last6Months,
