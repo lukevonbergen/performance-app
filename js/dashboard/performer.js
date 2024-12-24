@@ -212,7 +212,28 @@ async function loadDashboardData() {
 }
 
 // Update the dashboard stats function to calculate total earnings from completed performances
-async function updateDashboardStats(performances, ratings) {
+function updateDashboardStats(performances, ratings) {
+    // Add null checks for all elements first
+    const elements = {
+        upcomingGigs: document.getElementById('upcomingGigs'),
+        averageRating: document.getElementById('averageRating'),
+        totalEarnings: document.getElementById('totalEarnings'),
+        monthlyEarnings: document.getElementById('monthlyEarnings'),
+        completedGigs: document.getElementById('completedGigs'),
+        topVenue: document.getElementById('topVenue'),
+        monthlyGigs: document.getElementById('monthlyGigs')
+    };
+
+    // Check if any required elements are missing
+    const missingElements = Object.entries(elements)
+        .filter(([key, element]) => !element)
+        .map(([key]) => key);
+
+    if (missingElements.length > 0) {
+        console.warn('Missing dashboard elements:', missingElements);
+        return; // Exit early if elements are missing
+    }
+
     const now = new Date();
     const today = now.toISOString().split('T')[0];
     
@@ -263,14 +284,14 @@ async function updateDashboardStats(performances, ratings) {
     const topVenue = Object.entries(venueFrequency)
         .sort(([,a], [,b]) => b - a)[0]?.[0] || '--';
 
-    // Update UI elements
-    document.getElementById('upcomingGigs').textContent = upcomingPerformances.length;
-    document.getElementById('averageRating').textContent = averageRating;
-    document.getElementById('totalEarnings').textContent = `£${totalEarnings.toFixed(2)}`;
-    document.getElementById('monthlyEarnings').textContent = `£${thisMonthEarnings.toFixed(2)}`;
-    document.getElementById('completedGigs').textContent = completedPerformances.length;
-    document.getElementById('topVenue').textContent = topVenue;
-    document.getElementById('monthlyGigs').textContent = thisMonthPerformances.length;
+    // Update UI elements with null checks
+    elements.upcomingGigs.textContent = upcomingPerformances.length;
+    elements.averageRating.textContent = averageRating;
+    elements.totalEarnings.textContent = `£${totalEarnings.toFixed(2)}`;
+    elements.monthlyEarnings.textContent = `£${thisMonthEarnings.toFixed(2)}`;
+    elements.completedGigs.textContent = completedPerformances.length;
+    elements.topVenue.textContent = topVenue;
+    elements.monthlyGigs.textContent = thisMonthPerformances.length;
 }
 
 function updatePerformanceTrend(performances) {
@@ -872,6 +893,11 @@ function processPeriodData(performances, periodDays) {
 
 function createEarningsChart(data) {
     const ctx = document.getElementById('earningsChart');
+    if (!ctx) {
+        console.warn('Earnings chart canvas not found');
+        return;
+    }
+    
     
     if (earningsChartInstance) {
         earningsChartInstance.destroy();
@@ -910,8 +936,23 @@ function createEarningsChart(data) {
     });
 }
 
+// Modify the createVenueAnalysis function:
 function createVenueAnalysis(venueStats) {
     const venueStatsContainer = document.getElementById('venueStats');
+    const ctx = document.getElementById('venueChart');
+    
+    // Add check for null elements
+    if (!venueStatsContainer || !ctx) {
+        console.warn('Venue analysis elements not found');
+        return;
+    }
+
+    // First destroy existing chart
+    if (venueChartInstance) {
+        venueChartInstance.destroy();
+        venueChartInstance = null;
+    }
+
     const sortedVenues = Object.entries(venueStats)
         .sort(([,a], [,b]) => b.earnings - a.earnings);
 
@@ -930,8 +971,7 @@ function createVenueAnalysis(venueStats) {
     `).join('');
 
     // Create venue chart
-    const ctx = document.getElementById('venueChart');
-    new Chart(ctx, {
+    venueChartInstance = new Chart(ctx, {
         type: 'doughnut',
         data: {
             labels: sortedVenues.map(([venue]) => venue),
@@ -1070,6 +1110,10 @@ function processReportsData(performances, periodDays) {
 
 function createTimesChart(timeStats) {
     const ctx = document.getElementById('timesChart');
+    if (!ctx) {
+        console.warn('Times chart canvas not found');
+        return;
+    }
 
     if (timesChartInstance) {
         timesChartInstance.destroy();
