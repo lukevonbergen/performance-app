@@ -63,71 +63,70 @@
     
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-    
+            
             const messageDiv = document.getElementById('message');
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
     
             try {
-                // ✅ Check venues table first
+                // First check venues table
                 let { data: venueData, error: venueError } = await supabase
                     .from('venues')
                     .select('*');
     
                 if (venueError) throw venueError;
     
-                // Match venue user
+                // Check for matching venue user
                 let user = venueData?.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
-    
+                
                 if (user) {
                     messageDiv.className = 'mt-4 text-center text-green-400';
-                    messageDiv.textContent = 'Login successful! Redirecting to your venue dashboard...';
-    
+                    messageDiv.textContent = 'Login successful! Lets book those gigs!';
+                    
                     // Store user data with type
                     sessionStorage.setItem('user', JSON.stringify({ ...user, type: 'venue' }));
-    
-                    // ✅ Redirect to venue subdomain
+                    
+                    // Redirect to venue dashboard
                     setTimeout(() => {
-                        window.location.href = 'https://venue.gostagelink.com';
+                        window.location.href = 'dashboard';
                     }, 1000);
                     return;
                 }
     
-                // ✅ If no venue user, check performers table
+                // If no venue found, check performers table
                 let { data: performerData, error: performerError } = await supabase
                     .from('performers')
                     .select('*');
     
                 if (performerError) throw performerError;
     
-                // Match performer user
+                // Check for matching performer user
                 user = performerData?.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
     
                 if (user) {
                     messageDiv.className = 'mt-4 text-center text-green-400';
-                    messageDiv.textContent = 'Login successful! Redirecting to your performer dashboard...';
-    
+                    messageDiv.textContent = 'Login successful! Lets get you performing!';
+                    
                     // Store user data with type
                     sessionStorage.setItem('user', JSON.stringify({ ...user, type: 'performer' }));
-    
-                    // ✅ Redirect to performer subdomain
+                    
+                    // Redirect to performer dashboard
                     setTimeout(() => {
-                        window.location.href = 'https://performer.gostagelink.com';
+                        window.location.href = 'performer-dashboard.html';
                     }, 1000);
                     return;
                 }
     
-                // ❌ If we get here, no valid user was found
+                // If we get here, no user was found
                 messageDiv.className = 'mt-4 text-center text-red-400';
-                messageDiv.textContent = 'Invalid email or password. Please try again.';
+                messageDiv.textContent = 'Invalid email or password';
     
             } catch (error) {
                 console.error('Error:', error);
                 messageDiv.className = 'mt-4 text-center text-red-400';
-                messageDiv.textContent = 'An error occurred while logging in. Please try again later.';
+                messageDiv.textContent = 'Error logging in. Please try again.';
             }
         });
     </script>
-    
 </body>
 </html>

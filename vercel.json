@@ -1,18 +1,12 @@
 {
   "rewrites": [
     {
-      "source": "/rate/venue/:venueId",
-      "destination": "/rate.html"
+      "source": "/:path",
+      "destination": "/:path.html"
     },
     {
-      "source": "/:path(.+)",
-      "destination": "/:path.html"
-    }
-  ],
-  "routes": [
-    {
-      "src": "^/(?!.*\\.html$).*$",
-      "dest": "/index.html"
+      "source": "/rate/venue/:venueId",
+      "destination": "/rate.html"
     }
   ]
 }
