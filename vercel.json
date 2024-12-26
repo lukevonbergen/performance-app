@@ -1,29 +1,17 @@
 {
-  "redirects": [
-    {
-      "source": "https://performer.gostagelink.com",
-      "destination": "https://gostagelink.com",
-      "statusCode": 307
-    },
-    {
-      "source": "https://venue.gostagelink.com",
-      "destination": "https://gostagelink.com",
-      "statusCode": 307
-    }
-  ],
   "rewrites": [
-    {
-      "source": "/:path",
-      "destination": "/:path.html"
-    },
     {
       "source": "/rate/venue/:venueId",
       "destination": "/rate.html"
+    },
+    {
+      "source": "/:path(.+)",
+      "destination": "/:path.html"
     }
   ],
   "routes": [
     {
-      "src": "^/.*$",
+      "src": "^/(?!.*\\.html$).*$",
       "dest": "/index.html"
     }
   ]
