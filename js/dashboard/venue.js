@@ -351,6 +351,145 @@ function updateSearchResults(availability, bookedPerformerIds, startTime, search
     }
 }
 
+// Calendar Class Definition
+class Calendar {
+    constructor() {
+        this.currentDate = new Date();
+        this.events = [];
+        this.container = document.getElementById('calendar-container');
+        this.initialize();
+    }
+
+    async initialize() {
+        await this.loadEvents();
+        this.render();
+        this.setupEventListeners();
+    }
+
+    async loadEvents() {
+        const startOfMonth = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), 1);
+        const endOfMonth = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() + 1, 0);
+        
+        try {
+            const { data, error } = await supabase
+                .from('performances')
+                .select(`
+                    *,
+                    performers (
+                        stage_name,
+                        performance_type
+                    )
+                `)
+                .eq('venue_id', window.user.id)
+                .eq('status', 'confirmed')
+                .gte('date', startOfMonth.toISOString())
+                .lte('date', endOfMonth.toISOString());
+                
+            if (error) throw error;
+            this.events = data || [];
+        } catch (error) {
+            console.error('Error loading calendar events:', error);
+        }
+    }
+
+    formatTime(timeString) {
+        const [hours, minutes] = timeString.split(':');
+        const period = hours >= 12 ? 'PM' : 'AM';
+        const formattedHours = hours % 12 || 12;
+        return `${formattedHours}:${minutes} ${period}`;
+    }
+
+    getDaysInMonth() {
+        return new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() + 1, 0).getDate();
+    }
+
+    getFirstDayOfMonth() {
+        return new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), 1).getDay();
+    }
+
+    async previousMonth() {
+        this.currentDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() - 1);
+        await this.loadEvents();
+        this.render();
+    }
+
+    async nextMonth() {
+        this.currentDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() + 1);
+        await this.loadEvents();
+        this.render();
+    }
+
+    setupEventListeners() {
+        const prevButton = this.container.querySelector('.prev-month');
+        const nextButton = this.container.querySelector('.next-month');
+        
+        prevButton?.addEventListener('click', () => this.previousMonth());
+        nextButton?.addEventListener('click', () => this.nextMonth());
+    }
+
+    render() {
+        const daysInMonth = this.getDaysInMonth();
+        const firstDay = this.getFirstDayOfMonth();
+        let calendarHTML = `
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-black">
+                    ${this.currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
+                </h2>
+                <div class="flex space-x-2">
+                    <button class="prev-month p-2 rounded-lg hover:bg-black/5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                    <button class="next-month p-2 rounded-lg hover:bg-black/5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-7 text-sm font-medium text-black border-b border-black/10">
+                ${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => 
+                    `<div class="p-2 text-center">${day}</div>`
+                ).join('')}
+            </div>
+            <div class="grid grid-cols-7">
+        `;
+
+        // Add empty cells for days before the first day of the month
+        for (let i = 0; i < firstDay; i++) {
+            calendarHTML += `<div class="h-32 bg-black/5 border border-black/10"></div>`;
+        }
+
+        // Add cells for each day of the month
+        for (let day = 1; day <= daysInMonth; day++) {
+            const date = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), day).toISOString().split('T')[0];
+            const dayEvents = this.events.filter(event => event.date === date);
+
+            calendarHTML += `
+                <div class="h-32 bg-white border border-black/10 p-2">
+                    <div class="font-medium text-sm mb-1">${day}</div>
+                    <div class="space-y-1">
+                        ${dayEvents.map(event => `
+                            <div class="text-xs p-1 rounded bg-indigo-500/10 border border-indigo-500/20">
+                                <div class="font-medium text-black">${event.performers.stage_name}</div>
+                                <div class="text-black/70">
+                                    ${this.formatTime(event.start_time)} - ${this.formatTime(event.end_time)}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        calendarHTML += `</div>`;
+        this.container.innerHTML = calendarHTML;
+        this.setupEventListeners();
+    }
+}
+
 // Modal Functions
 window.openBookingModal = async function(performerId, performerName, rate, startTime) {
     console.log('Opening modal with:', { performerId, performerName, rate, startTime });
@@ -1058,6 +1197,12 @@ document.addEventListener('DOMContentLoaded', async function() {
         await updateSettings(formData);
     });
 
+    document.querySelector('[data-tab="calendar"]').addEventListener('click', () => {
+        if (!window.calendarInstance) {
+            window.calendarInstance = new Calendar();
+        }
+    });
+
     // Auto-refresh setup
     setInterval(async () => {
         const activeTab = getActiveTab();
@@ -1069,6 +1214,14 @@ document.addEventListener('DOMContentLoaded', async function() {
                 case 'reports':
                     await loadReportsData();
                     break;
+                    case 'calendar':
+                        if (!window.calendarInstance) {
+                            window.calendarInstance = new Calendar();
+                        } else {
+                            await window.calendarInstance.loadEvents();
+                            window.calendarInstance.render();
+                        }
+                        break;
             }
         } catch (error) {
             console.error('Error in auto-refresh:', error);
