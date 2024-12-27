@@ -88,9 +88,9 @@ export class MessagingSystem {
     renderConversationsList(performers) {
         this.conversationsList.innerHTML = performers.map(performer => `
             <div 
-                class="px-6 py-4 border-b border-black/10 hover:bg-black/5 cursor-pointer"
+                class="px-6 py-4 border-b border-black/10 hover:bg-black/5 cursor-pointer performer-chat"
                 data-performer-id="${performer.id}"
-                onclick="window.messagingSystem.selectConversation('${performer.id}', '${performer.stage_name}')"
+                data-performer-name="${performer.stage_name}"
             >
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center">
@@ -107,6 +107,15 @@ export class MessagingSystem {
                 </div>
             </div>
         `).join('');
+    
+        // Add click handlers after rendering
+        this.conversationsList.querySelectorAll('.performer-chat').forEach(element => {
+            element.addEventListener('click', () => {
+                const performerId = element.dataset.performerId;
+                const performerName = element.dataset.performerName;
+                this.selectConversation(performerId, performerName);
+            });
+        });
     }
 
     async selectConversation(performerId, performerName) {

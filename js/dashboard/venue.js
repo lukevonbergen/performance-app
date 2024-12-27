@@ -1150,6 +1150,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     // Set up navigation handlers
+// In your tab switching logic where you handle other tabs
     document.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', async () => {
             const tabId = link.getAttribute('data-tab');
@@ -1173,6 +1174,13 @@ document.addEventListener('DOMContentLoaded', async function() {
                         break;
                     case 'dashboard':
                         await loadDashboardData();
+                        break;
+                    case 'messages':
+                        if (!window.messagingSystem) {
+                            window.messagingSystem = new MessagingSystem(window.user, supabase, showErrorMessage);
+                        } else {
+                            await window.messagingSystem.loadConversations();
+                        }
                         break;
                 }
             } catch (error) {
@@ -1232,16 +1240,8 @@ document.addEventListener('DOMContentLoaded', async function() {
                     }
                     break;
                 case 'messages':
-                    console.log('Messages tab clicked');
-                    if (!window.messagingSystem) {
-                        console.log('Initializing messaging system...');
-                        try {
-                            window.messagingSystem = new MessagingSystem(window.user, supabase, showErrorMessage);
-                        } catch (error) {
-                            console.error('Error initializing messaging system:', error);
-                        }
-                    } else {
-                        console.log('Messaging system already initialized');
+                    if (window.messagingSystem) {
+                        await window.messagingSystem.loadConversations();
                     }
                     break;
             }
