@@ -351,21 +351,19 @@ function updateSearchResults(availability, bookedPerformerIds, startTime, search
     }
 }
 
-// Calendar functionality
+// Calendar Class Definition
 class Calendar {
     constructor() {
         this.currentDate = new Date();
         this.events = [];
-        this.init();
+        this.container = document.getElementById('calendar-container');
+        this.initialize();
     }
 
-    async init() {
-        // Set up event listeners
-        document.getElementById('prev-month').addEventListener('click', () => this.previousMonth());
-        document.getElementById('next-month').addEventListener('click', () => this.nextMonth());
-        
+    async initialize() {
         await this.loadEvents();
         this.render();
+        this.setupEventListeners();
     }
 
     async loadEvents() {
@@ -389,7 +387,6 @@ class Calendar {
                 
             if (error) throw error;
             this.events = data || [];
-            this.render();
         } catch (error) {
             console.error('Error loading calendar events:', error);
         }
@@ -402,39 +399,75 @@ class Calendar {
         return `${formattedHours}:${minutes} ${period}`;
     }
 
+    getDaysInMonth() {
+        return new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() + 1, 0).getDate();
+    }
+
+    getFirstDayOfMonth() {
+        return new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), 1).getDay();
+    }
+
     async previousMonth() {
         this.currentDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() - 1);
         await this.loadEvents();
+        this.render();
     }
 
     async nextMonth() {
         this.currentDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() + 1);
         await this.loadEvents();
+        this.render();
+    }
+
+    setupEventListeners() {
+        const prevButton = this.container.querySelector('.prev-month');
+        const nextButton = this.container.querySelector('.next-month');
+        
+        prevButton?.addEventListener('click', () => this.previousMonth());
+        nextButton?.addEventListener('click', () => this.nextMonth());
     }
 
     render() {
-        // Update title
-        document.getElementById('calendar-title').textContent = 
-            this.currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+        const daysInMonth = this.getDaysInMonth();
+        const firstDay = this.getFirstDayOfMonth();
+        let calendarHTML = `
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-black">
+                    ${this.currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
+                </h2>
+                <div class="flex space-x-2">
+                    <button class="prev-month p-2 rounded-lg hover:bg-black/5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                    <button class="next-month p-2 rounded-lg hover:bg-black/5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
 
-        const daysContainer = document.getElementById('calendar-days');
-        const firstDay = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), 1).getDay();
-        const daysInMonth = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() + 1, 0).getDate();
-        
-        let html = '';
+            <div class="grid grid-cols-7 text-sm font-medium text-black border-b border-black/10">
+                ${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => 
+                    `<div class="p-2 text-center">${day}</div>`
+                ).join('')}
+            </div>
+            <div class="grid grid-cols-7">
+        `;
 
-        // Empty cells for days before the first day of the month
+        // Add empty cells for days before the first day of the month
         for (let i = 0; i < firstDay; i++) {
-            html += `<div class="h-32 bg-black/5 border border-black/10"></div>`;
+            calendarHTML += `<div class="h-32 bg-black/5 border border-black/10"></div>`;
         }
 
-        // Days of the month
+        // Add cells for each day of the month
         for (let day = 1; day <= daysInMonth; day++) {
-            const date = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), day)
-                .toISOString().split('T')[0];
+            const date = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), day).toISOString().split('T')[0];
             const dayEvents = this.events.filter(event => event.date === date);
 
-            html += `
+            calendarHTML += `
                 <div class="h-32 bg-white border border-black/10 p-2">
                     <div class="font-medium text-sm mb-1">${day}</div>
                     <div class="space-y-1">
@@ -451,7 +484,9 @@ class Calendar {
             `;
         }
 
-        daysContainer.innerHTML = html;
+        calendarHTML += `</div>`;
+        this.container.innerHTML = calendarHTML;
+        this.setupEventListeners();
     }
 }
 
@@ -1183,7 +1218,8 @@ document.addEventListener('DOMContentLoaded', async function() {
                         if (!window.calendarInstance) {
                             window.calendarInstance = new Calendar();
                         } else {
-                            window.calendarInstance.loadEvents();
+                            await window.calendarInstance.loadEvents();
+                            window.calendarInstance.render();
                         }
                         break;
             }
