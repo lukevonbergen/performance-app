@@ -36,6 +36,8 @@ export class MessagingSystem {
         try {
             const today = new Date().toISOString().split('T')[0];
             
+            console.log('Loading conversations for date:', today);
+            
             // Get confirmed upcoming performances
             const { data: performances, error } = await this.supabase
                 .from('performances')
@@ -47,9 +49,11 @@ export class MessagingSystem {
                     )
                 `)
                 .eq('venue_id', this.user.id)
-                .eq('status', 'confirmed')  // Only get confirmed bookings
-                .gte('date', today)        // Only get upcoming bookings
+                .eq('status', 'confirmed')
+                .gte('date', today)
                 .order('date', { ascending: true });
+    
+            console.log('Performances found:', performances);
     
             if (error) throw error;
     
@@ -62,6 +66,8 @@ export class MessagingSystem {
                     start_time: p.start_time
                 }])
             ).values()];
+    
+            console.log('Unique performers:', uniquePerformers);
     
             this.renderConversationsList(uniquePerformers);
         } catch (error) {
