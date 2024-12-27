@@ -75,6 +75,9 @@
                         <button data-tab="calendar" class="nav-link px-2 py-1 text-white/90 rounded-md hover:bg-white/10 my-2 whitespace-nowrap">
                             <span class="font-medium text-sm">Calendar</span>
                         </button>
+                        <button data-tab="messages" class="nav-link px-2 py-1 text-white/90 rounded-md hover:bg-white/10 my-2 whitespace-nowrap">
+                            <span class="font-medium text-sm">Messages</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -334,6 +337,50 @@
                     </div>
                     <div id="calendar-container" class="p-6">
                         <!-- Calendar will be rendered here -->
+                    </div>
+                </div>
+            </div>
+
+            <div id="messages-tab" class="tab-content hidden space-y-8">
+                <div class="glass-card rounded-xl border border-black/10">
+                    <div class="grid grid-cols-12 h-[600px]">
+                        <!-- Conversations List -->
+                        <div class="col-span-4 border-r border-black/10">
+                            <div class="px-6 py-4 border-b border-black/10">
+                                <h2 class="text-lg font-semibold text-black">Conversations</h2>
+                            </div>
+                            <div id="conversations-list" class="h-[540px] overflow-y-auto">
+                                <!-- Conversations will be loaded here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Message Area -->
+                        <div class="col-span-8 flex flex-col">
+                            <div class="px-6 py-4 border-b border-black/10">
+                                <h2 id="chat-header" class="text-lg font-semibold text-black">Select a conversation</h2>
+                            </div>
+                            <div id="messages-container" class="flex-1 p-6 overflow-y-auto">
+                                <!-- Messages will be loaded here -->
+                            </div>
+                            <div class="p-4 border-t border-black/10">
+                                <form id="message-form" class="flex gap-4">
+                                    <input 
+                                        type="text" 
+                                        id="message-input"
+                                        class="flex-1 px-4 py-2 bg-black/5 border border-black/10 rounded-lg"
+                                        placeholder="Type your message..."
+                                        disabled
+                                    >
+                                    <button 
+                                        type="submit"
+                                        class="px-6 py-2 bg-gray-900 text-white rounded-lg disabled:opacity-50"
+                                        disabled
+                                    >
+                                        Send
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

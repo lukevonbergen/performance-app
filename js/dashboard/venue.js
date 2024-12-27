@@ -1,5 +1,6 @@
 // Import and Global Setup
 import { supabase } from '../utils/supabase.js';
+import { MessagingSystem } from './messaging.js';
 
 // Make supabase globally available
 window.supabase = supabase;
@@ -1222,14 +1223,19 @@ document.addEventListener('DOMContentLoaded', async function() {
                 case 'reports':
                     await loadReportsData();
                     break;
-                    case 'calendar':
-                        if (!window.calendarInstance) {
-                            window.calendarInstance = new Calendar();
-                        } else {
-                            await window.calendarInstance.loadEvents();
-                            window.calendarInstance.render();
-                        }
-                        break;
+                case 'calendar':
+                    if (!window.calendarInstance) {
+                        window.calendarInstance = new Calendar();
+                    } else {
+                        await window.calendarInstance.loadEvents();
+                        window.calendarInstance.render();
+                    }
+                    break;
+                case 'messages':
+                    if (!window.messagingSystem) {
+                        window.messagingSystem = new MessagingSystem();
+                    }
+                    break;
             }
         } catch (error) {
             console.error('Error in auto-refresh:', error);
