@@ -34,25 +34,35 @@ export class MessagingSystem {
 
     async loadConversations() {
         try {
+            const today = new Date().toISOString().split('T')[0];
+            
+            // Get confirmed upcoming performances
             const { data: performances, error } = await this.supabase
                 .from('performances')
                 .select(`
                     *,
                     performers (
                         id,
-                        stage_name,
-                        profile_image
+                        stage_name
                     )
                 `)
-                .eq('venue_id', this.user.id);
-
+                .eq('venue_id', this.user.id)
+                .eq('status', 'confirmed')  // Only get confirmed bookings
+                .gte('date', today)        // Only get upcoming bookings
+                .order('date', { ascending: true });
+    
             if (error) throw error;
-
+    
             // Create unique conversations from performances
             const uniquePerformers = [...new Map(
-                performances.map(p => [p.performer_id, p.performers])
+                performances.map(p => [p.performer_id, {
+                    id: p.performer_id,
+                    stage_name: p.performers.stage_name,
+                    next_performance: p.date,
+                    start_time: p.start_time
+                }])
             ).values()];
-
+    
             this.renderConversationsList(uniquePerformers);
         } catch (error) {
             console.error('Error loading conversations:', error);
@@ -75,7 +85,9 @@ export class MessagingSystem {
                     </div>
                     <div>
                         <h3 class="font-medium text-black">${performer.stage_name}</h3>
-                        <p class="text-sm text-gray-500">Performer</p>
+                        <p class="text-sm text-gray-500">
+                            Next performance: ${new Date(performer.next_performance).toLocaleDateString()} at ${this.formatTime(performer.start_time)}
+                        </p>
                     </div>
                 </div>
             </div>
