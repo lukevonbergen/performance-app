@@ -1232,8 +1232,16 @@ document.addEventListener('DOMContentLoaded', async function() {
                     }
                     break;
                 case 'messages':
+                    console.log('Messages tab clicked');
                     if (!window.messagingSystem) {
-                        window.messagingSystem = new MessagingSystem();
+                        console.log('Initializing messaging system...');
+                        try {
+                            window.messagingSystem = new MessagingSystem(window.user, supabase, showErrorMessage);
+                        } catch (error) {
+                            console.error('Error initializing messaging system:', error);
+                        }
+                    } else {
+                        console.log('Messaging system already initialized');
                     }
                     break;
             }
