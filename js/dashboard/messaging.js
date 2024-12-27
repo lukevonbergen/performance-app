@@ -8,6 +8,15 @@ export class MessagingSystem {
         this.initialize();
     }
 
+    formatTime(timeString) {
+        if (!timeString) return 'Invalid Time';
+        const [hours, minutes] = timeString.split(':').map(Number);
+        const period = hours >= 12 ? 'PM' : 'AM';
+        const formattedHours = hours % 12 === 0 ? 12 : hours % 12;
+        const formattedMinutes = String(minutes).padStart(2, '0');
+        return `${formattedHours}:${formattedMinutes} ${period}`;
+    }
+
     initialize() {
         // Get DOM elements
         this.messagesList = document.getElementById('messages-container');
@@ -20,15 +29,6 @@ export class MessagingSystem {
         this.setupEventListeners();
         this.loadConversations();
         this.setupRealtimeSubscription();
-    }
-
-    formatTime(timeString) {
-        if (!timeString) return 'Invalid Time';
-        const [hours, minutes] = timeString.split(':').map(Number);
-        const period = hours >= 12 ? 'PM' : 'AM';
-        const formattedHours = hours % 12 === 0 ? 12 : hours % 12;
-        const formattedMinutes = String(minutes).padStart(2, '0');
-        return `${formattedHours}:${formattedMinutes} ${period}`;
     }
 
     setupEventListeners() {
