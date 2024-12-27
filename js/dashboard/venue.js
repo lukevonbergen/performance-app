@@ -3,6 +3,8 @@ import { supabase } from '../utils/supabase.js';
 
 // Make supabase globally available
 window.supabase = supabase;
+window.revenueChart = null;
+window.timesChart = null;
 
 // Global Variables and Initial Setup
 window.user = JSON.parse(sessionStorage.getItem('user'));
@@ -760,18 +762,21 @@ function updateReportsSummary(totalConfirmedCost, totalBookings, confirmedCount)
 
 function createCostChart(monthlyCosts) {
     const ctx = document.getElementById('revenueChart');
-    const months = Object.keys(monthlyCosts);
-    const costs = Object.values(monthlyCosts);
+    
+    // Destroy existing chart if it exists
+    if (window.revenueChart) {
+        window.revenueChart.destroy();
+    }
 
-    new Chart(ctx, {
+    window.revenueChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: months,
+            labels: Object.keys(monthlyCosts),
             datasets: [{
                 label: 'Cost',
-                data: costs,
-                borderColor: '#4F46E5', // Changed to a darker indigo
-                backgroundColor: 'rgba(79, 70, 229, 0.1)', // Light indigo background
+                data: Object.values(monthlyCosts),
+                borderColor: '#4F46E5',
+                backgroundColor: 'rgba(79, 70, 229, 0.1)',
                 tension: 0.1
             }]
         },
@@ -782,25 +787,25 @@ function createCostChart(monthlyCosts) {
                 y: {
                     beginAtZero: true,
                     grid: {
-                        color: 'rgba(0, 0, 0, 0.1)' // Darker grid lines
+                        color: 'rgba(0, 0, 0, 0.1)'
                     },
                     ticks: {
-                        color: 'rgba(0, 0, 0, 0.7)' // Darker text
+                        color: 'rgba(0, 0, 0, 0.7)'
                     }
                 },
                 x: {
                     grid: {
-                        color: 'rgba(0, 0, 0, 0.1)' // Darker grid lines
+                        color: 'rgba(0, 0, 0, 0.1)'
                     },
                     ticks: {
-                        color: 'rgba(0, 0, 0, 0.7)' // Darker text
+                        color: 'rgba(0, 0, 0, 0.7)'
                     }
                 }
             },
             plugins: {
                 legend: {
                     labels: {
-                        color: 'rgba(0, 0, 0, 0.7)' // Darker legend text
+                        color: 'rgba(0, 0, 0, 0.7)'
                     }
                 }
             }
@@ -810,18 +815,21 @@ function createCostChart(monthlyCosts) {
 
 function createTimesChart(timeStats) {
     const ctx = document.getElementById('timesChart');
-    const hours = Object.keys(timeStats).sort();
-    const counts = hours.map(hour => timeStats[hour]);
+    
+    // Destroy existing chart if it exists
+    if (window.timesChart) {
+        window.timesChart.destroy();
+    }
 
-    new Chart(ctx, {
+    window.timesChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: hours.map(hour => `${hour}:00`),
+            labels: Object.keys(timeStats).sort().map(hour => `${hour}:00`),
             datasets: [{
                 label: 'Bookings',
-                data: counts,
-                backgroundColor: '#0EA5E9', // Changed to sky blue
-                hoverBackgroundColor: '#0284C7' // Darker sky blue on hover
+                data: Object.keys(timeStats).sort().map(hour => timeStats[hour]),
+                backgroundColor: '#0EA5E9',
+                hoverBackgroundColor: '#0284C7'
             }]
         },
         options: {
@@ -831,25 +839,25 @@ function createTimesChart(timeStats) {
                 y: {
                     beginAtZero: true,
                     grid: {
-                        color: 'rgba(0, 0, 0, 0.1)' // Darker grid lines
+                        color: 'rgba(0, 0, 0, 0.1)'
                     },
                     ticks: {
-                        color: 'rgba(0, 0, 0, 0.7)' // Darker text
+                        color: 'rgba(0, 0, 0, 0.7)'
                     }
                 },
                 x: {
                     grid: {
-                        color: 'rgba(0, 0, 0, 0.1)' // Darker grid lines
+                        color: 'rgba(0, 0, 0, 0.1)'
                     },
                     ticks: {
-                        color: 'rgba(0, 0, 0, 0.7)' // Darker text
+                        color: 'rgba(0, 0, 0, 0.7)'
                     }
                 }
             },
             plugins: {
                 legend: {
                     labels: {
-                        color: 'rgba(0, 0, 0, 0.7)' // Darker legend text
+                        color: 'rgba(0, 0, 0, 0.7)'
                     }
                 }
             }
