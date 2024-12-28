@@ -1268,25 +1268,33 @@ document.addEventListener("DOMContentLoaded", async function () {
   // Show initial tab content
   document.getElementById(`${storedTab}-tab`).classList.remove("hidden");
 
-  // Load initial data
-  try {
-    await loadDashboardData();
-
-    // Load data based on active tab
-    switch (storedTab) {
-      case "reports":
-        await loadReportsData();
-        break;
-      case "settings":
-        await loadSettings();
-        break;
-      case "dashboard":
-        // Already loaded
-        break;
-    }
-  } catch (error) {
-    console.error("Error loading initial data:", error);
-  }
+    // Load initial data
+    try {
+        await loadDashboardData();
+        
+        // Load data based on active tab
+        switch(storedTab) {
+            case 'reports':
+                await loadReportsData();
+                break;
+            case 'settings':
+                await loadSettings();
+                break;
+            case 'dashboard':
+                // Already loaded
+                break;
+            case 'calendar':
+                if (!window.calendarInstance) {
+                    window.calendarInstance = new Calendar();
+                } else {
+                    await window.calendarInstance.loadEvents();
+                    window.calendarInstance.render();
+                }
+                break;
+        }
+    } catch (error) {
+        console.error('Error loading initial data:', error);
+}
 
   // Generate and display QR code
   try {

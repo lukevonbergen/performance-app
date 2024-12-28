@@ -183,6 +183,7 @@ export class MessagingSystem {
     }
 
     async sendMessage(content) {
+
         if (!content.trim() || !this.activeConversation) return;
     
         const conversationId = [this.user.id, this.activeConversation].sort().join('_');
