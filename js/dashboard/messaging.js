@@ -184,21 +184,21 @@ export class MessagingSystem {
 
     async sendMessage(content) {
         if (!content.trim() || !this.activeConversation) return;
-
+    
         const conversationId = [this.user.id, this.activeConversation].sort().join('_');
         
         try {
             const { error } = await this.supabase
                 .from('messages')
                 .insert([{
-                    sender_id: this.user.id,
-                    receiver_id: this.activeConversation,
+                    venue_id: this.user.id,
+                    performer_id: this.activeConversation,
                     message: content,
                     conversation_id: conversationId,
                     sender_type: 'venue',
                     receiver_type: 'performer'
                 }]);
-
+    
             if (error) throw error;
         } catch (error) {
             console.error('Error sending message:', error);
