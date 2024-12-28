@@ -545,34 +545,33 @@ class Calendar {
 
     // Add cells for each day of the month
     for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(
-        this.currentDate.getFullYear(),
-        this.currentDate.getMonth(),
-        day,
-      )
-        .toISOString()
-        .split("T")[0];
-      const dayEvents = this.events.filter((event) => event.date === date);
-
-      calendarHTML += `
-                <div class="h-32 bg-white border border-black/10 p-2">
-                    <div class="font-medium text-sm mb-1">${day}</div>
-                    <div class="space-y-1">
-                        ${dayEvents
-                          .map(
-                            (event) => `
-                            <div class="text-xs p-1 rounded bg-indigo-500/10 border border-indigo-500/20">
-                                <div class="font-medium text-black">${event.performers.stage_name}</div>
-                                <div class="text-black/70">
-                                    ${this.formatTime(event.start_time)} - ${this.formatTime(event.end_time)}
-                                </div>
-                            </div>
-                        `,
-                          )
-                          .join("")}
-                    </div>
+        const date = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), day).toISOString().split('T')[0];
+        const dayEvents = this.events.filter(event => event.date === date);
+        const isToday = date === new Date().toISOString().split('T')[0];
+    
+        html += `
+            <div class="h-32 bg-white border border-black/10 p-2">
+                <div class="font-medium text-sm mb-1 relative">
+                    ${isToday ? 
+                        `<div class="inline-flex relative">
+                            ${day}
+                            <div class="absolute -top-1 -right-1.5 w-2 h-2 bg-red-500 rounded-full"></div>
+                        </div>` : 
+                        day
+                    }
                 </div>
-            `;
+                <div class="space-y-1">
+                    ${dayEvents.map(event => `
+                        <div class="text-xs p-1 rounded bg-indigo-500/10 border border-indigo-500/20">
+                            <div class="font-medium text-black">${event.performers.stage_name}</div>
+                            <div class="text-black/70">
+                                ${this.formatTime(event.start_time)} - ${this.formatTime(event.end_time)}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
     }
 
     calendarHTML += `</div>`;
